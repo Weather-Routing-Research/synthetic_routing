@@ -3,12 +3,12 @@ from typing import Optional
 import jax.numpy as jnp
 import numpy as np
 
-from hybrid_routing.utils.distance import (
+from hybrid_routing.utils.euclidean import (
     ang_between_coords,
     ang_mod_to_components,
     components_to_ang_mod,
     dist_between_coords,
-    dist_to_dest,
+    dist_p0_to_p1,
 )
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -48,6 +48,26 @@ class RouteJax:
     def pts(self):
         return jnp.stack([self.x, self.y], axis=1)
 
+    @property
+    def dt(self):
+        return -np.diff(self.t)
+
+    @property
+    def dx(self):
+        return -np.diff(self.x)
+
+    @property
+    def dy(self):
+        return -np.diff(self.y)
+
+    @property
+    def dxdt(self):
+        return self.dx / self.dt
+
+    @property
+    def dydt(self):
+        return self.dy / self.dt
+
     def append_points(
         self,
         x: jnp.array,
@@ -86,7 +106,7 @@ class RouteJax:
         vel : float
             Vessel velocity, typically in meters per second
         """
-        dist = dist_to_dest((self.x[-1], self.y[-1]), (x, y))
+        dist = dist_p0_to_p1((self.x[-1], self.y[-1]), (x, y))
         t = dist / vel + self.t[-1]
         self.append_points(x, y, t)
 

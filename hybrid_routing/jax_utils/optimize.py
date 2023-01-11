@@ -2,23 +2,16 @@ from copy import deepcopy
 from typing import List, Optional, Tuple
 
 import numpy as np
+
+import hybrid_routing.utils.euclidean as euclidean
+import hybrid_routing.utils.spherical as spherical
 from hybrid_routing.jax_utils.route import RouteJax
 from hybrid_routing.jax_utils.zivp import (
     solve_discretized_zermelo,
     solve_ode_zermelo,
     solve_rk_zermelo,
 )
-from hybrid_routing.utils.distance import dist_to_dest
 from hybrid_routing.vectorfields.base import Vectorfield
-
-
-def compute_cone_center(
-    x_start: float, y_start: float, x_end: float, y_end: float
-) -> float:
-    """Compute the angle between two points in radians"""
-    dx = x_end - x_start
-    dy = y_end - y_start
-    return np.arctan2(dy, dx)
 
 
 def compute_thetas_in_cone(
@@ -35,31 +28,6 @@ def compute_thetas_in_cone(
     else:
         thetas = np.array([cone_center])
     return thetas
-
-
-def min_dist_to_dest(list_routes: List[RouteJax], pt_goal: Tuple) -> int:
-    """Out of a list of routes, returns the index of the route the ends
-    at the minimum distance to the goal.
-
-    Parameters
-    ----------
-    list_routes : List[np.array]
-        List of routes, defined by (x, y, theta)
-    pt_goal : _type_
-        Goal point, defined by (x, y)
-
-    Returns
-    -------
-    int
-        Index of the route that ends at the minimum distance to the goal.
-    """
-    min_dist = np.inf
-    for idx, route in enumerate(list_routes):
-        dist = dist_to_dest((route.x[-1], route.y[-1]), pt_goal)
-        if dist < min_dist:
-            min_dist = dist
-            idx_best_point = idx
-    return idx_best_point
 
 
 class Optimizer:
@@ -107,6 +75,14 @@ class Optimizer:
         """
         self.vectorfield = vectorfield
 
+        # Define distance metric
+        if vectorfield.spherical:
+            self.dist_p0_to_p1 = spherical.dist_p0_to_p1
+            self.angle_p0_to_p1 = spherical.angle_p0_to_p1
+        else:
+            self.dist_p0_to_p1 = euclidean.dist_p0_to_p1
+            self.angle_p0_to_p1 = euclidean.angle_p0_to_p1
+
         # Choose solving method depends on whether the vectorfield is discrete
         if use_rk:
             self.solver = solve_rk_zermelo
@@ -134,6 +110,30 @@ class Optimizer:
             print("Non recognized method, using 'direction'.")
             self.method = "direction"
         self.exploration = None
+
+    def min_dist_p0_to_p1(self, list_routes: List[RouteJax], pt_goal: Tuple) -> int:
+        """Out of a list of routes, returns the index of the route the ends
+        at the minimum distance to the goal.
+
+        Parameters
+        ----------
+        list_routes : List[np.array]
+            List of routes, defined by (x, y, theta)
+        pt_goal : _type_
+            Goal point, defined by (x, y)
+
+        Returns
+        -------
+        int
+            Index of the route that ends at the minimum distance to the goal.
+        """
+        min_dist = np.inf
+        for idx, route in enumerate(list_routes):
+            dist = self.dist_p0_to_p1((route.x[-1], route.y[-1]), pt_goal)
+            if dist < min_dist:
+                min_dist = dist
+                idx_best_point = idx
+        return idx_best_point
 
     def solve_ivp(
         self, x: np.array, y: np.array, theta: np.array, t: float = 0
@@ -168,6 +168,7 @@ class Optimizer:
             vel=self.vel,
         )
 
+    # TODO: Ensure spherical compatibility
     def _optimize_by_closest(
         self, x_start: float, y_start: float, x_end: float, y_end: float
     ) -> List[RouteJax]:
@@ -205,7 +206,7 @@ class Optimizer:
             The path that terminates closest to destination is on top.
         """
         # Compute angle between first and last point
-        cone_center = compute_cone_center(x_start, y_start, x_end, y_end)
+        cone_center = self.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
 
         # Position now
         x = x_start
@@ -213,7 +214,7 @@ class Optimizer:
         # Time now
         t = 0
 
-        while dist_to_dest((x, y), (x_end, y_end)) > self.dist_min:
+        while self.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min:
             # Get arrays of initial coordinates for these segments
             arr_x = np.repeat(x, self.num_angles)
             arr_y = np.repeat(y, self.num_angles)
@@ -235,13 +236,13 @@ class Optimizer:
 
             # Update the closest points and best route
             x_old, y_old = x, y
-            idx_best = min_dist_to_dest(list_routes, (x_end, y_end))
+            idx_best = self.min_dist_p0_to_p1(list_routes, (x_end, y_end))
             route_best = deepcopy(list_routes[idx_best])
             x, y = route_best.x[-1], route_best.y[-1]
             t = route_best.t[-1]
 
             # Recompute the cone center
-            cone_center = compute_cone_center(x, y, x_end, y_end)
+            cone_center = self.angle_p0_to_p1((x, y), (x_end, y_end))
 
             # Move best route to first position
             list_routes.insert(0, list_routes.pop(idx_best))
@@ -250,11 +251,12 @@ class Optimizer:
             if x == x_old and y == y_old:
                 break
 
+    # TODO: Ensure spherical compatibility
     def _optimize_by_direction(
         self, x_start: float, y_start: float, x_end: float, y_end: float
     ) -> List[RouteJax]:
         # Compute angle between first and last point
-        cone_center = compute_cone_center(x_start, y_start, x_end, y_end)
+        cone_center = self.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
 
         # Position now
         x = x_start
@@ -278,7 +280,9 @@ class Optimizer:
         self.exploration = True  # Exploitation step / Exploration step
         idx_refine = 1  # Where the best segment start + 1
         # The loop continues until the algorithm reaches the end or it gets stuck
-        while (dist_to_dest((x, y), (x_end, y_end)) > self.dist_min) and (t != t_last):
+        while (self.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min) and (
+            t != t_last
+        ):
             t_last = t  # Update time of last loop
             # Get arrays of initial coordinates for these segments
             arr_x = np.array([route.x[-1] for route in list_routes])
@@ -296,8 +300,8 @@ class Optimizer:
                     continue
                 route_new = list_segments[idx]
                 # Compute angle between route and goal
-                theta_goal = compute_cone_center(
-                    route_new.x[-1], route_new.y[-1], x_end, y_end
+                theta_goal = self.angle_p0_to_p1(
+                    (route_new.x[-1], route_new.y[-1]), (x_end, y_end)
                 )
                 # Keep routes which heading is inside search cone
                 delta_theta = abs(route_new.theta[-1] - theta_goal)
@@ -320,7 +324,7 @@ class Optimizer:
                     # the end of the best segment, using a cone centered
                     # around the direction to the goal
                     # Recompute the cone center using best route
-                    cone_center = compute_cone_center(x, y, x_end, y_end)
+                    cone_center = self.angle_p0_to_p1((x, y), (x_end, y_end))
                     # Generate new arr_theta
                     arr_theta = compute_thetas_in_cone(
                         cone_center, self.angle_amplitude, self.num_angles
@@ -357,7 +361,7 @@ class Optimizer:
                 continue
 
             # The best route will be the one closest to our destination
-            idx_best = min_dist_to_dest(list_routes, (x_end, y_end))
+            idx_best = self.min_dist_p0_to_p1(list_routes, (x_end, y_end))
             route_best = list_routes[idx_best]
             x, y = route_best.x[-1], route_best.y[-1]
             t = max(route.t[-1] for route in list_routes)
