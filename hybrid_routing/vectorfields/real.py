@@ -71,7 +71,7 @@ class VectorfieldReal(Vectorfield):
         df_y = pd.read_csv(path / (name + "-lat.csv"), index_col=0)
         return cls(df_x, df_y, radians=radians)
 
-    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    def get_current(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
         """Takes the current values (u,v) at a given point (x,y) on the grid.
 
         Parameters
@@ -86,25 +86,32 @@ class VectorfieldReal(Vectorfield):
         jnp.array
             The current's velocity in x and y direction (u, v)
         """
-        arr_x = jnp.tile(self.arr_x, x.shape + (1,))
-        arr_y = jnp.tile(self.arr_y, y.shape + (1,))
-        x = jnp.reshape(x, x.shape + (1,))
-        y = jnp.reshape(y, y.shape + (1,))
+        # Reshape arrays
+        # P = shape of the point array `x`, `y` (may be multidimensional)
+        # X = length of the X-grid, `self.arr_x`
+        # Y = length of the Y-grid, `self.arr_x`
+        arr_x = jnp.tile(self.arr_x, x.shape + (1,))  # (P, X)
+        arr_y = jnp.tile(self.arr_y, y.shape + (1,))  # (P, Y)
+        x = jnp.reshape(x, x.shape + (1,))  # (P, 1)
+        y = jnp.reshape(y, y.shape + (1,))  # (P, 1)
 
         # Compute distance from all points to the X grid points
-        dx = jnp.abs(arr_x - x) / self._dx
+        dx = jnp.abs(arr_x - x) / self._dx  # (P, X)
         # Compute distance from all points to the Y grid points
-        dy = jnp.abs(arr_y - y) / self._dy
+        dy = jnp.abs(arr_y - y) / self._dy  # (P, Y)
 
         # Assign a weight relative to its proximity
         # Grid points more that one point away will have zero weight
-        wx = 1 - jnp.where(dx < 1, dx, 1)
-        wy = 1 - jnp.where(dy < 1, dy, 1)
+        wx = 1 - jnp.where(dx < 1, dx, 1)  # (P, X)
+        wy = 1 - jnp.where(dy < 1, dy, 1)  # (P, Y)
 
         # Turn arrays of weights into mesh grids
-        wx = jnp.reshape(wx, wx.shape + (1,))
-        wy = jnp.reshape(wy, wy.shape[:-1] + (1, wy.shape[-1]))
+        wx = jnp.reshape(wx, wx.shape + (1,))  # (P, X, 1)
+        wy = jnp.reshape(wy, wy.shape[:-1] + (1, wy.shape[-1]))  # (P, 1, Y)
         # Multiply both matrices to get the final matrix of weights
-        w = wx * wy
+        w = wx * wy  # (P, X, Y)
 
-        return (self.u * w).sum(axis=(-2, -1)), (self.v * w).sum(axis=(-2, -1))
+        u = (self.u * w).sum(axis=(-2, -1))  # (P, )
+        v = (self.v * w).sum(axis=(-2, -1))  # (P, )
+
+        return u, v
