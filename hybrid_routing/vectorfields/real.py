@@ -111,6 +111,8 @@ class VectorfieldReal(Vectorfield):
         # Multiply both matrices to get the final matrix of weights
         w = wx * wy  # (P, X, Y)
 
+        # Use the weights to compute the velocity component
+        # relative to those points
         u = (self.u * w).sum(axis=(-2, -1))  # (P, )
         v = (self.v * w).sum(axis=(-2, -1))  # (P, )
 
