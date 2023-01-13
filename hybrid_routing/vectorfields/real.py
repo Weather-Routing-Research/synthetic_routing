@@ -42,10 +42,10 @@ class VectorfieldReal(Vectorfield):
         self._dx = jnp.abs(jnp.mean(jnp.diff(self.arr_x)))
         self._dy = jnp.abs(jnp.mean(jnp.diff(self.arr_y)))
 
+        super().__init__(spherical=True)
+
         # Add the rest of parameters used by the vectorfield
-        self.spherical = True
         self.is_discrete = True
-        self.ode_zermelo = self._ode_zermelo_spherical
 
     @classmethod
     def from_folder(
@@ -86,19 +86,25 @@ class VectorfieldReal(Vectorfield):
         jnp.array
             The current's velocity in x and y direction (u, v)
         """
+        arr_x = jnp.tile(self.arr_x, x.shape + (1,))
+        arr_y = jnp.tile(self.arr_y, y.shape + (1,))
+        x = jnp.reshape(x, x.shape + (1,))
+        y = jnp.reshape(y, y.shape + (1,))
 
         # Compute distance from all points to the X grid points
-        dx = jnp.abs(self.arr_x - x) / self._dx
+        dx = jnp.abs(arr_x - x) / self._dx
         # Compute distance from all points to the Y grid points
-        dy = jnp.abs(self.arr_y - y) / self._dy
+        dy = jnp.abs(arr_y - y) / self._dy
+
         # Assign a weight relative to its proximity
         # Grid points more that one point away will have zero weight
         wx = 1 - jnp.where(dx < 1, dx, 1)
         wy = 1 - jnp.where(dy < 1, dy, 1)
 
         # Turn arrays of weights into mesh grids
-        wx, wy = jnp.meshgrid(wx, wy)
+        wx = jnp.reshape(wx, wx.shape + (1,))
+        wy = jnp.reshape(wy, wy.shape[:-1] + (1, wy.shape[-1]))
         # Multiply both matrices to get the final matrix of weights
         w = wx * wy
 
-        return (self.u * w).sum(axis=(0, 1)), (self.v * w).sum(axis=(0, 1))
+        return (self.u * w).sum(axis=(-2, -1)), (self.v * w).sum(axis=(-2, -1))
