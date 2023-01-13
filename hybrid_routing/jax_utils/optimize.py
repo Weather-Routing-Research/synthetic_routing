@@ -374,6 +374,11 @@ class Optimizer:
     def optimize_route(
         self, x_start: float, y_start: float, x_end: float, y_end: float
     ) -> List[RouteJax]:
+        d = self.dist_p0_to_p1((x_start, y_start), (x_end, y_end))
+        if self.dist_min >= d:
+            raise ValueError(
+                f"Minimum distance allowed is {self.dist_min} and distance to cover is {d}."
+            )
         if self.method == "closest":
             return self._optimize_by_closest(x_start, y_start, x_end, y_end)
         elif self.method == "direction":

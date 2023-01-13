@@ -2,7 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-RADIUS = 6367.449  # meters
+RADIUS = 6367449  # meters
 RAD2M = RADIUS / (2 * np.pi)  # Radians to meters conversion
 DEG2RAD = np.pi / 180
 
