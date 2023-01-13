@@ -36,11 +36,13 @@ class VectorfieldReal(Vectorfield):
         # Load velocity components (in meters per second)
         self.u = jnp.asarray(df_x.values)
         self.v = jnp.asarray(df_y.values)
-        # Define methods to get closest indexes
-        self.closest_idx = jnp.vectorize(lambda x: jnp.argmin(jnp.abs(self.arr_x - x)))
-        self.closest_idy = jnp.vectorize(lambda y: jnp.argmin(jnp.abs(self.arr_y - y)))
 
-        #
+        # Compute the average step between X and Y coordinates
+        # We are assuming this step is constant!
+        self._dx = jnp.abs(jnp.mean(jnp.diff(self.arr_x)))
+        self._dy = jnp.abs(jnp.mean(jnp.diff(self.arr_y)))
+
+        # Add the rest of parameters used by the vectorfield
         self.spherical = True
         self.is_discrete = True
         self.ode_zermelo = self._ode_zermelo_spherical
@@ -84,5 +86,19 @@ class VectorfieldReal(Vectorfield):
         jnp.array
             The current's velocity in x and y direction (u, v)
         """
-        idx, idy = self.closest_idx(x), self.closest_idy(y)
-        return jnp.asarray([self.u[idx, idy], self.v[idx, idy]])
+
+        # Compute distance from all points to the X grid points
+        dx = jnp.abs(self.arr_x - x) / self._dx
+        # Compute distance from all points to the Y grid points
+        dy = jnp.abs(self.arr_y - y) / self._dy
+        # Assign a weight relative to its proximity
+        # Grid points more that one point away will have zero weight
+        wx = 1 - jnp.where(dx < 1, dx, 1)
+        wy = 1 - jnp.where(dy < 1, dy, 1)
+
+        # Turn arrays of weights into mesh grids
+        wx, wy = jnp.meshgrid(wx, wy)
+        # Multiply both matrices to get the final matrix of weights
+        w = wx * wy
+
+        return (self.u * w).sum(axis=(0, 1)), (self.v * w).sum(axis=(0, 1))
