@@ -12,7 +12,8 @@ import numpy as np
 from hybrid_routing.jax_utils.dnj import DNJ
 from hybrid_routing.jax_utils.optimize import Optimizer
 from hybrid_routing.jax_utils.route import RouteJax
-from hybrid_routing.vectorfields import Circular, FourVortices
+from hybrid_routing.utils.spherical import DEG2RAD
+from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
 
 """
@@ -36,11 +37,11 @@ def pipeline(
     xmax: float = 1,
     ymin: float = None,
     ymax: float = None,
-    vel: float = 1,
-    time_opt_iter: float = 0.5,
-    time_opt_step: float = 0.025,
-    dist_min: float = 0.1,
-    time_dnj_step: float = 0.01,
+    vel: float = 10,
+    time_opt_iter: float = 360,
+    time_opt_step: float = 60,
+    dist_min: float = 1000,
+    time_dnj_step: float = 0.1,
     x_text: float = None,
     y_text: float = None,
     textbox_align: str = "top",
@@ -86,10 +87,11 @@ def pipeline(
         alpha=0.8,
     )
     plt.gca().set_aspect("equal")
-    xticks = np.arange(xmin, xmax, 1)
-    plt.xticks(xticks)
-    yticks = np.arange(ymin, ymax, 1)
-    plt.yticks(yticks)
+    #
+    xticks = np.arange(xmin, xmax, 2 * DEG2RAD)
+    plt.xticks(xticks, labels=[f"{i:.1f}" for i in xticks / DEG2RAD])
+    yticks = np.arange(ymin, ymax, 2 * DEG2RAD)
+    plt.yticks(yticks, labels=[f"{i:.1f}" for i in yticks / DEG2RAD])
 
     # Plot source and destination point
     plt.scatter(x0, y0, c="green", s=20, zorder=10)
@@ -157,59 +159,74 @@ def pipeline(
 
 
 """
-Vectorfield - Circular
+Vectorfield - Real
 """
 
-dict_results["Circular"] = pipeline(
-    vectorfield=Circular(),
-    x0=3,
-    y0=2,
-    xn=-7,
-    yn=2,
-    xmin=-8,
-    xmax=8,
-    x_text=0,
-    y_text=-3.5,
-    textbox_align="bottom",
-)
+vf = VectorfieldReal.from_folder("./data", "real", radians=True)
 
-# Store plot
-plt.xlim(-8, 4)
-plt.ylim(-4, 6)
-plt.tight_layout()
-plt.savefig(path_out / "results-circular.png")
-plt.close()
+for vel in [3, 6, 10]:
+    dict_results[f"Real {vel}"] = pipeline(
+        vectorfield=vf,
+        x0=-79.7 * DEG2RAD,
+        y0=32.7 * DEG2RAD,
+        xn=-29.5 * DEG2RAD,
+        yn=38.5 * DEG2RAD,
+        vel=vel,  # m/s
+        time_opt_iter=360,
+        time_opt_step=60,
+        dist_min=1000,  # m
+        time_dnj_step=0.1,
+        xmin=vf.arr_x.min(),
+        xmax=vf.arr_x.max(),
+        ymin=vf.arr_y.min(),
+        ymax=vf.arr_y.max(),
+        x_text=None,
+        y_text=None,
+        textbox_align="bottom",
+    )
 
-print("Done Circular vectorfield")
+    # Store plot
+    plt.tight_layout()
+    plt.savefig(path_out / f"results-real-{vel}.png")
+    plt.close()
+
+    print(f"Done Real vectorfield, {vel} m/s")
 
 """
-Vectorfield - Four Vortices
+Vectorfield - Real land
 """
 
-# We will regenerate the results from Ferraro et al.
-dict_results["FourVortices"] = pipeline(
-    vectorfield=FourVortices(),
-    x0=0,
-    y0=0,
-    xn=6,
-    yn=2,
-    xmin=-2,
-    xmax=8,
-    x_text=0,
-    y_text=5.5,
-)
+vf = VectorfieldReal.from_folder("./data", "real-land", radians=True)
+for vel in [3, 6, 10]:
+    dict_results[f"Real {vel}"] = pipeline(
+        vectorfield=vf,
+        x0=-79.7 * DEG2RAD,
+        y0=32.7 * DEG2RAD,
+        xn=-29.5 * DEG2RAD,
+        yn=38.5 * DEG2RAD,
+        vel=vel,  # m/s
+        time_opt_iter=360,
+        time_opt_step=60,
+        dist_min=1000,  # m
+        time_dnj_step=0.1,
+        xmin=vf.arr_x.min(),
+        xmax=vf.arr_x.max(),
+        ymin=vf.arr_y.min(),
+        ymax=vf.arr_y.max(),
+        x_text=None,
+        y_text=None,
+        textbox_align="bottom",
+    )
 
-# Store plot
-plt.xlim(-0.5, 6.5)
-plt.ylim(-1.5, 6)
-plt.tight_layout()
-plt.savefig(path_out / "results-fourvortices.png")
-plt.close()
+    # Store plot
+    plt.tight_layout()
+    plt.savefig(path_out / f"results-real-land-{vel}.png")
+    plt.close()
 
-print("Done Four Vortices vectorfield")
+    print(f"Done Real vectorfield with land, {vel} m/s")
 
 """
 Store dictionary
 """
-with open(path_out / "results.json", "w") as outfile:
+with open(path_out / "results-real.json", "w") as outfile:
     json.dump(dict_results, outfile)
