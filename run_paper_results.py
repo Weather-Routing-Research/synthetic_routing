@@ -37,10 +37,10 @@ def pipeline(
     ymin: float = None,
     ymax: float = None,
     vel: float = 1,
-    time_opt_iter: float = 0.5,
-    time_opt_step: float = 0.025,
+    rk_time_iter: float = 0.5,
+    rk_time_step: float = 0.025,
     dist_min: float = 0.1,
-    time_dnj_step: float = 0.01,
+    dnj_time_step: float = 0.01,
     x_text: float = None,
     y_text: float = None,
     textbox_align: str = "top",
@@ -49,8 +49,8 @@ def pipeline(
     # Initialize the optimizer
     optimizer = Optimizer(
         vectorfield,
-        time_iter=time_opt_iter,
-        time_step=time_opt_step,
+        time_iter=rk_time_iter,
+        time_step=rk_time_step,
         angle_amplitude=np.pi,
         angle_heading=np.pi / 2,
         num_angles=20,
@@ -104,7 +104,7 @@ def pipeline(
     print("Optimization step done.")
 
     # Apply DNJ
-    dnj = DNJ(vectorfield, time_step=time_dnj_step, optimize_for="fuel")
+    dnj = DNJ(vectorfield, time_step=dnj_time_step, optimize_for="fuel")
     # Apply DNJ in loop
     for n in range(5):
         dnj.optimize_route(route, num_iter=200)

@@ -21,11 +21,15 @@ class RouteJax:
         t: Optional[jnp.array] = None,
         theta: Optional[jnp.array] = None,
     ):
-        self.x = jnp.atleast_1d(x)
-        self.y = jnp.atleast_1d(y)
-        self.t = jnp.atleast_1d(t) if t is not None else jnp.arange(0, len(self.x), 1)
+        self.x: jnp.ndarray = jnp.atleast_1d(x)
+        self.y: jnp.ndarray = jnp.atleast_1d(y)
+        self.t: jnp.ndarray = (
+            jnp.atleast_1d(t) if t is not None else jnp.arange(0, len(self.x), 1)
+        )
         assert len(self.x) == len(self.y) == len(self.t), "Array lengths are not equal"
-        self.theta = jnp.atleast_1d(theta) if theta is not None else jnp.zeros_like(x)
+        self.theta: jnp.ndarray = (
+            jnp.atleast_1d(theta) if theta is not None else jnp.zeros_like(x)
+        )
 
     def __len__(self) -> int:
         return len(self.x)
@@ -43,6 +47,15 @@ class RouteJax:
             f"xN={self.x[-1]:.2f}, yN={self.y[-1]:.2f}, "
             f"length={len(self)})"
         )
+
+    def asdict(self) -> dict:
+        """Return dictionary with coordinates, times and headings"""
+        return {
+            "x": self.x.tolist(),
+            "y": self.y.tolist(),
+            "t": self.t.tolist(),
+            "theta": self.theta.tolist(),
+        }
 
     @property
     def pts(self):

@@ -2,6 +2,7 @@
 Generate all the figures used in the paper. Results section
 """
 
+import datetime as dt
 import json
 from pathlib import Path
 from typing import Dict
@@ -20,7 +21,9 @@ from hybrid_routing.vectorfields.base import Vectorfield
 Create output folder
 """
 
-path_out: Path = Path("output")
+# Custom folder for this date
+today = dt.date.today().strftime("%y-%m-%d")
+path_out: Path = Path(f"output-{today}")
 if not path_out.exists():
     path_out.mkdir()
 # Initialize dict of results
@@ -38,20 +41,30 @@ def pipeline(
     ymin: float = None,
     ymax: float = None,
     vel: float = 10,
-    time_opt_iter: float = 360,
-    time_opt_step: float = 60,
+    rk_time_iter: float = 360,
+    rk_time_step: float = 60,
     dist_min: float = 1000,
-    time_dnj_step: float = 0.1,
+    dnj_time_step: float = 0.1,
+    dnj_num_iter: int = 5,
     x_text: float = None,
     y_text: float = None,
     textbox_align: str = "top",
 ) -> Dict:
+    # Initialize the output dictionary
+    dict_out = {
+        "vel": vel,
+        "rk_time_iter": rk_time_iter,
+        "rk_time_step": rk_time_step,
+        "rk_dist_min": dist_min,
+        "dnj_time_step": dnj_time_step,
+        "dnj_num_iter": dnj_num_iter,
+    }
 
     # Initialize the optimizer
     optimizer = Optimizer(
         vectorfield,
-        time_iter=time_opt_iter,
-        time_step=time_opt_step,
+        time_iter=rk_time_iter,
+        time_step=rk_time_step,
         angle_amplitude=np.pi,
         angle_heading=np.pi / 2,
         num_angles=20,
@@ -87,7 +100,7 @@ def pipeline(
         alpha=0.8,
     )
     plt.gca().set_aspect("equal")
-    #
+    # Radians to degrees
     xticks = np.arange(xmin, xmax, 2 * DEG2RAD)
     plt.xticks(xticks, labels=[f"{i:.1f}" for i in xticks / DEG2RAD])
     yticks = np.arange(ymin, ymax, 2 * DEG2RAD)
@@ -98,24 +111,27 @@ def pipeline(
     plt.scatter(xn, yn, c="green", s=20, zorder=10)
     # Plot route
     plt.plot(route.x, route.y, c="red", linewidth=1, alpha=0.9, zorder=5)
-    time_opt = float(route.t[-1])
+    dict_out["route_rk"] = route.asdict()
     # Recompute times
-    route.recompute_times(vel, vectorfield)
+    route.recompute_times(vel, vectorfield, interp=False)
     time_opt_rec = float(route.t[-1])
+    dict_out["route_rk2"] = route.asdict()
 
     print("Optimization step done.")
 
     # Apply DNJ
-    dnj = DNJ(vectorfield, time_step=time_dnj_step, optimize_for="fuel")
+    dnj = DNJ(vectorfield, time_step=dnj_time_step, optimize_for="fuel")
     # Apply DNJ in loop
+    num_iter = dnj_num_iter // 5
     for n in range(5):
-        dnj.optimize_route(route, num_iter=200)
+        dnj.optimize_route(route, num_iter=num_iter)
         s = 2 if n == 4 else 1
         c = "black" if n == 4 else "grey"
         alpha = 0.9 if n == 4 else 0.6
         plt.plot(route.x, route.y, c=c, linewidth=s, alpha=alpha, zorder=5)
-    route.recompute_times(vel, vectorfield)
+    route.recompute_times(vel, vectorfield, interp=False)
     time_dnj = float(route.t[-1])
+    dict_out["route_dnj"] = route.asdict()
 
     print("DNJ step done.")
 
@@ -148,14 +164,7 @@ def pipeline(
         bbox=dict_bbox,
     )
 
-    return {
-        "Time opt": time_opt,
-        "Time opt rec": time_opt_rec,
-        "Time DNJ": time_dnj,
-        "x": route.x,
-        "y": route.y,
-        "t": route.t,
-    }
+    return dict_out
 
 
 """
@@ -172,10 +181,10 @@ for vel in [3, 6, 10]:
         xn=-29.5 * DEG2RAD,
         yn=38.5 * DEG2RAD,
         vel=vel,  # m/s
-        time_opt_iter=360,
-        time_opt_step=60,
+        rk_time_iter=360,
+        rk_time_step=60,
         dist_min=1000,  # m
-        time_dnj_step=0.1,
+        dnj_time_step=0.1,
         xmin=vf.arr_x.min(),
         xmax=vf.arr_x.max(),
         ymin=vf.arr_y.min(),
@@ -200,15 +209,15 @@ vf = VectorfieldReal.from_folder("./data", "real-land", radians=True)
 for vel in [3, 6, 10]:
     dict_results[f"Real {vel}"] = pipeline(
         vectorfield=vf,
-        x0=-79.7 * DEG2RAD,
-        y0=32.7 * DEG2RAD,
-        xn=-29.5 * DEG2RAD,
-        yn=38.5 * DEG2RAD,
+        x0=43.49 * DEG2RAD,
+        y0=-1.66 * DEG2RAD,
+        xn=98.14 * DEG2RAD,
+        yn=10.21 * DEG2RAD,
         vel=vel,  # m/s
-        time_opt_iter=360,
-        time_opt_step=60,
+        rk_time_iter=360,
+        rk_time_step=60,
         dist_min=1000,  # m
-        time_dnj_step=0.1,
+        dnj_time_step=0.1,
         xmin=vf.arr_x.min(),
         xmax=vf.arr_x.max(),
         ymin=vf.arr_y.min(),
