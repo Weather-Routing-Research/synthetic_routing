@@ -272,6 +272,8 @@ class Optimizer:
         list_routes: List[RouteJax] = [
             RouteJax(x_start, y_start, t, theta) for theta in arr_theta
         ]
+        # Initialize the best route as the first one (avoids UnboundLocalError)
+        route_best = deepcopy(list_routes[0])
 
         # Initialize list of routes to stop (outside of angle threshold)
         list_stop: List[int] = []
