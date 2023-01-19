@@ -23,7 +23,7 @@ Create output folder
 
 # Custom folder for this date
 today = dt.date.today().strftime("%y-%m-%d")
-path_out: Path = Path(f"output-{today}")
+path_out: Path = Path(f"output/{today}")
 if not path_out.exists():
     path_out.mkdir()
 # Initialize dict of results
@@ -44,7 +44,7 @@ def pipeline(
     rk_time_iter: float = 360,
     rk_time_step: float = 60,
     dist_min: float = 1000,
-    dnj_time_step: float = 0.1,
+    dnj_time_step: float = 0.01,
     dnj_num_iter: int = 5,
     x_text: float = None,
     y_text: float = None,
@@ -140,15 +140,15 @@ def pipeline(
     dict_bbox = dict(boxstyle="round", facecolor="white", alpha=0.95)
     text = (
         r"$\left\langle x_0, y_0 \right\rangle = \left\langle"
-        + str(x0)
+        + "{:.1f}".format(x0 / DEG2RAD)
         + ", "
-        + str(y0)
+        + "{:.1f}".format(y0 / DEG2RAD)
         + r"\right\rangle$"
         + "\n"
         r"$\left\langle x_T, y_T \right\rangle = \left\langle"
-        + str(xn)
+        + "{:.1f}".format(xn / DEG2RAD)
         + ", "
-        + str(yn)
+        + "{:.1f}".format(yn / DEG2RAD)
         + r"\right\rangle$"
         + f"\nOptimized (red):\n"
         + f"  t = {time_opt_rec:.3f}\n"
@@ -163,6 +163,10 @@ def pipeline(
         verticalalignment=textbox_align,
         bbox=dict_bbox,
     )
+
+    # Set plot limits
+    plt.xlim(xmin, xmax)
+    plt.ylim(ymin, ymax)
 
     return dict_out
 
@@ -181,17 +185,10 @@ for vel in [3, 6, 10]:
         xn=-29.5 * DEG2RAD,
         yn=38.5 * DEG2RAD,
         vel=vel,  # m/s
-        rk_time_iter=360,
-        rk_time_step=60,
-        dist_min=1000,  # m
-        dnj_time_step=0.1,
         xmin=vf.arr_x.min(),
         xmax=vf.arr_x.max(),
         ymin=vf.arr_y.min(),
         ymax=vf.arr_y.max(),
-        x_text=None,
-        y_text=None,
-        textbox_align="bottom",
     )
 
     # Store plot
@@ -214,17 +211,10 @@ for vel in [3, 6, 10]:
         xn=98.14 * DEG2RAD,
         yn=10.21 * DEG2RAD,
         vel=vel,  # m/s
-        rk_time_iter=360,
-        rk_time_step=60,
-        dist_min=1000,  # m
-        dnj_time_step=0.1,
         xmin=vf.arr_x.min(),
         xmax=vf.arr_x.max(),
         ymin=vf.arr_y.min(),
         ymax=vf.arr_y.max(),
-        x_text=None,
-        y_text=None,
-        textbox_align="bottom",
     )
 
     # Store plot
