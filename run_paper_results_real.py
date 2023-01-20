@@ -44,7 +44,7 @@ def pipeline(
     rk_time_iter: float = 360,
     rk_time_step: float = 60,
     dist_min: float = 1000,
-    dnj_time_step: float = 0.01,
+    dnj_time_step: float = 0.0001,
     dnj_num_iter: int = 5,
     x_text: float = None,
     y_text: float = None,
