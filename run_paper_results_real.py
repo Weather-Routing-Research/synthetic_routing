@@ -178,24 +178,26 @@ Vectorfield - Real
 vf = VectorfieldReal.from_folder("./data", "real", radians=True)
 
 for vel in [3, 6, 10]:
-    dict_results[f"Real {vel}"] = pipeline(
-        vectorfield=vf,
-        x0=-79.7 * DEG2RAD,
-        y0=32.7 * DEG2RAD,
-        xn=-29.5 * DEG2RAD,
-        yn=38.5 * DEG2RAD,
-        vel=vel,  # m/s
-        xmin=vf.arr_x.min(),
-        xmax=vf.arr_x.max(),
-        ymin=vf.arr_y.min(),
-        ymax=vf.arr_y.max(),
-    )
+    try:
+        dict_results[f"Real {vel}"] = pipeline(
+            vectorfield=vf,
+            x0=-79.7 * DEG2RAD,
+            y0=32.7 * DEG2RAD,
+            xn=-29.5 * DEG2RAD,
+            yn=38.5 * DEG2RAD,
+            vel=vel,  # m/s
+            xmin=vf.arr_x.min(),
+            xmax=vf.arr_x.max(),
+            ymin=vf.arr_y.min(),
+            ymax=vf.arr_y.max(),
+        )
 
-    # Store plot
-    plt.tight_layout()
-    plt.savefig(path_out / f"results-real-{vel}.png")
-    plt.close()
-
+        # Store plot
+        plt.tight_layout()
+        plt.savefig(path_out / f"results-real-{vel}.png")
+        plt.close()
+    except Exception as er:
+        print(er)
     print(f"Done Real vectorfield, {vel} m/s")
 
 """
@@ -204,24 +206,26 @@ Vectorfield - Real land
 
 vf = VectorfieldReal.from_folder("./data", "real-land", radians=True)
 for vel in [3, 6, 10]:
-    dict_results[f"Real {vel}"] = pipeline(
-        vectorfield=vf,
-        x0=43.49 * DEG2RAD,
-        y0=-1.66 * DEG2RAD,
-        xn=98.14 * DEG2RAD,
-        yn=10.21 * DEG2RAD,
-        vel=vel,  # m/s
-        xmin=vf.arr_x.min(),
-        xmax=vf.arr_x.max(),
-        ymin=vf.arr_y.min(),
-        ymax=vf.arr_y.max(),
-    )
+    try:
+        dict_results[f"Real land {vel}"] = pipeline(
+            vectorfield=vf,
+            x0=43.49 * DEG2RAD,
+            y0=-1.66 * DEG2RAD,
+            xn=98.14 * DEG2RAD,
+            yn=10.21 * DEG2RAD,
+            vel=vel,  # m/s
+            xmin=vf.arr_x.min(),
+            xmax=vf.arr_x.max(),
+            ymin=vf.arr_y.min(),
+            ymax=vf.arr_y.max(),
+        )
 
-    # Store plot
-    plt.tight_layout()
-    plt.savefig(path_out / f"results-real-land-{vel}.png")
-    plt.close()
-
+        # Store plot
+        plt.tight_layout()
+        plt.savefig(path_out / f"results-real-land-{vel}.png")
+        plt.close()
+    except Exception as er:
+        print(er)
     print(f"Done Real vectorfield with land, {vel} m/s")
 
 """
