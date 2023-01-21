@@ -73,6 +73,7 @@ class VectorfieldReal(Vectorfield):
 
     def get_current(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
         """Takes the current values (u,v) at a given point (x,y) on the grid.
+        Returns meter per second.
 
         Parameters
         ----------
