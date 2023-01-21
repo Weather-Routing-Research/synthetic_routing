@@ -48,7 +48,7 @@ def pipeline(
     dnj_num_iter: int = 5,
     x_text: float = None,
     y_text: float = None,
-    textbox_align: str = "top",
+    textbox_align: str = "bottom",
 ) -> Dict:
     # Initialize the output dictionary
     dict_out = {
@@ -95,7 +95,7 @@ def pipeline(
         x_max=xmax,
         y_min=ymin,
         y_max=ymax,
-        step=0.25,
+        step=1 * DEG2RAD,
         color="grey",
         alpha=0.8,
     )
