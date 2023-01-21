@@ -197,7 +197,7 @@ for vel in [3, 6, 10]:
         plt.savefig(path_out / f"results-real-{vel}.png")
         plt.close()
     except Exception as er:
-        print(er)
+        print("[ERROR]", er)
     print(f"Done Real vectorfield, {vel} m/s")
 
 """
@@ -225,7 +225,7 @@ for vel in [3, 6, 10]:
         plt.savefig(path_out / f"results-real-land-{vel}.png")
         plt.close()
     except Exception as er:
-        print(er)
+        print("[ERROR]", er)
     print(f"Done Real vectorfield with land, {vel} m/s")
 
 """
