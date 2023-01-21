@@ -34,6 +34,29 @@ class Vectorfield(ABC):
     def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         pass
 
+    def get_current_rad(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Takes the current values (u,v) at a given point (x,y) on the grid.
+        Returns radians per second.
+
+        Parameters
+        ----------
+        x : jnp.array
+            x-coordinate of the ship
+        y : jnp.array
+            y-coordinate of the ship
+
+        Returns
+        -------
+        jnp.array
+            The current's velocity in x and y direction (u, v)
+        """
+        u, v = self.get_current(x, y)
+        # Meters to radians
+        # Velocity component across longitude is affected by latitude
+        u = u / self.rad2m / jnp.cos(y)
+        v = v / self.rad2m
+        return u, v
+
     """
     Takes the Jacobian (a 2x2 matrix) of the background vectorfield (W) using JAX package 
     by Google LLC if it is not specified in the children classes.
