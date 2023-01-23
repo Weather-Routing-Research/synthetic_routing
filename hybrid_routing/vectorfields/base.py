@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from jax import jacfwd, jacrev, jit
 
+from hybrid_routing.geometry import Euclidean, Geometry, Spherical
 from hybrid_routing.geometry.spherical import RAD2M
 
 
@@ -18,6 +19,7 @@ class Vectorfield(ABC):
         pass upon initialization, returns the current in tuples `(u, v)` given the position of the boat `(x, y)`
     """
 
+    geometry: Geometry
     rad2m = jnp.float32(RAD2M)  # Radians to meters conversion
 
     def __init__(self, spherical: bool = False):
@@ -27,8 +29,10 @@ class Vectorfield(ABC):
         self.spherical = spherical
         if spherical:
             self.ode_zermelo = self._ode_zermelo_spherical
+            self.geometry = Spherical()
         else:
             self.ode_zermelo = self._ode_zermelo_euclidean
+            self.geometry = Euclidean()
 
     @abstractmethod
     def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:

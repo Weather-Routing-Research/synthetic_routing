@@ -18,7 +18,9 @@ def test_optimize(use_rk: bool):
     num_angles = 10
     vel = 1
 
-    route_opt = RouteJax(x=x_start, y=y_start, t=0, theta=0)
+    route_opt = RouteJax(
+        x=x_start, y=y_start, t=0, theta=0, geometry=vectorfield.geometry
+    )
     optimizer = Optimizer(
         vectorfield,
         time_iter=time_iter,

@@ -177,7 +177,7 @@ class DNJRandomGuess:
                 ).flatten()
                 y = np.concatenate([y, y_new[1:]])
             # Add the route to the list
-            list_routes[idx_route] = RouteJax(x, y)
+            list_routes[idx_route] = RouteJax(x, y, geometry=vectorfield.geometry)
         # Store parameters
         self.dnj = DNJ(
             vectorfield=vectorfield, time_step=time_step, optimize_for=optimize_for

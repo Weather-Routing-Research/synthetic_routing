@@ -205,7 +205,7 @@ class Optimizer:
             The path that terminates closest to destination is on top.
         """
         # Compute angle between first and last point
-        cone_center = self.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
+        cone_center = self.geometry.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
 
         # Position now
         x = x_start
@@ -269,7 +269,8 @@ class Optimizer:
             cone_center, self.angle_amplitude, self.num_angles
         )
         list_routes: List[RouteJax] = [
-            RouteJax(x_start, y_start, t, theta) for theta in arr_theta
+            RouteJax(x_start, y_start, t, theta, geometry=self.geometry)
+            for theta in arr_theta
         ]
         # Initialize the best route as the middle one (avoids UnboundLocalError)
         route_best = deepcopy(list_routes[len(list_routes) // 2])
@@ -346,8 +347,9 @@ class Optimizer:
                     route_new = RouteJax(
                         route_best.x[:idx_refine],
                         route_best.y[:idx_refine],
-                        route_best.t[:idx_refine],
-                        route_best.theta[:idx_refine],
+                        t=route_best.t[:idx_refine],
+                        theta=route_best.theta[:idx_refine],
+                        geometry=self.geometry,
                     )
                 # Reinitialize route lists
                 list_routes: List[RouteJax] = []
