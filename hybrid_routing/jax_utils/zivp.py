@@ -53,7 +53,13 @@ def solve_ode_zermelo(
     for idx, theta in enumerate(thetas):
         p = [x[idx], y[idx], theta]
         sol = odeint(vectorfield.ode_zermelo, p, t, args=(vel,))
-        list_routes[idx] = RouteJax(x=sol[:, 0], y=sol[:, 1], t=t, theta=sol[:, 2], geometry=vectorfield.geometry)
+        list_routes[idx] = RouteJax(
+            x=sol[:, 0],
+            y=sol[:, 1],
+            t=t,
+            theta=sol[:, 2],
+            geometry=vectorfield.geometry,
+        )
 
     return list_routes
 
@@ -117,7 +123,9 @@ def solve_discretized_zermelo(
             list_x[idx2] = x_temp
             list_y[idx2] = y_temp
         # Include the new route in the list
-        list_routes[idx] = RouteJax(list_x, list_y, theta=list_theta, geometry=vectorfield.geometry)
+        list_routes[idx] = RouteJax(
+            list_x, list_y, theta=list_theta, geometry=vectorfield.geometry
+        )
     return list_routes
 
 
@@ -196,7 +204,7 @@ def solve_rk_zermelo(
             y=[v[idx] for v in arr_q[:, 1, :]],
             t=arr_t,
             theta=[v[idx] for v in arr_q[:, 2, :]],
-            geometry=vectorfield.geometry
+            geometry=vectorfield.geometry,
         )
 
     return list_routes
