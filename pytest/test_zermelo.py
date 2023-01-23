@@ -3,9 +3,9 @@ from typing import List
 import numpy as np
 
 import pytest
+from hybrid_routing.geometry.spherical import DEG2RAD, RAD2M
 from hybrid_routing.jax_utils.route import RouteJax
 from hybrid_routing.jax_utils.zivp import solve_rk_zermelo
-from hybrid_routing.utils.spherical import DEG2RAD, RAD2M
 from hybrid_routing.vectorfields import NoCurrent
 
 VEL = 10

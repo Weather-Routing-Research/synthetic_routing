@@ -10,10 +10,10 @@ from typing import Dict
 import matplotlib.pyplot as plt
 import numpy as np
 
+from hybrid_routing.geometry.spherical import DEG2RAD
 from hybrid_routing.jax_utils.dnj import DNJ
 from hybrid_routing.jax_utils.optimize import Optimizer
 from hybrid_routing.jax_utils.route import RouteJax
-from hybrid_routing.utils.spherical import DEG2RAD
 from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
 

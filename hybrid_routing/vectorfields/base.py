@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from jax import jacfwd, jacrev, jit
 
-from hybrid_routing.utils.spherical import RAD2M
+from hybrid_routing.geometry.spherical import RAD2M
 
 
 class Vectorfield(ABC):

@@ -4,7 +4,7 @@ from typing import Union
 import jax.numpy as jnp
 import pandas as pd
 
-from hybrid_routing.utils.spherical import DEG2RAD
+from hybrid_routing.geometry.spherical import DEG2RAD
 from hybrid_routing.vectorfields.base import Vectorfield
 
 

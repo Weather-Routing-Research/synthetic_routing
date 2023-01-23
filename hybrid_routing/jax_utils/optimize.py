@@ -3,8 +3,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-import hybrid_routing.utils.euclidean as euclidean
-import hybrid_routing.utils.spherical as spherical
+from hybrid_routing.geometry import Euclidean, Geometry, Spherical
 from hybrid_routing.jax_utils.route import RouteJax
 from hybrid_routing.jax_utils.zivp import (
     solve_discretized_zermelo,
@@ -31,6 +30,8 @@ def compute_thetas_in_cone(
 
 
 class Optimizer:
+    geometry: Geometry
+
     def __init__(
         self,
         vectorfield: Vectorfield,
@@ -77,11 +78,9 @@ class Optimizer:
 
         # Define distance metric
         if vectorfield.spherical:
-            self.dist_p0_to_p1 = spherical.dist_p0_to_p1
-            self.angle_p0_to_p1 = spherical.angle_p0_to_p1
+            self.geometry = Spherical()
         else:
-            self.dist_p0_to_p1 = euclidean.dist_p0_to_p1
-            self.angle_p0_to_p1 = euclidean.angle_p0_to_p1
+            self.geometry = Euclidean()
 
         # Choose solving method depends on whether the vectorfield is discrete
         if use_rk:
@@ -129,7 +128,7 @@ class Optimizer:
         """
         min_dist = np.inf
         for idx, route in enumerate(list_routes):
-            dist = self.dist_p0_to_p1((route.x[-1], route.y[-1]), pt_goal)
+            dist = self.geometry.dist_p0_to_p1((route.x[-1], route.y[-1]), pt_goal)
             if dist < min_dist:
                 min_dist = dist
                 idx_best_point = idx
@@ -214,7 +213,7 @@ class Optimizer:
         # Time now
         t = 0
 
-        while self.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min:
+        while self.geometry.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min:
             # Get arrays of initial coordinates for these segments
             arr_x = np.repeat(x, self.num_angles)
             arr_y = np.repeat(y, self.num_angles)
@@ -242,7 +241,7 @@ class Optimizer:
             t = route_best.t[-1]
 
             # Recompute the cone center
-            cone_center = self.angle_p0_to_p1((x, y), (x_end, y_end))
+            cone_center = self.geometry.angle_p0_to_p1((x, y), (x_end, y_end))
 
             # Move best route to first position
             list_routes.insert(0, list_routes.pop(idx_best))
@@ -256,7 +255,7 @@ class Optimizer:
         self, x_start: float, y_start: float, x_end: float, y_end: float
     ) -> List[RouteJax]:
         # Compute angle between first and last point
-        cone_center = self.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
+        cone_center = self.geometry.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
 
         # Position now
         x = x_start
@@ -282,9 +281,9 @@ class Optimizer:
         self.exploration = True  # Exploitation step / Exploration step
         idx_refine = 1  # Where the best segment start + 1
         # The loop continues until the algorithm reaches the end or it gets stuck
-        while (self.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min) and (
-            t != t_last
-        ):
+        while (
+            self.geometry.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min
+        ) and (t != t_last):
             t_last = t  # Update time of last loop
             # Get arrays of initial coordinates for these segments
             arr_x = np.array([route.x[-1] for route in list_routes])
@@ -302,7 +301,7 @@ class Optimizer:
                     continue
                 route_new = list_segments[idx]
                 # Compute angle between route and goal
-                theta_goal = self.angle_p0_to_p1(
+                theta_goal = self.geometry.angle_p0_to_p1(
                     (route_new.x[-1], route_new.y[-1]), (x_end, y_end)
                 )
                 # Keep routes which heading is inside search cone
@@ -326,7 +325,7 @@ class Optimizer:
                     # the end of the best segment, using a cone centered
                     # around the direction to the goal
                     # Recompute the cone center using best route
-                    cone_center = self.angle_p0_to_p1((x, y), (x_end, y_end))
+                    cone_center = self.geometry.angle_p0_to_p1((x, y), (x_end, y_end))
                     # Generate new arr_theta
                     arr_theta = compute_thetas_in_cone(
                         cone_center, self.angle_amplitude, self.num_angles
@@ -376,7 +375,7 @@ class Optimizer:
     def optimize_route(
         self, x_start: float, y_start: float, x_end: float, y_end: float
     ) -> List[RouteJax]:
-        d = self.dist_p0_to_p1((x_start, y_start), (x_end, y_end))
+        d = self.geometry.dist_p0_to_p1((x_start, y_start), (x_end, y_end))
         if self.dist_min >= d:
             raise ValueError(
                 f"Minimum distance allowed is {self.dist_min} and distance to cover is {d}."
