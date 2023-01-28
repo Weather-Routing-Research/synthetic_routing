@@ -96,10 +96,14 @@ def pipeline(
     plt.scatter(xn, yn, c="green", s=20, zorder=10)
     # Plot route
     plt.plot(route.x, route.y, c="red", linewidth=1, alpha=0.9, zorder=5)
-    time_opt = float(route.t[-1])
+
+    # Initialize dictionary
+    dict_out = {"route": route.asdict()}
+
     # Recompute times
     route.recompute_times(vel, vectorfield)
     time_opt_rec = float(route.t[-1])
+    dict_out["route_recompute"] = route.asdict()
 
     print("Optimization step done.")
 
@@ -114,6 +118,7 @@ def pipeline(
         plt.plot(route.x, route.y, c=c, linewidth=s, alpha=alpha, zorder=5)
     route.recompute_times(vel, vectorfield)
     time_dnj = float(route.t[-1])
+    dict_out["route_dnj"] = route.asdict()
 
     print("DNJ step done.")
 
@@ -146,14 +151,7 @@ def pipeline(
         bbox=dict_bbox,
     )
 
-    return {
-        "Time opt": time_opt,
-        "Time opt rec": time_opt_rec,
-        "Time DNJ": time_dnj,
-        "x": route.x,
-        "y": route.y,
-        "t": route.t,
-    }
+    return dict_out
 
 
 """
