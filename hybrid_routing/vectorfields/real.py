@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Tuple, Union
 
 import jax.numpy as jnp
 import pandas as pd
@@ -39,8 +39,8 @@ class VectorfieldReal(Vectorfield):
 
         # Land mask, change NaN to 0's
         self.land = jnp.isnan(u) | jnp.isnan(v)
-        self.u = jnp.nan_to_num(u, 0)
-        self.v = jnp.nan_to_num(v, 0)
+        self.u = jnp.nan_to_num(u)
+        self.v = jnp.nan_to_num(v)
 
         # Compute the average step between X and Y coordinates
         # We are assuming this step is constant!
@@ -76,9 +76,8 @@ class VectorfieldReal(Vectorfield):
         df_y = pd.read_csv(path / (name + "-lat.csv"), index_col=0)
         return cls(df_x, df_y, radians=radians)
 
-    def get_current(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
-        """Takes the current values (u,v) at a given point (x,y) on the grid.
-        Returns meter per second.
+    def _weight_coordinates(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Weights the influence of each coordinate of the grid at point (x,y) on the grid.
 
         Parameters
         ----------
@@ -90,7 +89,7 @@ class VectorfieldReal(Vectorfield):
         Returns
         -------
         jnp.array
-            The current's velocity in x and y direction (u, v)
+            The weight of each coordinate w.r.t given point
         """
         # Reshape arrays
         # P = shape of the point array `x`, `y` (may be multidimensional)
@@ -116,6 +115,25 @@ class VectorfieldReal(Vectorfield):
         wy = jnp.reshape(wy, wy.shape[:-1] + (1, wy.shape[-1]))  # (P, 1, Y)
         # Multiply both matrices to get the final matrix of weights
         w = wx * wy  # (P, X, Y)
+        return w
+
+    def get_current(self, x: jnp.ndarray, y: jnp.ndarray) -> Tuple[jnp.ndarray]:
+        """Takes the current values (u,v) at a given point (x,y) on the grid.
+        Returns meter per second.
+
+        Parameters
+        ----------
+        x : jnp.array
+            x-coordinate of the ship
+        y : jnp.array
+            y-coordinate of the ship
+
+        Returns
+        -------
+        Tuple[jnp.array]
+            The current's velocity in x and y direction (u, v)
+        """
+        w = self._weight_coordinates(x, y)
 
         # Use the weights to compute the velocity component
         # relative to those points
@@ -123,3 +141,22 @@ class VectorfieldReal(Vectorfield):
         v = (self.v * w).sum(axis=(-2, -1))  # (P, )
 
         return u, v
+
+    def is_land(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Indicates the presence of land at a given point (x,y) on the grid.
+
+        Parameters
+        ----------
+        x : jnp.array
+            x-coordinate of the ship
+        y : jnp.array
+            y-coordinate of the ship
+
+        Returns
+        -------
+        jnp.array
+            Boolean array
+        """
+        w = self._weight_coordinates(x, y)
+        b: jnp.ndarray = (self.land * w).sum(axis=(-2, -1))  # (P, )
+        return b.at[b > 0].set(1).astype(bool)

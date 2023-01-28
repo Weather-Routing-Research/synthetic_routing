@@ -302,12 +302,17 @@ class Optimizer:
                     continue
                 route_new = list_segments[idx]
                 # Compute angle between route and goal
+                # We keep routes which heading is inside search cone
                 theta_goal = self.geometry.angle_p0_to_p1(
                     (route_new.x[-1], route_new.y[-1]), (x_end, y_end)
                 )
-                # Keep routes which heading is inside search cone
                 delta_theta = abs(route_new.theta[-1] - theta_goal)
-                if delta_theta <= (self.angle_heading):
+                cond_theta = delta_theta <= (self.angle_heading)
+                # Check if the route crosses land. If not, we keep it
+                is_land = self.vectorfield.is_land(route_new.x[1:], route_new.y[1:])
+                cond_land = not is_land.any()
+                # Check both conditions
+                if cond_theta and cond_land:
                     route.append_points(
                         route_new.x[1:],
                         route_new.y[1:],
@@ -387,4 +392,5 @@ class Optimizer:
         elif self.method == "direction":
             return self._optimize_by_direction(x_start, y_start, x_end, y_end)
         else:
+            raise ValueError(f"Method not identified: {self.method}")
             raise ValueError(f"Method not identified: {self.method}")

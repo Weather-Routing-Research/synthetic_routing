@@ -230,6 +230,10 @@ class Vectorfield(ABC):
         u, v = self.get_current(x, y)
         plt.quiver(x, y, u, v, **kwargs)
 
+    def is_land(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Just a placeholder function. Indicates that no point has land."""
+        return jnp.full_like(x, False)
+
 
 class VectorfieldDiscrete(Vectorfield):
     def __init__(
