@@ -202,6 +202,10 @@ class Vectorfield(ABC):
                 self, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max, step=step
             )
 
+    def is_land(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Just a placeholder function. Indicates that no point has land."""
+        return jnp.full_like(x, False)
+
     def plot(
         self,
         x_min: float = -4,
@@ -209,6 +213,7 @@ class Vectorfield(ABC):
         y_min: float = -4,
         y_max: float = 4,
         step: float = 1,
+        do_color: bool = False,
         **kwargs
     ):
         """Plots the vector field
@@ -225,14 +230,21 @@ class Vectorfield(ABC):
             Up limit of Y axes, by default 125
         step : float, optional
             Distance between points to plot, by default .5
+        do_color : bool, optional
+            Plot a background color indicating the strength of the current
         """
         x, y = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
         u, v = self.get_current(x, y)
+        if do_color:
+            m = (u**2 + v**2) ** (1 / 2)  # Velocity module
+            plt.matshow(
+                m,
+                origin="lower",
+                extent=[x_min, x_max, y_min, y_max],
+                alpha=0.6,
+            )
+        # Quiver
         plt.quiver(x, y, u, v, **kwargs)
-
-    def is_land(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
-        """Just a placeholder function. Indicates that no point has land."""
-        return jnp.full_like(x, False)
 
 
 class VectorfieldDiscrete(Vectorfield):
