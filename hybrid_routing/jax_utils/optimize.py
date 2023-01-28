@@ -386,3 +386,5 @@ class Optimizer:
             return self._optimize_by_closest(x_start, y_start, x_end, y_end)
         elif self.method == "direction":
             return self._optimize_by_direction(x_start, y_start, x_end, y_end)
+        else:
+            raise ValueError(f"Method not identified: {self.method}")

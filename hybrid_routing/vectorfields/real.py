@@ -34,8 +34,13 @@ class VectorfieldReal(Vectorfield):
             self.arr_y = self.arr_y * DEG2RAD
 
         # Load velocity components (in meters per second)
-        self.u = jnp.asarray(df_x.values)
-        self.v = jnp.asarray(df_y.values)
+        u = jnp.asarray(df_x.values)
+        v = jnp.asarray(df_y.values)
+
+        # Land mask, change NaN to 0's
+        self.land = jnp.isnan(u) | jnp.isnan(v)
+        self.u = jnp.nan_to_num(u, 0)
+        self.v = jnp.nan_to_num(v, 0)
 
         # Compute the average step between X and Y coordinates
         # We are assuming this step is constant!
