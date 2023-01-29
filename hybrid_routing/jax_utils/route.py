@@ -3,13 +3,7 @@ from typing import Optional
 import jax.numpy as jnp
 import numpy as np
 
-from hybrid_routing.utils.euclidean import (
-    ang_between_coords,
-    ang_mod_to_components,
-    components_to_ang_mod,
-    dist_between_coords,
-    dist_p0_to_p1,
-)
+from hybrid_routing.geometry import Euclidean, Geometry
 from hybrid_routing.vectorfields.base import Vectorfield
 
 
@@ -20,12 +14,19 @@ class RouteJax:
         y: jnp.array,
         t: Optional[jnp.array] = None,
         theta: Optional[jnp.array] = None,
+        geometry: Optional[Geometry] = None,
     ):
-        self.x = jnp.atleast_1d(x)
-        self.y = jnp.atleast_1d(y)
-        self.t = jnp.atleast_1d(t) if t is not None else jnp.arange(0, len(self.x), 1)
+        self.x: jnp.ndarray = jnp.atleast_1d(x)
+        self.y: jnp.ndarray = jnp.atleast_1d(y)
+        self.t: jnp.ndarray = (
+            jnp.atleast_1d(t) if t is not None else jnp.arange(0, len(self.x), 1)
+        )
         assert len(self.x) == len(self.y) == len(self.t), "Array lengths are not equal"
-        self.theta = jnp.atleast_1d(theta) if theta is not None else jnp.zeros_like(x)
+        self.theta: jnp.ndarray = (
+            jnp.atleast_1d(theta) if theta is not None else jnp.zeros_like(x)
+        )
+        # Define the geometry of this route
+        self.geometry = geometry if isinstance(geometry, Geometry) else Euclidean()
 
     def __len__(self) -> int:
         return len(self.x)
@@ -43,6 +44,15 @@ class RouteJax:
             f"xN={self.x[-1]:.2f}, yN={self.y[-1]:.2f}, "
             f"length={len(self)})"
         )
+
+    def asdict(self) -> dict:
+        """Return dictionary with coordinates, times and headings"""
+        return {
+            "x": self.x.tolist(),
+            "y": self.y.tolist(),
+            "t": self.t.tolist(),
+            "theta": self.theta.tolist(),
+        }
 
     @property
     def pts(self):
@@ -106,7 +116,7 @@ class RouteJax:
         vel : float
             Vessel velocity, typically in meters per second
         """
-        dist = dist_p0_to_p1((self.x[-1], self.y[-1]), (x, y))
+        dist = self.geometry.dist_p0_to_p1((self.x[-1], self.y[-1]), (x, y))
         t = dist / vel + self.t[-1]
         self.append_points(x, y, t)
 
@@ -132,16 +142,16 @@ class RouteJax:
             x = np.interp(i, j, x)
             y = np.interp(i, j, y)
         # Angle over ground and the distance between points
-        a_g = ang_between_coords(x, y)
-        d = dist_between_coords(x, y)
+        a_g = self.geometry.ang_between_coords(x, y)
+        d = self.geometry.dist_between_coords(x, y)
         # Componentes of the velocity of vectorfield
         v_cx, v_cy = vf.get_current(x[:-1], y[:-1])
         # Angle and module of the velocity of vectorfield
-        a_c, v_c = components_to_ang_mod(v_cx, v_cy)
+        a_c, v_c = self.geometry.components_to_ang_mod(v_cx, v_cy)
         # Angle of the vectorfield w.r.t. the direction over ground
         a_cg = a_c - a_g
         # Components of the vectorfield w.r.t. the direction over ground
-        v_cg_para, v_cg_perp = ang_mod_to_components(a_cg, v_c)
+        v_cg_para, v_cg_perp = self.geometry.ang_mod_to_components(a_cg, v_c)
         # The perpendicular component of the vessel velocity must compensate the vectorfield
         v_vg_perp = -v_cg_perp
         # Component of the vessel velocity parallel w.r.t. the direction over ground

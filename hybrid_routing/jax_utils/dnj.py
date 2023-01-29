@@ -25,18 +25,22 @@ class DNJ:
         self.vectorfield = vectorfield
         self.time_step = time_step
         h = time_step
+        if vectorfield.spherical:
+            get_current = vectorfield.get_current_rad
+        else:
+            get_current = vectorfield.get_current
 
         if optimize_for == "fuel":
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
-                w = vectorfield.get_current(x[0], x[1])
+                w = get_current(x[0], x[1])
                 cost = jnp.sqrt((xp[0] - w[0]) ** 2 + (xp[1] - w[1]) ** 2)
                 return cost
 
         elif optimize_for == "time":
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
-                w = vectorfield.get_current(x[0], x[1])
+                w = get_current(x[0], x[1])
                 a = 1 - (w[0] ** 2 + w[1] ** 2)
                 cost = (
                     jnp.sqrt(
@@ -173,7 +177,7 @@ class DNJRandomGuess:
                 ).flatten()
                 y = np.concatenate([y, y_new[1:]])
             # Add the route to the list
-            list_routes[idx_route] = RouteJax(x, y)
+            list_routes[idx_route] = RouteJax(x, y, geometry=vectorfield.geometry)
         # Store parameters
         self.dnj = DNJ(
             vectorfield=vectorfield, time_step=time_step, optimize_for=optimize_for

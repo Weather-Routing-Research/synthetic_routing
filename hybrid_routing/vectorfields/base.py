@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from jax import jacfwd, jacrev, jit
 
-from hybrid_routing.utils.spherical import RAD2M
+from hybrid_routing.geometry import Euclidean, Geometry, Spherical
+from hybrid_routing.geometry.spherical import RAD2M
 
 
 class Vectorfield(ABC):
@@ -18,6 +19,7 @@ class Vectorfield(ABC):
         pass upon initialization, returns the current in tuples `(u, v)` given the position of the boat `(x, y)`
     """
 
+    geometry: Geometry
     rad2m = jnp.float32(RAD2M)  # Radians to meters conversion
 
     def __init__(self, spherical: bool = False):
@@ -27,12 +29,37 @@ class Vectorfield(ABC):
         self.spherical = spherical
         if spherical:
             self.ode_zermelo = self._ode_zermelo_spherical
+            self.geometry = Spherical()
         else:
             self.ode_zermelo = self._ode_zermelo_euclidean
+            self.geometry = Euclidean()
 
     @abstractmethod
     def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         pass
+
+    def get_current_rad(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Takes the current values (u,v) at a given point (x,y) on the grid.
+        Returns radians per second.
+
+        Parameters
+        ----------
+        x : jnp.array
+            x-coordinate of the ship
+        y : jnp.array
+            y-coordinate of the ship
+
+        Returns
+        -------
+        jnp.array
+            The current's velocity in x and y direction (u, v)
+        """
+        u, v = self.get_current(x, y)
+        # Meters to radians
+        # Velocity component across longitude is affected by latitude
+        u = u / self.rad2m / jnp.cos(y)
+        v = v / self.rad2m
+        return u, v
 
     """
     Takes the Jacobian (a 2x2 matrix) of the background vectorfield (W) using JAX package 
@@ -175,6 +202,10 @@ class Vectorfield(ABC):
                 self, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max, step=step
             )
 
+    def is_land(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Just a placeholder function. Indicates that no point has land."""
+        return jnp.full_like(x, False)
+
     def plot(
         self,
         x_min: float = -4,
@@ -182,6 +213,7 @@ class Vectorfield(ABC):
         y_min: float = -4,
         y_max: float = 4,
         step: float = 1,
+        do_color: bool = False,
         **kwargs
     ):
         """Plots the vector field
@@ -198,10 +230,28 @@ class Vectorfield(ABC):
             Up limit of Y axes, by default 125
         step : float, optional
             Distance between points to plot, by default .5
+        do_color : bool, optional
+            Plot a background color indicating the strength of the current
         """
+        # Quiver
         x, y = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
         u, v = self.get_current(x, y)
         plt.quiver(x, y, u, v, **kwargs)
+        # Heatmap
+        if do_color:
+            # Matshow color is finer than quiver
+            x, y = np.meshgrid(
+                np.arange(x_min, x_max, step / 5), np.arange(y_min, y_max, step / 5)
+            )
+            u, v = self.get_current(x, y)
+            # Velocity module
+            m = (u**2 + v**2) ** (1 / 2)
+            plt.matshow(
+                m,
+                origin="lower",
+                extent=[x_min, x_max, y_min, y_max],
+                alpha=0.6,
+            )
 
 
 class VectorfieldDiscrete(Vectorfield):

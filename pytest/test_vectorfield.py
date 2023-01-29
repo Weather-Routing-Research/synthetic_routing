@@ -1,8 +1,9 @@
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
 
 import pytest
-from hybrid_routing.vectorfields import Circular, NoCurrent
+from hybrid_routing.vectorfields import Circular, NoCurrent, VectorfieldReal
 
 
 def test_no_current_vectorfield():
@@ -40,3 +41,26 @@ def test_ode_zermelo(x: float, theta: float, vel: float):
     np.testing.assert_allclose(dx_euc, dx_sph * rad2m, rtol=1e-5)
     np.testing.assert_allclose(dy_euc, dy_sph * rad2m, rtol=1e-5)
     np.testing.assert_allclose(dt_euc, dt_sph * rad2m, rtol=1e-5)
+
+
+def test_real_vectorfield():
+    df = pd.DataFrame(
+        np.random.uniform(low=-5, high=5, size=(10, 10)),
+        index=np.arange(start=-5, stop=5, step=1),
+        columns=np.arange(start=-5, stop=5, step=1),
+    )
+    vf = VectorfieldReal(df, df, radians=False)
+
+    # Test one point
+    x = jnp.array(vf.arr_x[5])
+    y = jnp.array(vf.arr_y[5])
+    u, v = vf.get_current(x, y)
+    np.testing.assert_allclose(u, vf.u[5, 5], rtol=1e-4)
+    np.testing.assert_allclose(v, vf.v[5, 5], rtol=1e-4)
+
+    # Test several points
+    x = vf.arr_x
+    y = vf.arr_y
+    u, v = vf.get_current(x, y)
+    np.testing.assert_allclose(u, np.diag(vf.u), rtol=1e-4)
+    np.testing.assert_allclose(v, np.diag(vf.v), rtol=1e-4)
