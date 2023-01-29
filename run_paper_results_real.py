@@ -102,9 +102,9 @@ def pipeline(
     )
     plt.gca().set_aspect("equal")
     # Radians to degrees
-    xticks = np.arange(xmin, xmax, 2 * DEG2RAD)
+    xticks = np.arange(xmin, xmax, 5 * DEG2RAD)
     plt.xticks(xticks, labels=[f"{i:.1f}" for i in xticks / DEG2RAD])
-    yticks = np.arange(ymin, ymax, 2 * DEG2RAD)
+    yticks = np.arange(ymin, ymax, 5 * DEG2RAD)
     plt.yticks(yticks, labels=[f"{i:.1f}" for i in yticks / DEG2RAD])
 
     # Plot source and destination point
@@ -113,12 +113,16 @@ def pipeline(
     # Plot route
     plt.plot(route.x, route.y, c="red", linewidth=1, alpha=0.9, zorder=5)
     dict_out["route_rk"] = route.asdict()
-    # Recompute times
-    route.recompute_times(vel, vectorfield, interp=False)
-    time_opt_rec = float(route.t[-1])
-    dict_out["route_rk2"] = route.asdict()
-
     print("Optimization step done.")
+
+    # Recompute times
+    try:
+        route.recompute_times(vel, vectorfield, interp=False)
+        dict_out["route_rk2"] = route.asdict()
+        print("Recomputation step done.")
+    except AssertionError:
+        print("Recomputation step failed.")
+    time_opt_rec = float(route.t[-1])
 
     # Apply DNJ
     dnj = DNJ(vectorfield, time_step=dnj_time_step, optimize_for="fuel")
@@ -133,7 +137,6 @@ def pipeline(
     route.recompute_times(vel, vectorfield, interp=False)
     time_dnj = float(route.t[-1])
     dict_out["route_dnj"] = route.asdict()
-
     print("DNJ step done.")
 
     # Times
@@ -198,7 +201,7 @@ for vel in [3, 6, 10]:
         plt.close()
     except Exception as er:
         print("[ERROR]", er)
-    print(f"Done Real vectorfield with land, {vel} m/s")
+    print(f"Done Real vectorfield with land, {vel} m/s\n---")
 
 """
 Vectorfield - Real
@@ -227,7 +230,7 @@ for vel in [3, 6, 10]:
         plt.close()
     except Exception as er:
         print("[ERROR]", er)
-    print(f"Done Real vectorfield, {vel} m/s")
+    print(f"Done Real vectorfield, {vel} m/s\n---")
 
 """
 Store dictionary

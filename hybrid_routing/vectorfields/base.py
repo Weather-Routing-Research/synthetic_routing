@@ -233,18 +233,25 @@ class Vectorfield(ABC):
         do_color : bool, optional
             Plot a background color indicating the strength of the current
         """
+        # Quiver
         x, y = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
         u, v = self.get_current(x, y)
+        plt.quiver(x, y, u, v, **kwargs)
+        # Heatmap
         if do_color:
-            m = (u**2 + v**2) ** (1 / 2)  # Velocity module
+            # Matshow color is finer than quiver
+            x, y = np.meshgrid(
+                np.arange(x_min, x_max, step / 5), np.arange(y_min, y_max, step / 5)
+            )
+            u, v = self.get_current(x, y)
+            # Velocity module
+            m = (u**2 + v**2) ** (1 / 2)
             plt.matshow(
                 m,
                 origin="lower",
                 extent=[x_min, x_max, y_min, y_max],
                 alpha=0.6,
             )
-        # Quiver
-        plt.quiver(x, y, u, v, **kwargs)
 
 
 class VectorfieldDiscrete(Vectorfield):
