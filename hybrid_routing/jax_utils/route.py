@@ -164,9 +164,14 @@ class RouteJax:
         v_g = v_vg_para + v_cg_para
         # Time is distance divided by velocity over ground
         t = np.divide(d, v_g)
-        assert (
-            t >= 0
-        ).all(), f"There can't be negative times. Raise vessel velocity over {vel}."
+        if (t < 0).any():
+            tneg = t[t < 0]
+            print(
+                f"[WARNING] Negative times found in {len(tneg)} out of {len(t)} points."
+                f" Worst is {min(tneg)}. Consider raising vessel velocity over {vel}."
+                " Time values were clipped to 0."
+            )
+            t = np.clip(t, a_min=0)
         # Update route times
         t = np.concatenate([[0], np.cumsum(t)])
         if interp:
