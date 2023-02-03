@@ -145,7 +145,10 @@ class RouteJax:
         a_g = self.geometry.ang_between_coords(x, y)
         d = self.geometry.dist_between_coords(x, y)
         # Componentes of the velocity of vectorfield
-        v_cx, v_cy = vf.get_current(x[:-1], y[:-1])
+        v_cx = np.zeros(len(x) - 1)
+        v_cy = np.zeros(len(y) - 1)
+        for i in range(len(x) - 1):
+            v_cx[i], v_cy[i] = vf.get_current(x[i], y[i])
         # Angle and module of the velocity of vectorfield
         a_c, v_c = self.geometry.components_to_ang_mod(v_cx, v_cy)
         # Angle of the vectorfield w.r.t. the direction over ground
