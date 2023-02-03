@@ -99,6 +99,21 @@ you can also use `make install`.
 
 The difference between `conda` and `pip` is that conda will create an isolated environment while pip will install all the dependencies in the current Python env. This might be a conda environment or any other Python env created by other tools. If you already have the dependencies installed, you can update it to reflect the last version of the packages in the `requirements.txt` with `pip-sync`. 
 
+## GPU support
+
+If JAX is not using GPU, the following message will appear:
+
+`WARNING:absl:No GPU/TPU found, falling back to CPU. (Set TF_CPP_MIN_LOG_LEVEL=0 and rerun for more info.)`
+
+To solve it, install the following dependencies in the environment:
+
+```cmd
+conda install -c anaconda cudatoolkit
+conda install -c anaconda cudnn
+pip install -U jaxlib==0.3.14+cuda11.cudnn82 -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+conda install -c nvidia cuda-nvcc
+```
+
 ## Add dependencies
 
 Add abstract dependency to `setup.py`. If neccessary, add version requirements but try to be as flexible as possible
