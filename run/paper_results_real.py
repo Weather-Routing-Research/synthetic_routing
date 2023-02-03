@@ -12,6 +12,7 @@ import numpy as np
 
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.jax_utils import DNJ, Optimizer, RouteJax
+from hybrid_routing.utils.plot import plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -100,11 +101,7 @@ def pipeline(
         do_color=True,
     )
     plt.gca().set_aspect("equal")
-    # Radians to degrees
-    xticks = np.arange(xmin, xmax, 5 * DEG2RAD)
-    plt.xticks(xticks, labels=[f"{i:.1f}" for i in xticks / DEG2RAD])
-    yticks = np.arange(ymin, ymax, 5 * DEG2RAD)
-    plt.yticks(yticks, labels=[f"{i:.1f}" for i in yticks / DEG2RAD])
+    plot_ticks_radians_to_degrees(step=5)
 
     # Plot source and destination point
     plt.scatter(x0, y0, c="green", s=20, zorder=10)
