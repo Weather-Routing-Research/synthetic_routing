@@ -21,11 +21,11 @@ class Vectorfield(ABC):
 
     geometry: Geometry
     rad2m = jnp.float32(RAD2M)  # Radians to meters conversion
+    is_discrete: bool = False
 
     def __init__(self, spherical: bool = False):
         self._dv = jit(jacrev(self.get_current, argnums=1))
         self._du = jit(jacfwd(self.get_current, argnums=0))
-        self.is_discrete = False
         self.spherical = spherical
         if spherical:
             self.ode_zermelo = self._ode_zermelo_spherical
@@ -198,7 +198,7 @@ class Vectorfield(ABC):
         if self.is_discrete:
             return self
         else:
-            return VectorfieldDiscrete(
+            return VectorfieldDiscrete.from_vectorfield(
                 self, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max, step=step
             )
 
@@ -255,8 +255,20 @@ class Vectorfield(ABC):
 
 
 class VectorfieldDiscrete(Vectorfield):
-    def __init__(
-        self,
+    is_discrete: True
+
+    def __init__(self, spherical: bool = False):
+        self.spherical = spherical
+        if spherical:
+            self.ode_zermelo = self._ode_zermelo_spherical
+            self.geometry = Spherical()
+        else:
+            self.ode_zermelo = self._ode_zermelo_euclidean
+            self.geometry = Euclidean()
+
+    @classmethod
+    def from_vectorfield(
+        cls,
         vectorfield: Vectorfield,
         x_min: float = 0,
         x_max: float = 10,
@@ -265,19 +277,21 @@ class VectorfieldDiscrete(Vectorfield):
         step: float = 1,
     ):
         # Copy all atributes of the original vectorfield into this one
-        self.__dict__.update(vectorfield.__dict__)
-        self.arr_x = jnp.arange(x_min, x_max, step)
-        self.arr_y = jnp.arange(y_min, y_max, step)
-        mat_x, mat_y = jnp.meshgrid(self.arr_x, self.arr_y)
+        cls.__dict__.update(vectorfield.__dict__)
+        cls.arr_x = jnp.arange(x_min, x_max, step)
+        cls.arr_y = jnp.arange(y_min, y_max, step)
+        mat_x, mat_y = jnp.meshgrid(cls.arr_x, cls.arr_y)
         u, v = vectorfield.get_current(mat_x, mat_y)
-        self.u, self.v = u.T, v.T
+        cls.u, cls.v = u.T, v.T
         # Define methods to get closest indexes
-        self.closest_idx = jnp.vectorize(lambda x: jnp.argmin(jnp.abs(self.arr_x - x)))
-        self.closest_idy = jnp.vectorize(lambda y: jnp.argmin(jnp.abs(self.arr_y - y)))
-        self.is_discrete = True
+        cls.closest_idx = jnp.vectorize(lambda x: jnp.argmin(jnp.abs(cls.arr_x - x)))
+        cls.closest_idy = jnp.vectorize(lambda y: jnp.argmin(jnp.abs(cls.arr_y - y)))
+        cls.is_discrete = True
+        return cls
 
-    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
-        """Takes the current values (u,v) at a given point (x,y) on the grid.
+    def _weight_coordinates(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Weights the influence of each coordinate of the grid at point (x,y)
+        on the grid.
 
         Parameters
         ----------
@@ -289,10 +303,58 @@ class VectorfieldDiscrete(Vectorfield):
         Returns
         -------
         jnp.array
+            The weight of each coordinate w.r.t given point
+        """
+        # Reshape arrays
+        # P = shape of the point array `x`, `y` (may be multidimensional)
+        # X = length of the X-grid, `self.arr_x`
+        # Y = length of the Y-grid, `self.arr_x`
+        arr_x = jnp.tile(self.arr_x, x.shape + (1,))  # (P, X)
+        arr_y = jnp.tile(self.arr_y, y.shape + (1,))  # (P, Y)
+        x = jnp.reshape(x, x.shape + (1,))  # (P, 1)
+        y = jnp.reshape(y, y.shape + (1,))  # (P, 1)
+
+        # Compute distance from all points to the X grid points
+        dx = jnp.abs(arr_x - x) / self._dx  # (P, X)
+        # Compute distance from all points to the Y grid points
+        dy = jnp.abs(arr_y - y) / self._dy  # (P, Y)
+
+        # Assign a weight relative to its proximity
+        # Grid points more that one point away will have zero weight
+        wx = 1 - jnp.where(dx < 1, dx, 1)  # (P, X)
+        wy = 1 - jnp.where(dy < 1, dy, 1)  # (P, Y)
+
+        # Turn arrays of weights into mesh grids
+        wx = jnp.reshape(wx, wx.shape + (1,))  # (P, X, 1)
+        wy = jnp.reshape(wy, wy.shape[:-1] + (1, wy.shape[-1]))  # (P, 1, Y)
+        # Multiply both matrices to get the final matrix of weights
+        w = wx * wy  # (P, X, Y)
+        return w
+
+    def get_current(self, x: jnp.ndarray, y: jnp.ndarray) -> Tuple[jnp.ndarray]:
+        """Takes the current values (u,v) at a given point (x,y) on the grid.
+        Returns meter per second.
+
+        Parameters
+        ----------
+        x : jnp.array
+            x-coordinate of the ship
+        y : jnp.array
+            y-coordinate of the ship
+
+        Returns
+        -------
+        Tuple[jnp.array]
             The current's velocity in x and y direction (u, v)
         """
-        idx, idy = self.closest_idx(x), self.closest_idy(y)
-        return jnp.asarray([self.u[idx, idy], self.v[idx, idy]])
+        w = self._weight_coordinates(x, y)
+
+        # Use the weights to compute the velocity component
+        # relative to those points
+        u = (self.u * w).sum(axis=(-2, -1))  # (P, )
+        v = (self.v * w).sum(axis=(-2, -1))  # (P, )
+
+        return u, v
 
     def plot(
         self,

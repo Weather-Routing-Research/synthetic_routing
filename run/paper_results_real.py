@@ -10,10 +10,8 @@ from typing import Dict
 import matplotlib.pyplot as plt
 import numpy as np
 
-from hybrid_routing.geometry.spherical import DEG2RAD
-from hybrid_routing.jax_utils.dnj import DNJ
-from hybrid_routing.jax_utils.optimize import Optimizer
-from hybrid_routing.jax_utils.route import RouteJax
+from hybrid_routing.geometry import DEG2RAD
+from hybrid_routing.jax_utils import DNJ, Optimizer, RouteJax
 from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -183,7 +181,7 @@ Vectorfield - Real land
 vf = VectorfieldReal.from_folder("./data", "real-land", radians=True)
 for vel in [3, 6, 10]:
     try:
-        dict_results[f"Real land {vel}"] = pipeline(
+        d = pipeline(
             vectorfield=vf,
             x0=43.49 * DEG2RAD,
             y0=-1.66 * DEG2RAD,
@@ -195,6 +193,10 @@ for vel in [3, 6, 10]:
             ymin=vf.arr_y.min(),
             ymax=vf.arr_y.max(),
         )
+
+        d["data"] = "real-land"
+
+        dict_results[f"Real land {vel}"] = d
 
         # Store plot
         plt.tight_layout()
@@ -212,7 +214,7 @@ vf = VectorfieldReal.from_folder("./data", "real", radians=True)
 
 for vel in [3, 6, 10]:
     try:
-        dict_results[f"Real {vel}"] = pipeline(
+        d = pipeline(
             vectorfield=vf,
             x0=-79.7 * DEG2RAD,
             y0=32.7 * DEG2RAD,
@@ -224,6 +226,9 @@ for vel in [3, 6, 10]:
             ymin=vf.arr_y.min(),
             ymax=vf.arr_y.max(),
         )
+
+        d["data"] = "real"
+        dict_results[f"Real {vel}"] = d
 
         # Store plot
         plt.tight_layout()
