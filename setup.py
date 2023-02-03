@@ -19,13 +19,9 @@ setuptools.setup(
     setup_requires=["setuptools_scm"],
     install_requires=[
         "black",
-        "cuda-nvcc",  # Required for JAX GPU support
-        "cudatoolkit",  # Required for JAX GPU support
-        "cudnn",  # Required for JAX GPU support
         "imageio",
         "jax==0.3.14",
-        # "jaxlib==0.3.14",
-        "jaxlib==0.3.14+cuda11.cudnn82",  # Use the above for CPU only
+        "jaxlib==0.3.14",
         "matplotlib",
         "numpy",
         "pip-tools",
