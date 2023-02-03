@@ -77,7 +77,8 @@ class VectorfieldReal(Vectorfield):
         return cls(df_x, df_y, radians=radians)
 
     def _weight_coordinates(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
-        """Weights the influence of each coordinate of the grid at point (x,y) on the grid.
+        """Weights the influence of each coordinate of the grid at point (x,y)
+        on the grid.
 
         Parameters
         ----------
