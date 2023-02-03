@@ -14,7 +14,7 @@ def main(
     path_json: str,
     key: str = "route_rk",
     path_out: str = "output",
-    time_step: float = 60,
+    time_step: float = 3600,
     num_iter: int = 200,
 ):
     path_out = Path(path_out)
@@ -56,12 +56,12 @@ def main(
         plt.scatter(route.x[0], route.y[0], c="green", s=20, zorder=10)
         plt.scatter(route.x[-1], route.y[-1], c="green", s=20, zorder=10)
         # Plot route
-        plt.plot(route.x, route.y, c="red", linewidth=1, alpha=0.9, zorder=5)
+        plt.plot(route.x, route.y, c="red", linewidth=2.5, alpha=0.9, zorder=5)
 
         # Apply DNJ
         dnj = DNJ(vf, time_step=time_step, optimize_for="time")
         # Apply DNJ in loop
-        num_iter = num_iter // 5
+        num_iter = max(1, num_iter // 5)
         for n in range(5):
             dnj.optimize_route(route, num_iter=num_iter)
             s = 2 if n == 4 else 1
