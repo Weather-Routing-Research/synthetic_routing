@@ -169,38 +169,6 @@ def pipeline(
 
 
 """
-Vectorfield - Real land
-"""
-
-vf = VectorfieldReal.from_folder("./data", "real-land", radians=True)
-for vel in [10, 6, 3]:
-    try:
-        d = pipeline(
-            vectorfield=vf,
-            x0=43.49 * DEG2RAD,
-            y0=-1.66 * DEG2RAD,
-            xn=98.14 * DEG2RAD,
-            yn=10.21 * DEG2RAD,
-            vel=vel,  # m/s
-            xmin=vf.arr_x.min(),
-            xmax=vf.arr_x.max(),
-            ymin=vf.arr_y.min(),
-            ymax=vf.arr_y.max(),
-        )
-
-        d["data"] = "real-land"
-
-        dict_results[f"Real land {vel}"] = d
-
-        # Store plot
-        plt.tight_layout()
-        plt.savefig(path_out / f"results-real-land-{vel}.png")
-        plt.close()
-    except Exception as er:
-        print("[ERROR]", er)
-    print(f"Done Real vectorfield with land, {vel} m/s\n---")
-
-"""
 Vectorfield - Real
 """
 
@@ -231,6 +199,38 @@ for vel in [10, 6, 3]:
     except Exception as er:
         print("[ERROR]", er)
     print(f"Done Real vectorfield, {vel} m/s\n---")
+
+"""
+Vectorfield - Real land
+"""
+
+vf = VectorfieldReal.from_folder("./data", "real-land", radians=True)
+for vel in [10, 6, 3]:
+    try:
+        d = pipeline(
+            vectorfield=vf,
+            x0=43.49 * DEG2RAD,
+            y0=-1.66 * DEG2RAD,
+            xn=98.14 * DEG2RAD,
+            yn=10.21 * DEG2RAD,
+            vel=vel,  # m/s
+            xmin=vf.arr_x.min(),
+            xmax=vf.arr_x.max(),
+            ymin=vf.arr_y.min(),
+            ymax=vf.arr_y.max(),
+        )
+
+        d["data"] = "real-land"
+
+        dict_results[f"Real land {vel}"] = d
+
+        # Store plot
+        plt.tight_layout()
+        plt.savefig(path_out / f"results-real-land-{vel}.png")
+        plt.close()
+    except Exception as er:
+        print("[ERROR]", er)
+    print(f"Done Real vectorfield with land, {vel} m/s\n---")
 
 """
 Store dictionary
