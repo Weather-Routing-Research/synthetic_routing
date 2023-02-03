@@ -375,23 +375,30 @@ class VectorfieldDiscrete(Vectorfield):
             Plot a background color indicating the strength of the current
         """
         # Compute the step for the discrete arrays
-        s = min(1, step // np.mean(np.abs(np.diff(self.arr_x))))
-        idx = jnp.argwhere((self.arr_x >= x_min) & (self.arr_x <= x_max)).flatten()[::s]
-        idy = jnp.argwhere((self.arr_y >= y_min) & (self.arr_y <= y_max)).flatten()[::s]
-        plt.quiver(
-            self.arr_x[idx],
-            self.arr_y[idy],
-            self.u[jnp.ix_(idx, idy)],
-            self.v[jnp.ix_(idx, idy)],
-            **kwargs
-        )
+        s = int(max(1, step // np.mean(np.abs(np.diff(self.arr_x)))))
+        idx = jnp.argwhere((self.arr_x >= x_min) & (self.arr_x <= x_max)).flatten()
+        idy = jnp.argwhere((self.arr_y >= y_min) & (self.arr_y <= y_max)).flatten()
+        idxx, idyy = idx[::s], idy[::s]
+        # Prepare matrices to plot
+        x = self.arr_x[idxx]
+        y = self.arr_y[idyy]
+        xx, yy = np.meshgrid(x, y)
+        u = self.u[jnp.ix_(idyy, idxx)]
+        v = self.v[jnp.ix_(idyy, idxx)]
         # Heatmap
         if do_color:
             # Velocity module
             m = (self.u**2 + self.v**2) ** (1 / 2)
             plt.matshow(
-                m[jnp.ix_(idx, idy)],
+                m[jnp.ix_(idy, idx)],
                 origin="lower",
-                extent=[x_min, x_max, y_min, y_max],
+                extent=[
+                    self.arr_x[idx[0]],
+                    self.arr_x[idx[-1]],
+                    self.arr_y[idy[0]],
+                    self.arr_y[idy[-1]],
+                ],
                 alpha=0.6,
             )
+        # Plot the quiver
+        plt.quiver(xx, yy, u, v, **kwargs)
