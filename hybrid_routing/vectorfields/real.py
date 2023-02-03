@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Union
 
 import jax.numpy as jnp
 import pandas as pd
