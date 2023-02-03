@@ -34,26 +34,26 @@ def main(path_json: str, key: str = "route_rk", path_out: str = "output"):
         # Plot
         plt.figure(figsize=(5, 5))
         vf.plot(
-            x_min=route.x.min(),
-            x_max=route.x.max(),
-            y_min=route.y.min(),
-            y_max=route.y.max(),
+            x_min=route.x.min() - 5 * DEG2RAD,
+            x_max=route.x.max() + 5 * DEG2RAD,
+            y_min=route.y.min() - 5 * DEG2RAD,
+            y_max=route.y.max() + 5 * DEG2RAD,
             step=1 * DEG2RAD,
             color="grey",
             alpha=0.8,
             do_color=True,
         )
         plt.gca().set_aspect("equal")
-
         plot_ticks_radians_to_degrees(step=5)
 
         # Plot source and destination point
-        plt.scatter(route.x[0], route.x[-1], c="green", s=20, zorder=10)
-        plt.scatter(route.y[0], route.y[-1], c="green", s=20, zorder=10)
+        plt.scatter(route.x[0], route.y[0], c="green", s=20, zorder=10)
+        plt.scatter(route.x[-1], route.y[-1], c="green", s=20, zorder=10)
         # Plot route
         plt.plot(route.x, route.y, c="red", linewidth=1, alpha=0.9, zorder=5)
 
-        plt.savefig(path_out / (name.replace(" ", "_") + ".png"))
+        plt.tight_layout()
+        plt.savefig(path_out / (name.lower().replace(" ", "_") + ".png"))
         plt.close()
 
 
