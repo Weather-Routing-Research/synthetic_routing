@@ -145,6 +145,7 @@ class RouteJax:
         a_g = self.geometry.ang_between_coords(x, y)
         d = self.geometry.dist_between_coords(x, y)
         # Componentes of the velocity of vectorfield
+        # We loop to avoid memory errors when using GPU
         v_cx = np.zeros(len(x) - 1)
         v_cy = np.zeros(len(y) - 1)
         for i in range(len(x) - 1):
