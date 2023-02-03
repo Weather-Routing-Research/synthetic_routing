@@ -186,13 +186,6 @@ The diagram below illustrates the setup: \
 (xN, yN) = `(x_end, y_end)`.
 ![Set up](./img/node_initial_setup.png)
 
-
-### TF Utils
-
-This module is not used right now. Avoid calling it.
-
-The module [hybrid_routing.tf_utils](./hybrid_routing/tf_utils/) implements all the functions to optimize a route by using TensorFlow.
-
 ### Web
 
 ```
