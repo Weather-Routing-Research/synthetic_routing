@@ -257,15 +257,6 @@ class Vectorfield(ABC):
 class VectorfieldDiscrete(Vectorfield):
     is_discrete: True
 
-    def __init__(self, spherical: bool = False):
-        self.spherical = spherical
-        if spherical:
-            self.ode_zermelo = self._ode_zermelo_spherical
-            self.geometry = Spherical()
-        else:
-            self.ode_zermelo = self._ode_zermelo_euclidean
-            self.geometry = Euclidean()
-
     @classmethod
     def from_vectorfield(
         cls,
