@@ -164,7 +164,17 @@ class RouteJax:
         v_g = v_vg_para + v_cg_para
         # Time is distance divided by velocity over ground
         t = np.divide(d, v_g)
-        if (t < 0).any():
+        # Identify NaN and negative values
+        mask_nan = np.isnan(t)
+        mask_neg = t < 0
+        if mask_nan.any():
+            print(
+                f"[WARNING] Negative times found in {mask_nan.sum()} "
+                f"out of {len(t)} points. Consider raising vessel velocity over {vel}."
+                " NaN values were changed to 0."
+            )
+            t = np.nan_to_num(t, nan=0)
+        if mask_neg.any():
             tneg = t[t < 0]
             print(
                 f"[WARNING] Negative times found in {len(tneg)} out of {len(t)} points."
