@@ -137,7 +137,7 @@ def pipeline(
         + ", "
         + str(yn)
         + r"\right\rangle$"
-        + f"\nOptimized (red):\n"
+        + "\nOptimized (red):\n"
         + f"  t = {time_opt_rec:.3f}\n"
         + "Smoothed (black):\n"
         + f"  t = {time_dnj:.3f}"
