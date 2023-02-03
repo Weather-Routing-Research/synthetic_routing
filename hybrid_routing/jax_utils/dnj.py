@@ -41,13 +41,13 @@ class DNJ:
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
                 w = get_current(x[0], x[1])
-                a = 1 - (w[0] ** 2 + w[1] ** 2)
+                alpha = 1 - (w[0] ** 2 + w[1] ** 2)
                 cost = (
                     jnp.sqrt(
-                        1 / a * (xp[0] ** 2 + xp[1] ** 2)
-                        + 1 / (a**2) * (w[0] * xp[0] + w[1] * xp[1]) ** 2
+                        1 / alpha * (xp[0] ** 2 + xp[1] ** 2)
+                        + 1 / (alpha**2) * (w[0] * xp[0] + w[1] * xp[1]) ** 2
                     )
-                    - 1 / a * (w[0] * xp[0] + w[1] * xp[1])
+                    - 1 / alpha * (w[0] * xp[0] + w[1] * xp[1])
                 ) ** 2
                 return cost
 
