@@ -5,12 +5,18 @@ import matplotlib.pyplot as plt
 import typer
 
 from hybrid_routing.geometry import DEG2RAD
-from hybrid_routing.jax_utils import RouteJax
+from hybrid_routing.jax_utils import DNJ, RouteJax
 from hybrid_routing.utils.plot import plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
 
 
-def main(path_json: str, key: str = "route_rk", path_out: str = "output"):
+def main(
+    path_json: str,
+    key: str = "route_rk",
+    path_out: str = "output",
+    time_step: float = 60,
+    num_iter: int = 200,
+):
     path_out = Path(path_out)
 
     with open(path_json) as file:
@@ -51,6 +57,18 @@ def main(path_json: str, key: str = "route_rk", path_out: str = "output"):
         plt.scatter(route.x[-1], route.y[-1], c="green", s=20, zorder=10)
         # Plot route
         plt.plot(route.x, route.y, c="red", linewidth=1, alpha=0.9, zorder=5)
+
+        # Apply DNJ
+        dnj = DNJ(vf, time_step=time_step, optimize_for="time")
+        # Apply DNJ in loop
+        num_iter = num_iter // 5
+        for n in range(5):
+            dnj.optimize_route(route, num_iter=num_iter)
+            s = 2 if n == 4 else 1
+            c = "black" if n == 4 else "grey"
+            alpha = 0.9 if n == 4 else 0.6
+            plt.plot(route.x, route.y, c=c, linewidth=s, alpha=alpha, zorder=5)
+        route.recompute_times(dict_run["vel"], vf, interp=False)
 
         plt.tight_layout()
         plt.savefig(path_out / (name.lower().replace(" ", "_") + ".png"))
