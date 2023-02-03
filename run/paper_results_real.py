@@ -45,7 +45,7 @@ def pipeline(
     rk_time_step: float = 60,
     dist_min: float = 1000,
     dnj_time_step: float = 60,
-    dnj_num_iter: int = 5,
+    dnj_num_iter: int = 20,
     x_text: float = None,
     y_text: float = None,
     textbox_align: str = "bottom",
@@ -107,21 +107,18 @@ def pipeline(
     plt.scatter(x0, y0, c="green", s=20, zorder=10)
     plt.scatter(xn, yn, c="green", s=20, zorder=10)
     # Plot route
-    plt.plot(route.x, route.y, c="red", linewidth=1, alpha=0.9, zorder=5)
+    plt.plot(route.x, route.y, c="red", linewidth=2.5, alpha=0.9, zorder=5)
     dict_out["route_rk"] = route.asdict()
     print("Optimization step done.")
 
     # Recompute times
-    try:
-        route.recompute_times(vel, vectorfield, interp=False)
-        dict_out["route_rk2"] = route.asdict()
-        print("Recomputation step done.")
-    except AssertionError:
-        print("Recomputation step failed.")
+    route.recompute_times(vel, vectorfield, interp=False)
+    dict_out["route_rk2"] = route.asdict()
+    print("Recomputation step done.")
     time_opt_rec = float(route.t[-1])
 
     # Apply DNJ
-    dnj = DNJ(vectorfield, time_step=dnj_time_step, optimize_for="fuel")
+    dnj = DNJ(vectorfield, time_step=dnj_time_step, optimize_for="time")
     # Apply DNJ in loop
     num_iter = dnj_num_iter // 5
     for n in range(5):
