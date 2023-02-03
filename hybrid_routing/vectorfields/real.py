@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Tuple, Union
-import matplotlib.pyplot as plt
+
 import jax.numpy as jnp
 import pandas as pd
 
@@ -161,54 +161,3 @@ class VectorfieldReal(Vectorfield):
         w = self._weight_coordinates(x, y)
         b: jnp.ndarray = (self.land * w).sum(axis=(-2, -1))  # (P, )
         return b.at[b > 0].set(1).astype(bool)
-
-    def plot(
-        self,
-        x_min: float = -4,
-        x_max: float = 4,
-        y_min: float = -4,
-        y_max: float = 4,
-        step: float = 1,
-        do_color: bool = False,
-        **kwargs
-    ):
-        """Plots the vector field
-
-        Parameters
-        ----------
-        x_min : float, optional
-            Left limit of X axes, by default 0
-        x_max : float, optional
-            Right limit of X axes, by default 125
-        y_min : float, optional
-            Bottom limit of Y axes, by default 0
-        y_max : float, optional
-            Up limit of Y axes, by default 125
-        step : float, optional
-            Distance between points to plot, by default .5
-        do_color : bool, optional
-            Plot a background color indicating the strength of the current
-        """
-        idx = jnp.argwhere((self.arr_x >= x_min) & (self.arr_x <= x_max)).flatten()[
-            ::10
-        ]
-        idy = jnp.argwhere((self.arr_y >= y_min) & (self.arr_y <= y_max)).flatten()[
-            ::10
-        ]
-        plt.quiver(
-            self.arr_x[idx],
-            self.arr_y[idy],
-            self.u[jnp.ix_(idx, idy)],
-            self.v[jnp.ix_(idx, idy)],
-            **kwargs
-        )
-        # Heatmap
-        if do_color:
-            # Velocity module
-            m = (self.u**2 + self.v**2) ** (1 / 2)
-            plt.matshow(
-                m[jnp.ix_(idx, idy)],
-                origin="lower",
-                extent=[x_min, x_max, y_min, y_max],
-                alpha=0.6,
-            )
