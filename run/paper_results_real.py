@@ -173,7 +173,7 @@ Vectorfield - Real land
 """
 
 vf = VectorfieldReal.from_folder("./data", "real-land", radians=True)
-for vel in [3, 6, 10]:
+for vel in [10, 6, 3]:
     try:
         d = pipeline(
             vectorfield=vf,
@@ -206,7 +206,7 @@ Vectorfield - Real
 
 vf = VectorfieldReal.from_folder("./data", "real", radians=True)
 
-for vel in [3, 6, 10]:
+for vel in [10, 6, 3]:
     try:
         d = pipeline(
             vectorfield=vf,
