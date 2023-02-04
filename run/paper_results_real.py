@@ -12,7 +12,7 @@ import numpy as np
 
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.jax_utils import DNJ, Optimizer, RouteJax
-from hybrid_routing.utils.plot import plot_ticks_radians_to_degrees
+from hybrid_routing.utils.plot import plot_textbox, plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -133,32 +133,12 @@ def pipeline(
     print("DNJ step done.")
 
     # Times
-    # Textbox properties
-    dict_bbox = dict(boxstyle="round", facecolor="white", alpha=0.95)
-    text = (
-        r"$\left\langle x_0, y_0 \right\rangle = \left\langle"
-        + "{:.1f}".format(x0 / DEG2RAD)
-        + ", "
-        + "{:.1f}".format(y0 / DEG2RAD)
-        + r"\right\rangle$"
-        + "\n"
-        r"$\left\langle x_T, y_T \right\rangle = \left\langle"
-        + "{:.1f}".format(xn / DEG2RAD)
-        + ", "
-        + "{:.1f}".format(yn / DEG2RAD)
-        + r"\right\rangle$"
-        + "\nOptimized (red):\n"
-        + f"  t = {time_opt_rec:.3f}\n"
-        + "Smoothed (black):\n"
-        + f"  t = {time_dnj:.3f}"
-    )
-    plt.text(
-        x_text,
-        y_text,
-        text,
-        fontsize=11,
-        verticalalignment=textbox_align,
-        bbox=dict_bbox,
+    plot_textbox(
+        (x0, y0),
+        (xn, yn),
+        (time_opt_rec, time_dnj),
+        pos=(x_text, y_text),
+        align=textbox_align,
     )
 
     # Set plot limits

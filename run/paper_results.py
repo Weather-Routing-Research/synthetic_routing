@@ -12,6 +12,7 @@ import numpy as np
 from hybrid_routing.jax_utils.dnj import DNJ
 from hybrid_routing.jax_utils.optimize import Optimizer
 from hybrid_routing.jax_utils.route import RouteJax
+from hybrid_routing.utils.plot import plot_textbox
 from hybrid_routing.vectorfields import Circular, FourVortices
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -45,7 +46,6 @@ def pipeline(
     y_text: float = None,
     textbox_align: str = "top",
 ) -> Dict:
-
     # Initialize the optimizer
     optimizer = Optimizer(
         vectorfield,
@@ -122,33 +122,12 @@ def pipeline(
 
     print("DNJ step done.")
 
-    # Times
-    # Textbox properties
-    dict_bbox = dict(boxstyle="round", facecolor="white", alpha=0.95)
-    text = (
-        r"$\left\langle x_0, y_0 \right\rangle = \left\langle"
-        + str(x0)
-        + ", "
-        + str(y0)
-        + r"\right\rangle$"
-        + "\n"
-        r"$\left\langle x_T, y_T \right\rangle = \left\langle"
-        + str(xn)
-        + ", "
-        + str(yn)
-        + r"\right\rangle$"
-        + "\nOptimized (red):\n"
-        + f"  t = {time_opt_rec:.3f}\n"
-        + "Smoothed (black):\n"
-        + f"  t = {time_dnj:.3f}"
-    )
-    plt.text(
-        x_text,
-        y_text,
-        text,
-        fontsize=11,
-        verticalalignment=textbox_align,
-        bbox=dict_bbox,
+    plot_textbox(
+        (x0, y0),
+        (xn, yn),
+        (time_opt_rec, time_dnj),
+        pos=(x_text, y_text),
+        align=textbox_align,
     )
 
     return dict_out
@@ -210,4 +189,5 @@ print("Done Four Vortices vectorfield")
 Store dictionary
 """
 with open(path_out / "results.json", "w") as outfile:
+    json.dump(dict_results, outfile)
     json.dump(dict_results, outfile)
