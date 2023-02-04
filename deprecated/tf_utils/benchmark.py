@@ -22,7 +22,6 @@ def R(a: tf.Tensor, b: tf.Tensor, x: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
 
 @tf.function
 def background_vector_field(x: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
-
     field = tf.math.multiply(
         tf.constant(1.7, dtype=tf.float32),
         tf.math.negative(R(C2, C2, x, y))

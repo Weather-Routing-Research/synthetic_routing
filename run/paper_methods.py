@@ -52,6 +52,7 @@ optimizer = Optimizer(
 Run Runge-Kutta method and plot its result
 """
 
+
 # Initialize figure with vectorfield
 # We encapsulate this code into a function because we are reusing it later
 def plot_vectorfield():
@@ -123,6 +124,7 @@ for list_routes in run:
         break
 
 plot_vectorfield()
+
 
 # Plot each route segment
 # We encapsulate this code into a function because we are reusing it later
