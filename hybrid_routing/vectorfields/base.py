@@ -236,7 +236,6 @@ class Vectorfield(ABC):
         # Quiver
         x, y = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
         u, v = self.get_current(x, y)
-        plt.quiver(x, y, u, v, **kwargs)
         # Heatmap
         if do_color:
             # Matshow color is finer than quiver
@@ -252,6 +251,7 @@ class Vectorfield(ABC):
                 extent=[x_min, x_max, y_min, y_max],
                 alpha=0.6,
             )
+        plt.quiver(x, y, u, v, **kwargs)
 
 
 class VectorfieldDiscrete(Vectorfield):
