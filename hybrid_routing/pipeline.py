@@ -19,10 +19,14 @@ class Pipeline:
         pn: Tuple[float],
         key: str,
         path: Optional[Union[str, Path]] = None,
-        radians: bool = True,
+        to_radians: bool = True,
     ):
         self.x0, self.y0 = p0
         self.xn, self.yn = pn
+        # Convert to radians
+        if to_radians:
+            self.x0, self.y0 = self.x0 * DEG2RAD, self.y0 * DEG2RAD
+            self.xn, self.yn = self.xn * DEG2RAD, self.yn * DEG2RAD
 
         if path is None:
             module = __import__("hybrid_routing")
@@ -30,13 +34,39 @@ class Pipeline:
             self.vectorfield: Vectorfield = getattr(module, key)()
             self.vf_real = False
         else:
-            self.vectorfield = VectorfieldReal.from_folder(path, key, radians=radians)
+            self.vectorfield = VectorfieldReal.from_folder(path, key, radians=True)
             self.vf_real = True
         self.vf_key = key
 
+        # Empty attributes
+        self.optimizer: Optimizer = None
+        self.vel = 1
         self.route_rk: RouteJax = None
+        self.dnj: DNJ = None
         self.route_dnj: RouteJax = None
         self._routes_dnj: List[RouteJax] = [None] * 4
+
+    def add_route(self, route: Union[RouteJax, Dict], vel: Optional[float] = None):
+        if isinstance(route, RouteJax):
+            self.route_rk = route
+        else:
+            self.route_rk = RouteJax(**route)
+        # Recompute times
+        self.route_rk2 = deepcopy(route)
+        self.route_rk2.recompute_times(
+            self.optimizer.vel, self.vectorfield, interp=False
+        )
+        # Compute velocity
+        if vel is None:
+            d = self.vectorfield.geometry.dist_between_coords(
+                self.route_rk.x, self.route_rk.y
+            )
+            vel = d / self.route_rk.dt
+            self.vel = np.mean(vel)
+        else:
+            self.vel = vel
+        # Update optimizer
+        self.optimizer = Optimizer(self.vectorfield, vel=self.vel)
 
     def solve_zivp(
         self,
@@ -51,7 +81,7 @@ class Pipeline:
         method: str = "direction",
     ):
         # Initialize the optimizer
-        optimizer = Optimizer(
+        self.optimizer = Optimizer(
             self.vectorfield,
             time_iter=time_iter,
             time_step=time_step,
@@ -64,18 +94,20 @@ class Pipeline:
             method=method,
         )
         # Run the optimizer until it converges
-        for list_routes in optimizer.optimize_route(self.x0, self.y0, self.xn, self.yn):
+        for list_routes in self.optimizer.optimize_route(
+            self.x0, self.y0, self.xn, self.yn
+        ):
             pass
 
         # Take the best route
         route: RouteJax = list_routes[0]
-        route.append_point_end(x=self.xn, y=self.yn, vel=optimizer.vel)
+        route.append_point_end(x=self.xn, y=self.yn, vel=self.optimizer.vel)
 
         self.route_rk = deepcopy(route)
         self.vel = vel
 
         # Recompute times
-        route.recompute_times(optimizer.vel, self.vectorfield, interp=False)
+        route.recompute_times(self.optimizer.vel, self.vectorfield, interp=False)
         self.route_rk2 = deepcopy(route)
 
     def solve_dnj(
@@ -87,16 +119,16 @@ class Pipeline:
         if self.route_rk is None:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
         # Apply DNJ
-        dnj = DNJ(self.vectorfield, time_step=time_step, optimize_for=optimize_for)
+        self.dnj = DNJ(self.vectorfield, time_step=time_step, optimize_for=optimize_for)
         # Apply DNJ in loop
         num_iter = num_iter // 5
         route = deepcopy(self.route_rk)
         # Intermediate steps
         for n in range(4):
-            dnj.optimize_route(route, num_iter=num_iter)
+            self.dnj.optimize_route(route, num_iter=num_iter)
             self._routes_dnj[n] = deepcopy(route)
         # Last DNJ run
-        dnj.optimize_route(route, num_iter=num_iter)
+        self.dnj.optimize_route(route, num_iter=num_iter)
         route.recompute_times(self.vel, self.vectorfield, interp=False)
         self.route_dnj = deepcopy(route)
 
@@ -112,6 +144,8 @@ class Pipeline:
             "route_rk": self.route_rk.asdict(),
             "route_rk2": self.route_rk2.asdict(),
             "route_dnj": self.route_dnj.asdict(),
+            "optimizer": self.optimizer.asdict(),
+            "dnj": self.dnj.asdict(),
         }
 
     def plot(
@@ -149,6 +183,8 @@ class Pipeline:
                 y_max=ymax,
             )
             plot_ticks_radians_to_degrees(step=5)
+            # Times to hours
+            times = (self.route_rk2.t[-1] / 3600, self.route_dnj.t[-1] / 3600)
         else:
             self.vectorfield.plot(
                 step=0.25,
@@ -164,6 +200,8 @@ class Pipeline:
             plt.xticks(xticks)
             yticks = np.arange(ymin, ymax, 1)
             plt.yticks(yticks)
+            # Times in not unit
+            times = (self.route_rk2.t[-1], self.route_dnj.t[-1])
 
         plt.gca().set_aspect("equal")
 
@@ -195,7 +233,7 @@ class Pipeline:
         plot_textbox(
             (self.x0, self.y0),
             (self.xn, self.yn),
-            (self.route_rk2.t[-1], self.route_dnj.t[-1]),
+            times,
             pos=textbox_pos,
             align=textbox_align,
         )
@@ -205,5 +243,4 @@ class Pipeline:
             plt.xlim(xmin, xmax)
             plt.ylim(ymin, ymax)
 
-        plt.tight_layout()
         plt.tight_layout()

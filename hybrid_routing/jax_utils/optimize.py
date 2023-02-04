@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -89,6 +89,7 @@ class Optimizer:
             self.solver = solve_discretized_zermelo
         else:
             self.solver = solve_ode_zermelo
+        self.use_rk = use_rk
 
         # Compute minimum distance as the average distance
         # transversed during one loop
@@ -109,6 +110,19 @@ class Optimizer:
             print("Non recognized method, using 'direction'.")
             self.method = "direction"
         self.exploration = None
+
+    def asdict(self) -> Dict:
+        return {
+            "time_iter": self.time_iter,
+            "time_step": self.time_step,
+            "angle_amplitude": self.angle_amplitude,
+            "angle_heading": self.angle_heading,
+            "num_angles": self.num_angles,
+            "vel": self.vel,
+            "dist_min": self.dist_min,
+            "use_rk": self.use_rk,
+            "method": self.method,
+        }
 
     def min_dist_p0_to_p1(self, list_routes: List[RouteJax], pt_goal: Tuple) -> int:
         """Out of a list of routes, returns the index of the route the ends

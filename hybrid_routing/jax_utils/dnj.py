@@ -1,6 +1,6 @@
 import warnings
 from functools import partial
-from typing import Callable, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 import jax.numpy as jnp
 import numpy as np
@@ -24,6 +24,7 @@ class DNJ:
     ):
         self.vectorfield = vectorfield
         self.time_step = time_step
+        self.optimize_for = optimize_for
         h = time_step
         if vectorfield.spherical:
             get_current = vectorfield.get_current_rad
@@ -79,6 +80,12 @@ class DNJ:
 
     def __eq__(self, other):
         return isinstance(other, DNJ)
+
+    def asdict(self) -> Dict:
+        return {
+            "time_step": self.time_step,
+            "optimize_for": self.optimize_for,
+        }
 
     @partial(jit, static_argnums=(0, 2))
     def optimize_distance(self, pts: jnp.array, damping: float = 0.9) -> jnp.array:
