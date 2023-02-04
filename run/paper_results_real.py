@@ -5,7 +5,7 @@ Generate all the figures used in the paper. Results section
 import datetime as dt
 import json
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -46,8 +46,7 @@ def pipeline(
     dist_min: float = 1000,
     dnj_time_step: float = 3600,
     dnj_num_iter: int = 500,
-    x_text: float = None,
-    y_text: float = None,
+    textbox_pos: Optional[Tuple[float]] = None,
     textbox_align: str = "bottom",
 ) -> Dict:
     # Initialize the output dictionary
@@ -77,8 +76,6 @@ def pipeline(
     # Assign None values
     ymin = xmin if ymin is None else ymin
     ymax = xmax if ymax is None else ymax
-    x_text = xmin if x_text is None else x_text
-    y_text = ymin if y_text is None else y_text
 
     # Run the optimizer until it converges
     for list_routes in optimizer.optimize_route(x0, y0, xn, yn):
@@ -137,7 +134,7 @@ def pipeline(
         (x0, y0),
         (xn, yn),
         (time_opt_rec, time_dnj),
-        pos=(x_text, y_text),
+        pos=textbox_pos,
         align=textbox_align,
     )
 

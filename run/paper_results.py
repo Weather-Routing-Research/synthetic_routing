@@ -4,7 +4,7 @@ Generate all the figures used in the paper. Results section
 
 import json
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,8 +42,7 @@ def pipeline(
     rk_time_step: float = 0.025,
     dist_min: float = 0.1,
     dnj_time_step: float = 0.01,
-    x_text: float = None,
-    y_text: float = None,
+    textbox_pos: Optional[Tuple[float]] = None,
     textbox_align: str = "top",
 ) -> Dict:
     # Initialize the optimizer
@@ -63,8 +62,6 @@ def pipeline(
     # Assign None values
     ymin = xmin if ymin is None else ymin
     ymax = xmax if ymax is None else ymax
-    x_text = xmin if x_text is None else x_text
-    y_text = ymin if y_text is None else y_text
 
     # Run the optimizer until it converges
     for list_routes in optimizer.optimize_route(x0, y0, xn, yn):
@@ -126,7 +123,7 @@ def pipeline(
         (x0, y0),
         (xn, yn),
         (time_opt_rec, time_dnj),
-        pos=(x_text, y_text),
+        pos=textbox_pos,
         align=textbox_align,
     )
 
@@ -145,8 +142,7 @@ dict_results["Circular"] = pipeline(
     yn=2,
     xmin=-8,
     xmax=8,
-    x_text=0,
-    y_text=-3.5,
+    textbox_pos=(0.0 - 3.5),
     textbox_align="bottom",
 )
 
@@ -172,8 +168,7 @@ dict_results["FourVortices"] = pipeline(
     yn=2,
     xmin=-2,
     xmax=8,
-    x_text=0,
-    y_text=5.5,
+    textbox_pos=(0, 5.5),
 )
 
 # Store plot

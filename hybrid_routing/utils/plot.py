@@ -37,7 +37,7 @@ def plot_textbox(
     p0: Tuple[float],
     pn: Tuple[float],
     t: Tuple[float],
-    pos: Tuple[float] = (0, 0),
+    pos: Optional[Tuple[float]] = None,
     align: str = "top",
 ):
     """Add a textbox indicating the starting and end position,
@@ -78,6 +78,10 @@ def plot_textbox(
         + "Smoothed (black):\n"
         + f"  t = {tdnj:.3f}"
     )
+    # Textbox position, by default at the bottom left corner
+    if pos is None:
+        ax: Axes = plt.gca()
+        pos = (ax.get_xlim[0], ax.get_ylim[0])
     plt.text(
         pos[0],
         pos[1],
