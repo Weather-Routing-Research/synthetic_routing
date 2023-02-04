@@ -222,7 +222,7 @@ class Pipeline:
         self,
         extent: Optional[Tuple[float]] = None,
         textbox_pos: Optional[Tuple[float]] = None,
-        textbox_align: str = "top",
+        textbox_align: str = "bottom",
     ):
         if self.route_zivp is None:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
