@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.jax_utils import DNJ, Optimizer, RouteJax
@@ -26,7 +27,7 @@ class Pipeline:
         if path is None:
             module = __import__("hybrid_routing")
             module = getattr(module, "vectorfields")
-            self.vectorfield: Vectorfield = getattr(module, key)
+            self.vectorfield: Vectorfield = getattr(module, key)()
             self.vf_real = False
         else:
             self.vectorfield = VectorfieldReal.from_folder(path, key, radians=radians)
@@ -37,9 +38,31 @@ class Pipeline:
         self.route_dnj: RouteJax = None
         self._routes_dnj: List[RouteJax] = [None] * 4
 
-    def solve_zivp(self, vel: float = 1, **kwargs):
+    def solve_zivp(
+        self,
+        time_iter: float = 0.5,
+        time_step: float = 0.025,
+        angle_amplitude: float = np.pi,
+        angle_heading: float = np.pi / 2,
+        num_angles: int = 20,
+        vel: float = 1,
+        dist_min: float = 0.1,
+        use_rk: bool = True,
+        method: str = "direction",
+    ):
         # Initialize the optimizer
-        optimizer = Optimizer(self.vectorfield, **kwargs)
+        optimizer = Optimizer(
+            self.vectorfield,
+            time_iter=time_iter,
+            time_step=time_step,
+            angle_amplitude=angle_amplitude,
+            angle_heading=angle_heading,
+            num_angles=num_angles,
+            vel=vel,
+            dist_min=dist_min,
+            use_rk=use_rk,
+            method=method,
+        )
         # Run the optimizer until it converges
         for list_routes in optimizer.optimize_route(self.x0, self.y0, self.xn, self.yn):
             pass
@@ -55,11 +78,16 @@ class Pipeline:
         route.recompute_times(optimizer.vel, self.vectorfield, interp=False)
         self.route_rk2 = deepcopy(route)
 
-    def solve_dnj(self, num_iter: int = 5, **kwargs):
+    def solve_dnj(
+        self,
+        num_iter: int = 5,
+        time_step: float = 0.01,
+        optimize_for: str = "time",
+    ):
         if self.route_rk is None:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
         # Apply DNJ
-        dnj = DNJ(self.vectorfield, **kwargs)
+        dnj = DNJ(self.vectorfield, time_step=time_step, optimize_for=optimize_for)
         # Apply DNJ in loop
         num_iter = num_iter // 5
         route = deepcopy(self.route_rk)
@@ -100,17 +128,44 @@ class Pipeline:
         # Initialize figure with vectorfield
         plt.figure(figsize=(5, 5))
         if extent is not None:
-            dict_extent = {
-                "x_min": extent[0],
-                "x_max": extent[1],
-                "y_min": extent[2],
-                "y_max": extent[3],
-            }
-        self.vectorfield.plot(
-            step=1 * DEG2RAD, color="grey", alpha=0.8, do_color=True, **dict_extent
-        )
+            xmin, xmax, ymin, ymax = extent
+        elif self.vf_real:
+            xmin = self.vectorfield.arr_x.min()
+            xmax = self.vectorfield.arr_x.max()
+            ymin = self.vectorfield.arr_y.min()
+            ymax = self.vectorfield.arr_y.max()
+        else:
+            xmin, xmax, ymin, ymax = [-5, 5, -5, 5]
+
+        if self.vf_real:
+            self.vectorfield.plot(
+                step=1 * DEG2RAD,
+                color="grey",
+                alpha=0.8,
+                do_color=True,
+                x_min=xmin,
+                x_max=xmax,
+                y_min=ymin,
+                y_max=ymax,
+            )
+            plot_ticks_radians_to_degrees(step=5)
+        else:
+            self.vectorfield.plot(
+                step=0.25,
+                color="grey",
+                alpha=0.8,
+                do_color=False,
+                x_min=xmin,
+                x_max=xmax,
+                y_min=ymin,
+                y_max=ymax,
+            )
+            xticks = np.arange(xmin, xmax, 1)
+            plt.xticks(xticks)
+            yticks = np.arange(ymin, ymax, 1)
+            plt.yticks(yticks)
+
         plt.gca().set_aspect("equal")
-        plot_ticks_radians_to_degrees(step=5)
 
         # Plot source and destination point
         plt.scatter(self.x0, self.y0, c="green", s=20, zorder=10)
@@ -147,7 +202,8 @@ class Pipeline:
 
         # Set plot limits
         if extent is not None:
-            plt.xlim(extent[0], extent[1])
-            plt.ylim(extent[2], extent[3])
+            plt.xlim(xmin, xmax)
+            plt.ylim(ymin, ymax)
 
+        plt.tight_layout()
         plt.tight_layout()
