@@ -4,7 +4,6 @@ from jax import grad, jacfwd, jacrev, jit
 
 
 def cost_function(x, xp):
-
     w = background_vector_field(x[0], x[1])
     cost = 0.5 * ((xp[0] - w[0]) ** 2 + (xp[1] - w[1]) ** 2)
     return cost
