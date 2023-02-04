@@ -10,6 +10,24 @@ import matplotlib.pyplot as plt
 
 from hybrid_routing.pipeline import Pipeline
 
+list_pipes = [
+    Pipeline(
+        p0=(-79.7, 32.7),
+        pn=(-29.5, 38.5),
+        key="real",
+        path="./data",
+        to_radians=True,
+    ),
+    Pipeline(
+        p0=(43.49, -1.66),
+        pn=(98.14, 10.21),
+        key="real-land",
+        path="./data",
+        to_radians=True,
+    ),
+]
+list_vel = [10, 6, 3]
+
 """
 Create output folder
 """
@@ -23,61 +41,26 @@ if not path_out.exists():
 dict_results = {}
 
 """
-Vectorfield - Real
+Run pipelines
 """
 
-pipe = Pipeline(
-    p0=(-79.7, 32.7), pn=(-29.5, 38.5), key="real", path="./data", to_radians=True
-)
-
-for vel in [10, 6, 3]:
-    try:
+for pipe in list_pipes:
+    for vel in list_vel:
         pipe.solve_zivp(
             vel=vel, num_angles=20, time_iter=360, time_step=60, dist_min=1000
         )
         pipe.solve_dnj(num_iter=500, time_step=3600)
 
         # Store in dictionary
-        dict_results[f"Real {vel}"] = pipe.to_dict()
+        k = pipe.key.lower().replace(" ", "-")
+        dict_results[f"{k} {vel}"] = pipe.to_dict()
 
         # Store plot
+        plt.figure(figsize=(5, 5))
         pipe.plot()
-        plt.savefig(path_out / f"results-real-{vel}.png")
+        plt.savefig(path_out / f"results-{k}-{vel}.png")
         plt.close()
-
-    except Exception as er:
-        print("[ERROR]", er)
-    print(f"Done Real vectorfield, {vel} m/s\n---")
-
-"""
-Vectorfield - Real land
-"""
-
-pipe = Pipeline(
-    p0=(43.49, -1.66),
-    pn=(98.14, 10.21),
-    key="real-land",
-    path="./data",
-    to_radians=True,
-)
-
-for vel in [10, 6, 3]:
-    try:
-        pipe.solve_zivp(
-            vel=vel, num_angles=20, time_iter=360, time_step=60, dist_min=1000
-        )
-        pipe.solve_dnj(num_iter=500, time_step=3600)
-
-        # Store in dictionary
-        dict_results[f"Real land {vel}"] = pipe.to_dict()
-        plt.tight_layout()
-        # Store plot
-        pipe.plot()
-        plt.savefig(path_out / f"results-real-{vel}.png")
-        plt.close()
-    except Exception as er:
-        print("[ERROR]", er)
-    print(f"Done Real vectorfield with land, {vel} m/s\n---")
+        print(f"Done {k} vectorfield, {vel} m/s\n---")
 
 """
 Store dictionary

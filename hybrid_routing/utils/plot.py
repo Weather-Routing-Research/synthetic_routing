@@ -81,7 +81,7 @@ def plot_textbox(
     # Textbox position, by default at the bottom left corner
     if pos is None:
         ax: Axes = plt.gca()
-        pos = (ax.get_xlim[0], ax.get_ylim[0])
+        pos = (ax.get_xlim()[0], ax.get_ylim()[0])
     plt.text(
         pos[0],
         pos[1],

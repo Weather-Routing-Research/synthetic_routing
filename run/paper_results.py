@@ -9,6 +9,11 @@ import matplotlib.pyplot as plt
 
 from hybrid_routing.pipeline import Pipeline
 
+list_pipe = [
+    Pipeline(p0=(3, 2), pn=(-7, 2), key="Circular"),
+    Pipeline(p0=(0, 0), pn=(6, 2), key="FourVortices"),  # Ferraro et al.
+]
+
 """
 Create output folder
 """
@@ -21,37 +26,23 @@ dict_results = {}
 
 
 """
-Vectorfield - Circular
+Run pipelines
 """
 
-pipe = Pipeline(p0=(3, 2), pn=(-7, 2), key="Circular")
-pipe.solve_zivp(vel=1, time_iter=0.5, time_step=0.025)
-pipe.solve_dnj(num_iter=1000, time_step=0.01)
+for pipe in list_pipe:
+    pipe.solve_zivp(vel=1, time_iter=0.5, time_step=0.025)
+    pipe.solve_dnj(num_iter=1000, time_step=0.01)
 
-dict_results["Circular"] = pipe.to_dict()
+    k = pipe.key.lower().replace(" ", "-")
+    dict_results[k] = pipe.to_dict()
 
-# Store plot
-pipe.plot(extent=(-8, 4, -4, 6), textbox_pos=(0, -3.5), textbox_align="bottom")
-plt.savefig(path_out / "results-circular.png")
-plt.close()
+    # Store plot
+    plt.figure(figsize=(5, 5))
+    pipe.plot(extent=(-8, 4, -4, 6), textbox_pos=(0, -3.5), textbox_align="bottom")
+    plt.savefig(path_out / f"results-{k}.png")
+    plt.close()
 
-print("Done Circular vectorfield")
-
-"""
-Vectorfield - Four Vortices
-"""
-
-# We will regenerate the results from Ferraro et al.
-pipe = Pipeline(p0=(0, 0), pn=(6, 2), key="FourVortices")
-pipe.solve_zivp(vel=1, time_iter=0.5, time_step=0.025)
-pipe.solve_dnj(num_iter=1000, time_step=0.01)
-
-# Store plot
-pipe.plot(extent=(-0.5, 6.5, -1.5, 6), textbox_pos=(0, 5.5), textbox_align="top")
-plt.savefig(path_out / "results-fourvortices.png")
-plt.close()
-
-print("Done Four Vortices vectorfield")
+    print(f"Done {k} vectorfield")
 
 """
 Store dictionary
