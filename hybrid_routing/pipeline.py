@@ -19,7 +19,7 @@ class Pipeline:
         pn: Tuple[float],
         key: str,
         path: Optional[Union[str, Path]] = None,
-        to_radians: bool = True,
+        to_radians: bool = False,
     ):
         """Initialize the pipeline with the start and end point, and the vectorfield
 
@@ -35,7 +35,7 @@ class Pipeline:
             Path to the data, if the vectorfield is real.
             If None, assume vectorfield is synthetic. By default None
         to_radians : bool, optional
-            Change p0 and pn from degrees to radians, by default True
+            Change p0 and pn from degrees to radians, by default False
         """
         self.x0, self.y0 = p0
         self.xn, self.yn = pn
