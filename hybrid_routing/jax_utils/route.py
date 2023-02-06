@@ -22,6 +22,7 @@ class Route:
             jnp.atleast_1d(t) if t is not None else jnp.arange(0, len(self.x), 1)
         )
         assert len(self.x) == len(self.y) == len(self.t), "Array lengths are not equal"
+        # Heading of the vessel
         self.theta: jnp.ndarray = (
             jnp.atleast_1d(theta) if theta is not None else jnp.zeros_like(x)
         )
@@ -34,6 +35,9 @@ class Route:
             self.geometry: Geometry = getattr(module, geometry)()
         else:
             self.geometry = Euclidean()
+
+        # Compute distance
+        self.d = self.geometry.dist_between_coords(x, y)
 
     def __len__(self) -> int:
         return len(self.x)
@@ -58,7 +62,8 @@ class Route:
             "x": self.x.tolist(),
             "y": self.y.tolist(),
             "t": self.t.tolist(),
-            "theta": self.theta.tolist(),
+            "theta": self.theta.tolist(),  # Heading of the vessel
+            "d": self.d.tolist(),
             "geometry": str(self.geometry),
         }
 
@@ -110,6 +115,8 @@ class Route:
         self.t = jnp.concatenate([self.t, jnp.atleast_1d(t)])
         theta = theta if theta is not None else jnp.full_like(x, self.theta[-1])
         self.theta = jnp.concatenate([self.theta, jnp.atleast_1d(theta)])
+        # Compute distance
+        self.d = self.geometry.dist_between_coords(x, y)
 
     def append_point_end(self, x: float, y: float, vel: float):
         """Append an end point to the route and compute its timestamp.
@@ -149,9 +156,8 @@ class Route:
             j = np.linspace(0, len(x), num=len(x))
             x = np.interp(i, j, x)
             y = np.interp(i, j, y)
-        # Angle over ground and the distance between points
+        # Angle over ground between points
         a_g = self.geometry.ang_between_coords(x, y)
-        d = self.geometry.dist_between_coords(x, y)
         # Componentes of the velocity of vectorfield
         # We loop to avoid memory errors when using GPU
         v_cx = np.zeros(len(x) - 1)
@@ -171,7 +177,7 @@ class Route:
         # Velocity over ground is the sum of vessel and vectorfield parallel components
         v_g = v_vg_para + v_cg_para
         # Time is distance divided by velocity over ground
-        t = np.divide(d, v_g)
+        t = np.divide(self.d, v_g)
         # Identify NaN and negative values
         mask_nan = np.isnan(t)
         mask_neg = t < 0
