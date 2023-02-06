@@ -47,7 +47,7 @@ Run pipelines
 for pipe in list_pipes:
     for vel in list_vel:
         pipe.solve_zivp(
-            vel=vel, num_angles=20, time_iter=3600, time_step=60, dist_min=1000
+            vel=vel, num_angles=20, time_iter=360, time_step=60, dist_min=1000
         )
         pipe.solve_dnj(num_iter=500, time_step=3600)
 
