@@ -18,9 +18,9 @@ def solve_ode_zermelo(
     vel: float = 2.0,
 ) -> List[Route]:
     """This function first computes the locally optimized paths with Scipy's ODE solver.
-    Given the starting coordinates (x_start, y_start), time (t_max), speed of the ship (vel),
-    and the direction the ship points in (angle_amplitude / num_angles), the ODE solver returns
-    a list of points on the locally optimized path.
+    Given the starting coordinates (x_start, y_start), time (t_max), speed of the ship
+    (vel), and the direction the ship points in (angle_amplitude / num_angles),
+    the ODE solver returns a list of points on the locally optimized path.
 
     Parameters
     ----------
@@ -37,7 +37,8 @@ def solve_ode_zermelo(
     time_end : float, optional
         End time of the iteration, by default 2
     time_step : float, optional
-        Number of steps to reach from 0 to time_iter (equivalently, how "smooth" each path is), by default 0.1
+        Number of steps to reach from 0 to time_iter
+        (equivalently, how "smooth" each path is), by default 0.1
     vel : float, optional
         Speed of the ship (unit unknown), by default 2
 
@@ -74,7 +75,8 @@ def solve_discretized_zermelo(
     time_step: float = 0.1,
     vel: float = 0.5,
 ) -> List[Route]:
-    """his function instead of using the Scipy's ODE solver, we take advantage of the discretized vectorfield.
+    """his function instead of using the Scipy's ODE solver, we take advantage of the
+    discretized vectorfield.
 
     Parameters
     ----------
@@ -96,7 +98,8 @@ def solve_discretized_zermelo(
     Returns
     -------
     List[Route]
-        Returns a list of all paths thats generated at each cone search. All points of the paths are of Route object.
+        Returns a list of all paths thats generated at each cone search.
+        All points of the paths are of Route object.
     """
 
     t = np.arange(time_start, time_end + time_step, time_step)
@@ -129,7 +132,6 @@ def solve_discretized_zermelo(
     return list_routes
 
 
-# TODO: Ensure spherical compatibility
 def solve_rk_zermelo(
     vectorfield: Vectorfield,
     x: np.array,
@@ -140,10 +142,11 @@ def solve_rk_zermelo(
     time_step: float = 0.1,
     vel: float = 2.0,
 ) -> List[Route]:
-    """This function first computes the locally optimized paths with Runge-Kutta 4 solver method.
-    Given the starting coordinates (x_start, y_start), time (t_max), speed of the ship (vel),
-    and the direction the ship points in (angle_amplitude / num_angles), the solver returns
-    a list of points on the locally optimized path.
+    """This function first computes the locally optimized paths with Runge-Kutta 4
+    solver method. Given the starting coordinates (x_start, y_start), time (t_max),
+    speed of the ship (vel), and the direction the ship points in
+    (angle_amplitude / num_angles), the solver returns a list of points on
+    the locally optimized path.
 
     Parameters
     ----------
@@ -160,7 +163,8 @@ def solve_rk_zermelo(
     time_end : float, optional
         End time of the iteration, by default 2
     time_step : float, optional
-        Number of steps to reach from 0 to time_iter (equivalently, how "smooth" each path is), by default 0.1
+        Number of steps to reach from 0 to time_iter
+        (equivalently, how "smooth" each path is), by default 0.1
     vel : float, optional
         Speed of the ship (unit unknown), by default 2
 
