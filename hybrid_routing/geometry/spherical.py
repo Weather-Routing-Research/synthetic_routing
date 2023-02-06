@@ -23,7 +23,11 @@ class Spherical(Geometry):
         """Compute the distance between two points, defined in radians,
         where p=(lon, lat). Returns meters."""
         return RADIUS * np.arccos(
-            (lonlatunitvector(p0) * lonlatunitvector(p1)).sum(axis=0)
+            np.clip(
+                (lonlatunitvector(p0) * lonlatunitvector(p1)).sum(axis=0),
+                a_min=-1,
+                a_max=1,
+            )
         )
 
     def angle_p0_to_p1(self, p0: np.ndarray, p1: np.ndarray) -> np.ndarray:
