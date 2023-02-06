@@ -116,7 +116,7 @@ class Route:
         theta = theta if theta is not None else jnp.full_like(x, self.theta[-1])
         self.theta = jnp.concatenate([self.theta, jnp.atleast_1d(theta)])
         # Compute distance
-        self.d = self.geometry.dist_between_coords(x, y)
+        self.d = self.geometry.dist_between_coords(self.x, self.y)
 
     def append_point_end(self, x: float, y: float, vel: float):
         """Append an end point to the route and compute its timestamp.
