@@ -39,5 +39,5 @@ class Spherical(Geometry):
             [-a2 * b1 + a1 * b2, -(a1 * a2 + b1 * b2) * c1 + (a1**2 + b1**2) * c2]
         )
         gd = self.dist_p0_to_p1(p0, p1)
-        vector = np.nan_to_num(gvec * gd / np.sqrt(gvec**2), 0)
+        vector = gvec * gd / np.clip(np.abs(gvec), a_min=1e-20)
         return np.arctan2(vector[1], vector[0])
