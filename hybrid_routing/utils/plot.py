@@ -63,15 +63,15 @@ def plot_textbox(
     dict_bbox = dict(boxstyle="round", facecolor="white", alpha=0.95)
     text = (
         r"$\left\langle x_0, y_0 \right\rangle = \left\langle"
-        + "{:.1f}".format(x0 / DEG2RAD)
+        + "{:.1f}".format(x0)
         + ", "
-        + "{:.1f}".format(y0 / DEG2RAD)
+        + "{:.1f}".format(y0)
         + r"\right\rangle$"
         + "\n"
         r"$\left\langle x_T, y_T \right\rangle = \left\langle"
-        + "{:.1f}".format(xn / DEG2RAD)
+        + "{:.1f}".format(xn)
         + ", "
-        + "{:.1f}".format(yn / DEG2RAD)
+        + "{:.1f}".format(yn)
         + r"\right\rangle$"
         + "\nOptimized (red):\n"
         + f"  t = {topt:.3f}\n"
