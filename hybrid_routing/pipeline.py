@@ -297,13 +297,14 @@ class Pipeline:
             zorder=5,
         )
 
-        plot_textbox(
-            (self.x0, self.y0),
-            (self.xn, self.yn),
-            times,
-            pos=textbox_pos,
-            align=textbox_align,
-        )
+        if self.si_units:
+            p0 = (self.x0 / DEG2RAD, self.y0 / DEG2RAD)
+            pn = (self.x0 / DEG2RAD, self.yn / DEG2RAD)
+        else:
+            p0 = (self.x0, self.y0)
+            pn = (self.xn, self.yn)
+
+        plot_textbox(p0, pn, times, pos=textbox_pos, align=textbox_align)
 
         # Set plot limits
         if extent is not None:
