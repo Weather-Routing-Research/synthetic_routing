@@ -37,7 +37,7 @@ class Route:
             self.geometry = Euclidean()
 
         # Compute distance
-        self.d = self.geometry.dist_between_coords(x, y)
+        self.d = self.geometry.dist_between_coords(self.x, self.y)
 
     def __len__(self) -> int:
         return len(self.x)
