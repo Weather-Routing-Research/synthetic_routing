@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from hybrid_routing.geometry import DEG2RAD
-from hybrid_routing.jax_utils import DNJ, Optimizer, RouteJax
+from hybrid_routing.jax_utils import DNJ, Optimizer, Route
 from hybrid_routing.utils.plot import plot_textbox, plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
@@ -57,25 +57,25 @@ class Pipeline:
         # Empty attributes
         self.optimizer: Optimizer = None
         self.vel = 1
-        self.route_zivp: RouteJax = None
+        self.route_zivp: Route = None
         self.dnj: DNJ = None
-        self.route_dnj: RouteJax = None
-        self._routes_dnj: List[RouteJax] = [None] * 4
+        self.route_dnj: Route = None
+        self._routes_dnj: List[Route] = [None] * 4
 
-    def add_route(self, route: Union[RouteJax, Dict], vel: Optional[float] = None):
+    def add_route(self, route: Union[Route, Dict], vel: Optional[float] = None):
         """Adds a route, skipping the ZIVP step
 
         Parameters
         ----------
-        route : Union[RouteJax, Dict]
+        route : Union[Route, Dict]
             Route to be added, either in dictionary or Route format
         vel : Optional[float], optional
             Vessel velocity. If not given, it is computed. By default None
         """
-        if isinstance(route, RouteJax):
+        if isinstance(route, Route):
             self.route_zivp = route
         else:
-            self.route_zivp = RouteJax(**route)
+            self.route_zivp = Route(**route)
         # Recompute times
         self.route_zivp2 = deepcopy(route)
         self.route_zivp2.recompute_times(
@@ -154,7 +154,7 @@ class Pipeline:
             pass
 
         # Take the best route
-        route: RouteJax = list_routes[0]
+        route: Route = list_routes[0]
         route.append_point_end(x=self.xn, y=self.yn, vel=self.optimizer.vel)
 
         self.route_zivp = deepcopy(route)

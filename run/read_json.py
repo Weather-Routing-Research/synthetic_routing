@@ -4,7 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import typer
 
-from hybrid_routing.jax_utils import RouteJax
+from hybrid_routing.jax_utils import Route
 from hybrid_routing.pipeline import Pipeline
 
 
@@ -26,7 +26,7 @@ def main(
 
         # Try to generate the route
         try:
-            route = RouteJax(**dict_run[key], geometry=vf.geometry)
+            route = Route(**dict_run[key], geometry=vf.geometry)
         except KeyError:
             raise KeyError(
                 "Key not found in dict. Available are: ", ", ".join(dict_run.keys())

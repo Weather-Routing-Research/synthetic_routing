@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 from scipy.integrate import odeint
 
-from hybrid_routing.jax_utils.route import RouteJax
+from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.vectorfields.base import Vectorfield
 
 
@@ -16,7 +16,7 @@ def solve_ode_zermelo(
     time_end: float = 2,
     time_step: float = 0.1,
     vel: float = 2.0,
-) -> List[RouteJax]:
+) -> List[Route]:
     """This function first computes the locally optimized paths with Scipy's ODE solver.
     Given the starting coordinates (x_start, y_start), time (t_max), speed of the ship (vel),
     and the direction the ship points in (angle_amplitude / num_angles), the ODE solver returns
@@ -43,17 +43,17 @@ def solve_ode_zermelo(
 
     Returns
     -------
-    List[RouteJax]
+    List[Route]
         Returns a list with all paths generated within the search cone.
     """
     # Define the time steps
     t = np.arange(time_start, time_end + time_step, time_step)
 
-    list_routes: List[RouteJax] = [None] * len(thetas)
+    list_routes: List[Route] = [None] * len(thetas)
     for idx, theta in enumerate(thetas):
         p = [x[idx], y[idx], theta]
         sol = odeint(vectorfield.ode_zermelo, p, t, args=(vel,))
-        list_routes[idx] = RouteJax(
+        list_routes[idx] = Route(
             x=sol[:, 0],
             y=sol[:, 1],
             t=t,
@@ -73,7 +73,7 @@ def solve_discretized_zermelo(
     time_end: float = 2,
     time_step: float = 0.1,
     vel: float = 0.5,
-) -> List[RouteJax]:
+) -> List[Route]:
     """his function instead of using the Scipy's ODE solver, we take advantage of the discretized vectorfield.
 
     Parameters
@@ -95,12 +95,12 @@ def solve_discretized_zermelo(
 
     Returns
     -------
-    List[RouteJax]
-        Returns a list of all paths thats generated at each cone search. All points of the paths are of RouteJax object.
+    List[Route]
+        Returns a list of all paths thats generated at each cone search. All points of the paths are of Route object.
     """
 
     t = np.arange(time_start, time_end + time_step, time_step)
-    list_routes: List[RouteJax] = [None] * len(thetas)
+    list_routes: List[Route] = [None] * len(thetas)
 
     for idx, theta in enumerate(thetas):
         # Initialize list of (x, y) coordinates
@@ -123,7 +123,7 @@ def solve_discretized_zermelo(
             list_x[idx2] = x_temp
             list_y[idx2] = y_temp
         # Include the new route in the list
-        list_routes[idx] = RouteJax(
+        list_routes[idx] = Route(
             list_x, list_y, theta=list_theta, geometry=vectorfield.geometry
         )
     return list_routes
@@ -139,7 +139,7 @@ def solve_rk_zermelo(
     time_end: float = 2,
     time_step: float = 0.1,
     vel: float = 2.0,
-) -> List[RouteJax]:
+) -> List[Route]:
     """This function first computes the locally optimized paths with Runge-Kutta 4 solver method.
     Given the starting coordinates (x_start, y_start), time (t_max), speed of the ship (vel),
     and the direction the ship points in (angle_amplitude / num_angles), the solver returns
@@ -166,7 +166,7 @@ def solve_rk_zermelo(
 
     Returns
     -------
-    List[RouteJax]
+    List[Route]
         Returns a list with all paths generated within the search cone.
     """
     # Define the time steps
@@ -197,9 +197,9 @@ def solve_rk_zermelo(
     # Shape is (num_time_steps, 3, num_angles) where 3 = (x, y, theta)
     arr_q = np.asarray(arr_q)
     # Initialize list of routes and store one route per theta
-    list_routes: List[RouteJax] = [None] * len(x)
+    list_routes: List[Route] = [None] * len(x)
     for idx in range(len(x)):
-        list_routes[idx] = RouteJax(
+        list_routes[idx] = Route(
             x=[v[idx] for v in arr_q[:, 0, :]],
             y=[v[idx] for v in arr_q[:, 1, :]],
             t=arr_t,

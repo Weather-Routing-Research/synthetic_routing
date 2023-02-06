@@ -6,7 +6,7 @@ import jax.numpy as jnp
 import numpy as np
 from jax import grad, jacfwd, jacrev, jit, vmap
 
-from hybrid_routing.jax_utils.route import RouteJax
+from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.vectorfields.base import Vectorfield
 
 
@@ -93,12 +93,12 @@ class DNJ:
         q = self.optim_vect(pts[:-2], pts[1:-1], pts[2:])
         return pts_new.at[1:-1].set(damping * q + pts[1:-1])
 
-    def optimize_route(self, route: RouteJax, num_iter: int = 10):
+    def optimize_route(self, route: Route, num_iter: int = 10):
         """Optimizes a route for any number of iterations
 
         Parameters
         ----------
-        route : RouteJax
+        route : Route
             Route to optimize
         num_iter : int, optional
             Number of DNJ iterations, by default 10
@@ -138,7 +138,7 @@ class DNJRandomGuess:
         """Initializes a DNJ with random guesses"""
         x_start, y_start = q0
         x_end, y_end = q1
-        list_routes: List[RouteJax] = [None] * num_routes
+        list_routes: List[Route] = [None] * num_routes
         # Randomly select number of segments per route
         num_segments = np.random.randint(2, 5, num_routes)
         for idx_route in range(num_routes):
@@ -184,7 +184,7 @@ class DNJRandomGuess:
                 ).flatten()
                 y = np.concatenate([y, y_new[1:]])
             # Add the route to the list
-            list_routes[idx_route] = RouteJax(x, y, geometry=vectorfield.geometry)
+            list_routes[idx_route] = Route(x, y, geometry=vectorfield.geometry)
         # Store parameters
         self.dnj = DNJ(
             vectorfield=vectorfield, time_step=time_step, optimize_for=optimize_for
@@ -193,7 +193,7 @@ class DNJRandomGuess:
         self.num_iter = num_iter
         self.total_iter: int = 0
 
-    def __next__(self) -> List[RouteJax]:
+    def __next__(self) -> List[Route]:
         for route in self.list_routes:
             self.dnj.optimize_route(route, num_iter=self.num_iter)
         self.total_iter += self.num_iter

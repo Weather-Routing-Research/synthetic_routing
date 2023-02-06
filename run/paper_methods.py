@@ -16,7 +16,7 @@ from hybrid_routing.jax_utils.optimize import (
     compute_cone_center,
     compute_thetas_in_cone,
 )
-from hybrid_routing.jax_utils.route import RouteJax
+from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.vectorfields import Circular
 
 """
@@ -128,7 +128,7 @@ plot_vectorfield()
 
 # Plot each route segment
 # We encapsulate this code into a function because we are reusing it later
-def plot_routes(list_routes: List[RouteJax]):
+def plot_routes(list_routes: List[Route]):
     # Plot source point
     plt.scatter(x0, y0, c="green", s=20, zorder=10)
     plt.scatter(xn, yn, c="green", s=20, zorder=10)
@@ -223,7 +223,7 @@ Finish optimization
 for list_routes in run:
     list_routes_plot = deepcopy(list_routes)
 # Append goal
-route: RouteJax = list_routes_plot[0]
+route: Route = list_routes_plot[0]
 route.append_point_end(x=xn, y=yn, vel=optimizer.vel)
 
 plot_vectorfield()

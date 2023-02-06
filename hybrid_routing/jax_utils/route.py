@@ -7,7 +7,7 @@ from hybrid_routing.geometry import Euclidean, Geometry
 from hybrid_routing.vectorfields.base import Vectorfield
 
 
-class RouteJax:
+class Route:
     def __init__(
         self,
         x: jnp.array,
@@ -33,14 +33,14 @@ class RouteJax:
 
     def __repr__(self) -> str:
         return (
-            f"RouteJax(x0={self.x[0]:.2f}, y0={self.y[0]:.2f}, "
+            f"Route(x0={self.x[0]:.2f}, y0={self.y[0]:.2f}, "
             f"xN={self.x[-1]:.2f}, yN={self.y[-1]:.2f}, "
             f"length={len(self)})"
         )
 
     def __str__(self) -> str:
         return (
-            f"RouteJax(x0={self.x[0]:.2f}, y0={self.y[0]:.2f}, "
+            f"Route(x0={self.x[0]:.2f}, y0={self.y[0]:.2f}, "
             f"xN={self.x[-1]:.2f}, yN={self.y[-1]:.2f}, "
             f"length={len(self)})"
         )

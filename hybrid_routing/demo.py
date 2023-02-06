@@ -26,7 +26,7 @@ from PIL import Image
 
 from hybrid_routing.jax_utils.dnj import DNJ, DNJRandomGuess
 from hybrid_routing.jax_utils.optimize import Optimizer
-from hybrid_routing.jax_utils.route import RouteJax
+from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.vectorfields import *
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -236,13 +236,13 @@ if do_run:
         remove_plot_lines_temporal()
 
     # Once optimization finishes, append last point to best route
-    route: RouteJax = list_routes[0]
+    route: Route = list_routes[0]
     route.append_point_end(x=x_end, y=y_end, vel=vel)
     plt.plot(route.x, route.y, color="red", linestyle="--", alpha=0.7)
     plot.pyplot(fig=fig)
 
     # Apply DNJ to best route
-    route_dnj: RouteJax = deepcopy(route)
+    route_dnj: Route = deepcopy(route)
     dnj.optimize_route(route_dnj, num_iter=NUM_ITER_DNJ)
     plt.plot(route_dnj.x, route_dnj.y, color="green", linestyle="--", alpha=0.7)
     plot.pyplot(fig=fig)
@@ -270,7 +270,7 @@ if do_run_dnj:
         num_iter=num_iter_plot,
     )
     for iter in range(num_iter_gen):
-        list_routes: List[RouteJax] = next(dnj_random_guess)
+        list_routes: List[Route] = next(dnj_random_guess)
         for route in list_routes:
             line = plt.plot(route.x, route.y, color="green", linestyle="--", alpha=0.7)
             LIST_PLOT_TEMP.append(line)

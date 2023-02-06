@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from hybrid_routing.geometry import Euclidean, Geometry, Spherical
-from hybrid_routing.jax_utils.route import RouteJax
+from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.jax_utils.zivp import (
     solve_discretized_zermelo,
     solve_ode_zermelo,
@@ -124,7 +124,7 @@ class Optimizer:
             "method": self.method,
         }
 
-    def min_dist_p0_to_p1(self, list_routes: List[RouteJax], pt_goal: Tuple) -> int:
+    def min_dist_p0_to_p1(self, list_routes: List[Route], pt_goal: Tuple) -> int:
         """Out of a list of routes, returns the index of the route the ends
         at the minimum distance to the goal.
 
@@ -150,7 +150,7 @@ class Optimizer:
 
     def solve_ivp(
         self, x: np.array, y: np.array, theta: np.array, t: float = 0
-    ) -> List[RouteJax]:
+    ) -> List[Route]:
         """Solve an initial value problem, given arrays of same length for
         x, y and theta (heading, w.r.t. x-axis)
 
@@ -167,7 +167,7 @@ class Optimizer:
 
         Returns
         -------
-        List[RouteJax]
+        List[Route]
             Routes generated with this IVP
         """
         return self.solver(
@@ -184,7 +184,7 @@ class Optimizer:
     # TODO: Ensure spherical compatibility
     def _optimize_by_closest(
         self, x_start: float, y_start: float, x_end: float, y_end: float
-    ) -> List[RouteJax]:
+    ) -> List[Route]:
         """
         System of ODE is from Zermelo's Navigation Problem
         https://en.wikipedia.org/wiki/Zermelo%27s_navigation_problem#General_solution)
@@ -214,7 +214,7 @@ class Optimizer:
 
         Yields
         ------
-        Iterator[List[RouteJax]]
+        Iterator[List[Route]]
             Returns a list with all paths generated within the search cone.
             The path that terminates closest to destination is on top.
         """
@@ -241,7 +241,7 @@ class Optimizer:
             # We append those segments to the best route, if we have it
             if "route_best" in locals():
                 for idx, route_new in enumerate(list_routes):
-                    route: RouteJax = deepcopy(route_best)
+                    route: Route = deepcopy(route_best)
                     route.append_points(
                         route_new.x[1:], route_new.y[1:], t=route_new.t[1:]
                     )
@@ -267,7 +267,7 @@ class Optimizer:
     # TODO: Ensure spherical compatibility
     def _optimize_by_direction(
         self, x_start: float, y_start: float, x_end: float, y_end: float
-    ) -> List[RouteJax]:
+    ) -> List[Route]:
         # Compute angle between first and last point
         cone_center = self.geometry.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
 
@@ -282,8 +282,8 @@ class Optimizer:
         arr_theta = compute_thetas_in_cone(
             cone_center, self.angle_amplitude, self.num_angles
         )
-        list_routes: List[RouteJax] = [
-            RouteJax(x_start, y_start, t, theta, geometry=self.geometry)
+        list_routes: List[Route] = [
+            Route(x_start, y_start, t, theta, geometry=self.geometry)
             for theta in arr_theta
         ]
         # Initialize the best route as the middle one (avoids UnboundLocalError)
@@ -363,7 +363,7 @@ class Optimizer:
                     arr_theta = compute_thetas_in_cone(
                         cone_center, self.angle_amplitude / 5, self.num_angles
                     )
-                    route_new = RouteJax(
+                    route_new = Route(
                         route_best.x[:idx_refine],
                         route_best.y[:idx_refine],
                         t=route_best.t[:idx_refine],
@@ -371,7 +371,7 @@ class Optimizer:
                         geometry=self.geometry,
                     )
                 # Reinitialize route lists
-                list_routes: List[RouteJax] = []
+                list_routes: List[Route] = []
                 list_stop: List[int] = []
                 # Fill new list of routes
                 for theta in arr_theta:
@@ -395,7 +395,7 @@ class Optimizer:
 
     def optimize_route(
         self, x_start: float, y_start: float, x_end: float, y_end: float
-    ) -> List[RouteJax]:
+    ) -> List[Route]:
         d = self.geometry.dist_p0_to_p1((x_start, y_start), (x_end, y_end))
         if self.dist_min >= d:
             raise ValueError(

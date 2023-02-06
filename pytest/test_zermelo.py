@@ -4,7 +4,7 @@ import numpy as np
 
 import pytest
 from hybrid_routing.geometry.spherical import DEG2RAD, RAD2M
-from hybrid_routing.jax_utils.route import RouteJax
+from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.jax_utils.zivp import solve_rk_zermelo
 from hybrid_routing.vectorfields import NoCurrent
 
@@ -12,7 +12,7 @@ VEL = 10
 
 
 @pytest.fixture
-def list_routes() -> List[RouteJax]:
+def list_routes() -> List[Route]:
     vf = NoCurrent(spherical=True)
 
     thetas = np.linspace(-np.pi, np.pi, 30)[1:-1]
@@ -24,7 +24,7 @@ def list_routes() -> List[RouteJax]:
     )
 
 
-def test_around_globe(list_routes: List[RouteJax]):
+def test_around_globe(list_routes: List[Route]):
     """Assert the routes turn around the globe and end at the starting point"""
 
     for route in list_routes:
@@ -46,7 +46,7 @@ def test_around_globe(list_routes: List[RouteJax]):
         assert np.all(check), "Route does not turn around the globe"
 
 
-def test_speed(list_routes: List[RouteJax]):
+def test_speed(list_routes: List[Route]):
     """Assert the routes maintain a constant velocity"""
     max_diff, max_mean = 0, 0
     for route in list_routes:
@@ -72,7 +72,7 @@ def test_speed(list_routes: List[RouteJax]):
     )
 
 
-def test_tangencial_acceleration_x(list_routes: List[RouteJax]):
+def test_tangencial_acceleration_x(list_routes: List[Route]):
     """Assert the tangencial acceleration is close to 0"""
     max_diff, max_mean = 0, 0
     for route in list_routes:
@@ -98,7 +98,7 @@ def test_tangencial_acceleration_x(list_routes: List[RouteJax]):
     )
 
 
-def test_tangencial_acceleration_y(list_routes: List[RouteJax]):
+def test_tangencial_acceleration_y(list_routes: List[Route]):
     """Assert the tangencial acceleration is close to 0"""
     max_diff, max_mean = 0, 0
     for route in list_routes:
