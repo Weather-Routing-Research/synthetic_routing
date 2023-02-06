@@ -179,17 +179,18 @@ class Route:
             print(
                 f"[WARNING] Negative times found in {mask_nan.sum()} "
                 f"out of {len(t)} points. Consider raising vessel velocity over {vel}."
-                " NaN values were changed to 0."
+                " NaN values were changed to max."
             )
-            t = np.nan_to_num(t, nan=0)
+            t[mask_nan] = np.nanmax(t)
         if mask_neg.any():
             tneg = t[t < 0]
             print(
                 f"[WARNING] Negative times found in {len(tneg)} out of {len(t)} points."
                 f" Worst is {min(tneg)}. Consider raising vessel velocity over {vel}."
-                " Time values were clipped to 0."
+                " Time values lower than 0 were changed to max."
             )
-            t = np.clip(t, a_min=0)
+            t[mask_neg] = np.nanmax(t)
+
         # Update route times
         t = np.concatenate([[0], np.cumsum(t)])
         if interp:
