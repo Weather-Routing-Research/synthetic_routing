@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from hybrid_routing.pipeline import Pipeline
 
@@ -37,8 +38,6 @@ today = dt.date.today().strftime("%y-%m-%d")
 path_out: Path = Path(f"output/{today}")
 if not path_out.exists():
     path_out.mkdir()
-# Initialize dict of results
-dict_results = {}
 
 """
 Run pipelines
@@ -47,24 +46,30 @@ Run pipelines
 for pipe in list_pipes:
     for vel in list_vel:
         pipe.solve_zivp(
-            vel=vel, num_angles=20, time_iter=3600, time_step=60, dist_min=10000
+            vel=vel,
+            time_iter=3600,
+            time_step=60,
+            dist_min=10000,
+            num_angles=20,
+            angle_amplitude=np.pi / 2,
+            angle_heading=np.pi / 4,
         )
         pipe.solve_dnj(num_iter=5, time_step=3600)
 
         # Store in dictionary
         k = pipe.key.lower().replace(" ", "-")
-        dict_results[f"{k} {vel}"] = pipe.to_dict()
+        dict_results = pipe.to_dict()
+
+        # Decide filename
+        file = path_out / f"results-{k}-{vel}"
 
         # Store plot
         plt.figure(figsize=(5, 5))
         pipe.plot()
-        plt.savefig(path_out / f"results-{k}-{vel}.png")
+        plt.savefig(file.with_suffix(".png"))
         plt.close()
         print(f"Done {k} vectorfield, {vel} m/s\n---")
 
-"""
-Store dictionary
-"""
-with open(path_out / "results-real.json", "w") as outfile:
-    json.dump(dict_results, outfile)
-    json.dump(dict_results, outfile)
+        # Store dictionary
+        with open(file.with_suffix(".json"), "w") as outfile:
+            json.dump(dict_results, outfile)

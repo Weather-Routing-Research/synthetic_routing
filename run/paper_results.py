@@ -25,8 +25,6 @@ Create output folder
 path_out: Path = Path("output")
 if not path_out.exists():
     path_out.mkdir()
-# Initialize dict of results
-dict_results = {}
 
 
 """
@@ -38,7 +36,10 @@ for idx, pipe in enumerate(list_pipe):
     pipe.solve_dnj(num_iter=1000, time_step=0.01)
 
     k = pipe.key.lower().replace(" ", "-")
-    dict_results[k] = pipe.to_dict()
+    dict_results = pipe.to_dict()
+
+    # Define filename
+    file = path_out / f"results-{k}"
 
     # Store plot
     plt.figure(figsize=(5, 5))
@@ -47,14 +48,11 @@ for idx, pipe in enumerate(list_pipe):
     ymin, ymax = pipe.route_zivp.y.min(), pipe.route_zivp.y.max()
     extent = (xmin - 1, xmax + 1, ymin - 1, ymax + 1)
     pipe.plot(**list_plot[idx])
-    plt.savefig(path_out / f"results-{k}.png")
+    plt.savefig(file.with_suffix(".png"))
     plt.close()
 
-    print(f"Done {k} vectorfield")
+    # Store dictionary
+    with open(file.with_suffix(".json"), "w") as outfile:
+        json.dump(dict_results, outfile)
 
-"""
-Store dictionary
-"""
-with open(path_out / "results.json", "w") as outfile:
-    json.dump(dict_results, outfile)
-    json.dump(dict_results, outfile)
+    print(f"Done {k} vectorfield")
