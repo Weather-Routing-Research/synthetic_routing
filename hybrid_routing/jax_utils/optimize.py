@@ -55,18 +55,20 @@ class Optimizer:
             The total amount of time the ship is allowed to travel by at each iteration,
             by default 2
         time_step : float, optional
-            Number of steps to reach from 0 to time_iter (equivalently, how "smooth" each path is),
-            by default 0.1
+            Number of steps to reach from 0 to time_iter (equivalently, how "smooth"
+            each path is), by default 0.1
         angle_amplitude : float, optional
             The search cone range in radians, by default pi
         angle_heading : float, optional
-            Maximum deviation allower when optimizing direction, by default 1/4 angle amplitude
+            Maximum deviation allower when optimizing direction,
+            by default 1/4 angle amplitude
         num_angles : int, optional
             Number of initial search angles, by default 5
         vel : float, optional
             Speed of the ship (unit unknown), by default 5
         dist_min : float, optional
-            Minimum terminating distance around the destination (x_end, y_end), by default None
+            Minimum terminating distance around the destination (x_end, y_end),
+            by default None
         use_rk : bool, optional
             Use Runge-Kutta solver instead of odeint solver
         method: str, optional
@@ -188,18 +190,19 @@ class Optimizer:
         """
         System of ODE is from Zermelo's Navigation Problem
         https://en.wikipedia.org/wiki/Zermelo%27s_navigation_problem#General_solution)
-        1) This function first computes the locally optimized paths with Scipy's ODE solver.
-        Given the starting coordinates (x_start, y_start), time (t_max), speed of the ship (vel),
-        and the direction the ship points in (angle_amplitude / num_angles), the ODE solver returns
-        a list of points on the locally optimized path.
-        2) We then use a loop to compute all locally optimal paths with given angles in the
-        angle amplitude and store them in a list.
-        3) We next finds the list of paths with an end point (x1, y1) that has the smallest
-        Euclidean distance to the destination (x_end, y_end).
-        4) We then use the end point (x1, y1) on that path to compute the next set of paths
-        by repeating the above algorithm.
-        5) This function terminates till the last end point is within a neighbourhood of the
-        destination (defaults vel * time_end).
+        1) This function first computes the locally optimized paths with Scipy's ODE
+        solver. Given the starting coordinates (x_start, y_start), time (t_max),
+        speed of the ship (vel), and the direction the ship points in
+        (angle_amplitude / num_angles), the ODE solver returns a list of points on the
+        locally optimized path.
+        2) We then use a loop to compute all locally optimal paths with given angles in
+        the angle amplitude and store them in a list.
+        3) We next finds the list of paths with an end point (x1, y1) that has the
+        smallest Euclidean distance to the destination (x_end, y_end).
+        4) We then use the end point (x1, y1) on that path to compute the next set of
+        paths by repeating the above algorithm.
+        5) This function terminates till the last end point is within a neighbourhood of
+        the destination (defaults vel * time_end).
 
         Parameters
         ----------
@@ -227,6 +230,9 @@ class Optimizer:
         # Time now
         t = 0
 
+        # Initialize route best
+        route_best: Route = None
+
         while self.geometry.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min:
             # Get arrays of initial coordinates for these segments
             arr_x = np.repeat(x, self.num_angles)
@@ -239,7 +245,7 @@ class Optimizer:
 
             # The routes outputted start at the closest point
             # We append those segments to the best route, if we have it
-            if "route_best" in locals():
+            if route_best is not None:
                 for idx, route_new in enumerate(list_routes):
                     route: Route = deepcopy(route_best)
                     route.append_points(
@@ -264,7 +270,6 @@ class Optimizer:
             if x == x_old and y == y_old:
                 break
 
-    # TODO: Ensure spherical compatibility
     def _optimize_by_direction(
         self, x_start: float, y_start: float, x_end: float, y_end: float
     ) -> List[Route]:
@@ -291,7 +296,8 @@ class Optimizer:
 
         # Initialize list of routes to stop (outside of angle threshold)
         list_stop: List[int] = []
-        # Define whether the next step is exploitation or exploration, and the exploitation index
+        # Define whether the next step is exploitation or exploration, and the
+        # exploitation index
         # We start in the exploration step, so next step is exploitation
         self.exploration = True  # Exploitation step / Exploration step
         idx_refine = 1  # Where the best segment start + 1
@@ -399,7 +405,8 @@ class Optimizer:
         d = self.geometry.dist_p0_to_p1((x_start, y_start), (x_end, y_end))
         if self.dist_min >= d:
             raise ValueError(
-                f"Minimum distance allowed is {self.dist_min} and distance to cover is {d}."
+                f"Minimum distance allowed is {self.dist_min} "
+                f"and distance to cover is {d}."
             )
         if self.method == "closest":
             return self._optimize_by_closest(x_start, y_start, x_end, y_end)
