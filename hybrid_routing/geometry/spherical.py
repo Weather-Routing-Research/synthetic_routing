@@ -3,7 +3,7 @@ import numpy as np
 from hybrid_routing.geometry.base import Geometry
 
 RADIUS = 6367449  # meters
-RAD2M = RADIUS / (2 * np.pi)  # Radians to meters conversion
+RAD2M = RADIUS  # Radians to meters conversion
 DEG2RAD = np.pi / 180
 
 
