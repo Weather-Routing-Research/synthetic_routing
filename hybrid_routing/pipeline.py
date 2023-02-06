@@ -76,11 +76,6 @@ class Pipeline:
             self.route_zivp = route
         else:
             self.route_zivp = Route(**route)
-        # Recompute times
-        self.route_zivp2 = deepcopy(route)
-        self.route_zivp2.recompute_times(
-            self.optimizer.vel, self.vectorfield, interp=False
-        )
         # Compute velocity
         if vel is None:
             d = self.vectorfield.geometry.dist_between_coords(
@@ -90,6 +85,9 @@ class Pipeline:
             self.vel = np.mean(vel)
         else:
             self.vel = vel
+        # Recompute times
+        self.route_zivp2 = deepcopy(route)
+        self.route_zivp2.recompute_times(vel, self.vectorfield, interp=False)
         # Update optimizer
         self.optimizer = Optimizer(self.vectorfield, vel=self.vel)
 
