@@ -68,8 +68,9 @@ for pipe in list_pipes:
         pipe.plot()
         plt.savefig(file.with_suffix(".png"))
         plt.close()
-        print(f"Done {k} vectorfield, {vel} m/s\n---")
 
         # Store dictionary
         with open(file.with_suffix(".json"), "w") as outfile:
             json.dump(dict_results, outfile)
+
+        print(f"Done {k} vectorfield, {vel} m/s\n---")
