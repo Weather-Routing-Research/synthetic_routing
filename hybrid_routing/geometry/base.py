@@ -9,6 +9,10 @@ class Geometry:
         pass
 
     @abstractmethod
+    def __str__(self) -> str:
+        pass
+
+    @abstractmethod
     def dist_p0_to_p1(self, p0: np.ndarray, p1: np.ndarray) -> np.ndarray:
         """Compute the distance between two points."""
         pass

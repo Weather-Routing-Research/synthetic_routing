@@ -26,11 +26,13 @@ def main(
 
         # Try to generate the route
         try:
-            route = Route(**dict_run[key], geometry=vf.geometry)
+            route = Route(**dict_run[key])
         except KeyError:
             raise KeyError(
                 "Key not found in dict. Available are: ", ", ".join(dict_run.keys())
             )
+        
+        print()
 
         path = "./data" if bool(dict_run["real"]) else None
         pipe = Pipeline(

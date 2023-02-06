@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 import jax.numpy as jnp
 import numpy as np
@@ -14,7 +14,7 @@ class Route:
         y: jnp.array,
         t: Optional[jnp.array] = None,
         theta: Optional[jnp.array] = None,
-        geometry: Optional[Geometry] = None,
+        geometry: Optional[Union[Geometry, str]] = None,
     ):
         self.x: jnp.ndarray = jnp.atleast_1d(x)
         self.y: jnp.ndarray = jnp.atleast_1d(y)
@@ -26,7 +26,14 @@ class Route:
             jnp.atleast_1d(theta) if theta is not None else jnp.zeros_like(x)
         )
         # Define the geometry of this route
-        self.geometry = geometry if isinstance(geometry, Geometry) else Euclidean()
+        if isinstance(geometry, Geometry):
+            self.geometry = geometry
+        elif isinstance(geometry, str):
+            module = __import__("hybrid_routing")
+            module = getattr(module, "geometry")
+            self.geometry: Geometry = getattr(module, geometry)()
+        else:
+            self.geometry = Euclidean()
 
     def __len__(self) -> int:
         return len(self.x)
@@ -52,6 +59,7 @@ class Route:
             "y": self.y.tolist(),
             "t": self.t.tolist(),
             "theta": self.theta.tolist(),
+            "geometry": str(self.geometry),
         }
 
     @property

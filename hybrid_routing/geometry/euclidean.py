@@ -5,10 +5,10 @@ from hybrid_routing.geometry.base import Geometry
 
 class Euclidean(Geometry):
     def __str__(self) -> str:
-        return "Euclidean Geometry"
+        return "Euclidean"
 
     def __repr__(self) -> str:
-        return "Euclidean Geometry"
+        return "Euclidean"
 
     def dist_p0_to_p1(self, p0: np.ndarray, p1: np.ndarray) -> np.ndarray:
         """Compute the distance between two points, where p=(x, y)"""
