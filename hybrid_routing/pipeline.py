@@ -74,22 +74,20 @@ class Pipeline:
             Vessel velocity. If not given, it is computed. By default None
         """
         if isinstance(route, Route):
-            self.route_zivp = route
+            route = deepcopy(route)
         else:
-            self.route_zivp = Route(**route)
+            route = Route(**route)
         # Compute velocity
         if vel is None:
-            d = self.vectorfield.geometry.dist_between_coords(
-                self.route_zivp.x, self.route_zivp.y
-            )
-            vel = d / self.route_zivp.dt
+            d = self.vectorfield.geometry.dist_between_coords(route.x, route.y)
+            vel = d / route.dt
             self.vel = np.mean(vel)
         else:
             self.vel = vel
         # Recompute times
-        self.route_zivp2 = deepcopy(route)
-        self.route_zivp2.recompute_times(vel, self.vectorfield, interp=False)
-        # Update optimizer
+        route.recompute_times(vel, self.vectorfield, interp=False)
+        # Update route and optimizer
+        self.route_zivp = route
         self.optimizer = Optimizer(self.vectorfield, vel=self.vel)
 
     def solve_zivp(
@@ -156,12 +154,14 @@ class Pipeline:
         route: Route = list_routes[0]
         route.append_point_end(x=self.xn, y=self.yn, vel=self.optimizer.vel)
 
+        # Store parameters
         self.route_zivp = deepcopy(route)
         self.vel = vel
 
         # Recompute times
-        route.recompute_times(self.optimizer.vel, self.vectorfield, interp=False)
-        self.route_zivp2 = deepcopy(route)
+        self.route_zivp.recompute_times(
+            self.optimizer.vel, self.vectorfield, interp=False
+        )
 
     def solve_dnj(
         self,
@@ -211,7 +211,6 @@ class Pipeline:
             "real": self.real,
             "vel": self.vel,
             "route_zivp": self.route_zivp.asdict(),
-            "route_zivp2": self.route_zivp2.asdict(),
             "route_dnj": self.route_dnj.asdict(),
             "optimizer": self.optimizer.asdict(),
             "dnj": self.dnj.asdict(),
@@ -252,7 +251,7 @@ class Pipeline:
             )
             plot_ticks_radians_to_degrees(step=5)
             # Times to hours
-            times = (self.route_zivp2.t[-1] / 3600, self.route_dnj.t[-1] / 3600)
+            times = (self.route_zivp.t[-1] / 3600, self.route_dnj.t[-1] / 3600)
         else:
             self.vectorfield.plot(
                 step=0.25,
@@ -269,7 +268,7 @@ class Pipeline:
             yticks = np.arange(ymin, ymax, 1)
             plt.yticks(yticks)
             # Times in not unit
-            times = (self.route_zivp2.t[-1], self.route_dnj.t[-1])
+            times = (self.route_zivp.t[-1], self.route_dnj.t[-1])
 
         plt.gca().set_aspect("equal")
 
