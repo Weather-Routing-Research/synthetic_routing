@@ -16,14 +16,14 @@ list_pipes = [
         pn=(-29.5, 38.5),
         key="real",
         path="./data",
-        to_radians=True,
+        si_units=True,
     ),
     Pipeline(
         p0=(43.49, -1.66),
         pn=(98.14, 10.21),
         key="real-land",
         path="./data",
-        to_radians=True,
+        si_units=True,
     ),
 ]
 list_vel = [10, 6, 3]
@@ -47,7 +47,7 @@ Run pipelines
 for pipe in list_pipes:
     for vel in list_vel:
         pipe.solve_zivp(
-            vel=vel, num_angles=20, time_iter=360, time_step=60, dist_min=1000
+            vel=vel, num_angles=20, time_iter=3600, time_step=60, dist_min=1000
         )
         pipe.solve_dnj(num_iter=500, time_step=3600)
 

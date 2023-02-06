@@ -19,7 +19,7 @@ class Pipeline:
         pn: Tuple[float],
         key: str,
         path: Optional[Union[str, Path]] = None,
-        to_radians: bool = False,
+        si_units: bool = False,
     ):
         """Initialize the pipeline with the start and end point, and the vectorfield
 
@@ -34,15 +34,16 @@ class Pipeline:
         path : Optional[Union[str, Path]], optional
             Path to the data, if the vectorfield is real.
             If None, assume vectorfield is synthetic. By default None
-        to_radians : bool, optional
-            Change p0 and pn from degrees to radians, by default False
+        si_units : bool, optional
+            Assume units arrive in SI (degrees, meters), by default False
         """
         self.x0, self.y0 = p0
         self.xn, self.yn = pn
         # Convert to radians
-        if to_radians:
+        if si_units:
             self.x0, self.y0 = self.x0 * DEG2RAD, self.y0 * DEG2RAD
             self.xn, self.yn = self.xn * DEG2RAD, self.yn * DEG2RAD
+        self.si_units = si_units
 
         if path is None:
             module = __import__("hybrid_routing")
