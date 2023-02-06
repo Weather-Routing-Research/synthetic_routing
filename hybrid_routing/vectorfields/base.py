@@ -16,7 +16,8 @@ class Vectorfield(ABC):
     Methods
     ----------
     get_current : _type_
-        pass upon initialization, returns the current in tuples `(u, v)` given the position of the boat `(x, y)`
+        pass upon initialization, returns the current in tuples `(u, v)` given
+        the position of the boat `(x, y)`
     """
 
     geometry: Geometry
@@ -62,14 +63,16 @@ class Vectorfield(ABC):
         return u, v
 
     """
-    Takes the Jacobian (a 2x2 matrix) of the background vectorfield (W) using JAX package 
-    by Google LLC if it is not specified in the children classes.
+    Takes the Jacobian (a 2x2 matrix) of the background vectorfield (W) using JAX
+    package by Google LLC if it is not specified in the children classes.
     
-    Jax docs: https://jax.readthedocs.io/en/latest/_autosummary/jax.jacfwd.html#jax.jacfwd 
-            & https://jax.readthedocs.io/en/latest/_autosummary/jax.jacrev.html#jax.jacrev.
+    Jax docs:
+    https://jax.readthedocs.io/en/latest/_autosummary/jax.jacfwd.html#jax.jacfwd 
+    https://jax.readthedocs.io/en/latest/_autosummary/jax.jacrev.html#jax.jacrev.
     
     `W: R^2 -> R^2, W: (x,y) -> (u,v)`
-    Each function below returns a specific linearized partial derivative with respect to the variable.
+    Each function below returns a specific linearized partial derivative with respect
+    to the variable.
 
     Parameters
     ----------
@@ -96,22 +99,26 @@ class Vectorfield(ABC):
         t: Iterable[float],
         vel: jnp.float16 = jnp.float16(0.1),
     ) -> Iterable[float]:
-        """System of ODE set up for scipy initial value problem method to solve in optimize.py
+        """System of ODE set up for scipy initial value problem method to solve in
+        optimize.py
 
         Parameters
         ----------
         p : Iterable[float]
-            Initial position: `(x, y, theta)`. The pair `(x,y)` is the position of the boat and
-            `theta` is heading (in radians) of the boat (with respect to the x-axis).
+            Initial position: `(x, y, theta)`. The pair `(x,y)` is the position of the
+            boat and `theta` is heading (in radians) of the boat
+            (with respect to the x-axis).
         t : Iterable[float]
-            Array of time steps, evenly spaced inverval from t_start to t_end, of length `n`.
+            Array of time steps, evenly spaced inverval from t_start to t_end, of
+            length `n`.
         vel : jnp.float16, optional
             Speed of the boat, by default jnp.float16(0.1)
 
         Returns
         -------
         Iterable[float]
-            A list of coordinates on the locally optimal path of length `n`, same format as `p`: `(x, y, theta)`.
+            A list of coordinates on the locally optimal path of length `n`, same
+            format as `p`: `(x, y, theta)`.
             `dxdt`, `dydt` are in m / s, `dthetadt` is in rad / s
         """
         x, y, theta = p
@@ -131,22 +138,26 @@ class Vectorfield(ABC):
         t: Iterable[float],
         vel: jnp.float16 = jnp.float16(0.1),
     ) -> Iterable[float]:
-        """System of ODE set up for scipy initial value problem method to solve in optimize.py
+        """System of ODE set up for scipy initial value problem method to solve in
+        optimize.py
 
         Parameters
         ----------
         p : Iterable[float]
-            Initial position: `(x, y, theta)`. The pair `(x,y)` is the position of the boat and
-            `theta` is heading (in radians) of the boat (with respect to the x-axis).jnp.cos(x)
+            Initial position: `(x, y, theta)`. The pair `(x,y)` is the position of the
+            boat and `theta` is heading (in radians) of the boat
+            (with respect to the x-axis)
         t : Iterable[float]
-            Array of time steps, evenly spaced inverval from t_start to t_end, of length `n`.
+            Array of time steps, evenly spaced inverval from t_start to t_end, of
+            length `n`.
         vel : jnp.float16, optional
             Speed of the boat, by default jnp.float16(0.1)
 
         Returns
         -------
         Iterable[float]
-            A list of coordinates on the locally optimal path of length `n`, same format as `p`: `(x, y, theta)`.
+            A list of coordinates on the locally optimal path of length `n`, same
+            format as `p`: `(x, y, theta)`.
             `dxdt`, `dydt`, `dthetadt` are in rad / s
         """
         x, y, theta = p
