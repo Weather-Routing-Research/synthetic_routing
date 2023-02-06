@@ -49,7 +49,7 @@ for pipe in list_pipes:
         pipe.solve_zivp(
             vel=vel, num_angles=20, time_iter=3600, time_step=60, dist_min=10000
         )
-        pipe.solve_dnj(num_iter=500, time_step=3600)
+        pipe.solve_dnj(num_iter=5, time_step=3600)
 
         # Store in dictionary
         k = pipe.key.lower().replace(" ", "-")
