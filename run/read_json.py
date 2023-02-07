@@ -15,24 +15,29 @@ def main(
     time_step: float = 3600,
     num_iter: int = 200,
 ):
-    path_out:Path = Path(path_out)
+    path_out: Path = Path(path_out)
 
     with open(path_json) as file:
         dict_json: dict = json.load(file)
-    
+
     name = path_out.stem
 
     print("\n---\nBenchmark, run:", name)
 
     # Try to generate the route
     try:
-        route = Route(**dict_json[key])
+        dict_route = dict_json[key]
     except KeyError:
         raise KeyError(
             "Key not found in dict. Available are: ", ", ".join(dict_json.keys())
         )
-    
-    print()
+    route = Route(
+        x=dict_route["x"],
+        y=dict_route["y"],
+        t=dict_route["t"],
+        theta=dict_route["theta"],
+        geometry=dict_route["geometry"],
+    )
 
     path = "./data" if bool(dict_json["real"]) else None
     pipe = Pipeline(
