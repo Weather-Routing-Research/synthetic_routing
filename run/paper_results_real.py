@@ -64,7 +64,7 @@ for pipe in list_pipes:
         file = path_out / f"results-{k}-{vel}"
 
         # Store plot
-        plt.figure(figsize=(5, 5))
+        plt.figure(dpi=120)
         pipe.plot()
         plt.savefig(file.with_suffix(".png"))
         plt.close()

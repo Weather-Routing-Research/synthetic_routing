@@ -14,8 +14,8 @@ list_pipe = [
     Pipeline(p0=(0, 0), pn=(6, 2), key="FourVortices"),  # Ferraro et al.
 ]
 list_plot = [
-    {"extent": (-8, 5, -4, 3), "textbox_pos": (0, -3.5), "textbox_align": "bottom"},
-    {"extent": (0, 8, -2, 6), "textbox_pos": (0, 5.5), "textbox_align": "top"},
+    {"extent": (-8, 4, -4, 3), "textbox_pos": (0, -3.5), "textbox_align": "bottom"},
+    {"extent": (-1, 7, -1, 6), "textbox_pos": (0, 5.5), "textbox_align": "top"},
 ]
 
 """
@@ -42,7 +42,7 @@ for idx, pipe in enumerate(list_pipe):
     file = path_out / f"results-{k}"
 
     # Store plot
-    plt.figure(figsize=(5, 5))
+    plt.figure(dpi=120)
     # Define plot extent
     xmin, xmax = pipe.route_zivp.x.min(), pipe.route_zivp.x.max()
     ymin, ymax = pipe.route_zivp.y.min(), pipe.route_zivp.y.max()
