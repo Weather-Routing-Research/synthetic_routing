@@ -104,6 +104,8 @@ class DNJ:
             Number of DNJ iterations, by default 10
         """
         pts = route.pts
+        mask_nan = jnp.isnan(pts)
+        # Loop iterations
         for iteration in range(num_iter):
             pts_old = pts
             pts = self.optimize_distance(pts)
