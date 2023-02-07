@@ -114,6 +114,23 @@ pip install -U jaxlib==0.3.14+cuda11.cudnn82 -f https://storage.googleapis.com/j
 conda install -c nvidia cuda-nvcc
 ```
 
+### Troubleshooting
+
+If the following error appears:
+
+```out
+cuLinkAddData fails. This is usually caused by stale driver version.
+The CUDA linking API did not work. Please use XLA_FLAGS=--xla_gpu_force_compilation_parallelism=1 to bypass it, but expect to get longer compilation time due to the lack of multi-threading.
+```
+
+You can fix it by running:
+
+```cmd
+pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+```
+
+This will raise an `ERROR` telling that the package `hybrid_routing` is no longer compatible. Ignore that.
+
 ## Add dependencies
 
 Add abstract dependency to `setup.py`. If neccessary, add version requirements but try to be as flexible as possible
