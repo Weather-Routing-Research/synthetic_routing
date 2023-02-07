@@ -16,11 +16,12 @@ def main(
     num_iter: int = 200,
 ):
     path_out: Path = Path(path_out)
+    path_json: Path = Path(path_json)
 
     with open(path_json) as file:
         dict_json: dict = json.load(file)
 
-    name = path_out.stem
+    name = path_json.stem
 
     print("\n---\nBenchmark, run:", name)
 
