@@ -14,8 +14,8 @@ list_pipe = [
     Pipeline(p0=(0, 0), pn=(6, 2), key="FourVortices"),  # Ferraro et al.
 ]
 list_plot = [
-    {"extent": (-8, 8, 0, -3.5), "textbox_pos": (0, -3.5), "textbox_align": "bottom"},
-    {"extent": (-2, 8, 0, 5.5), "textbox_pos": (0, 5.5), "textbox_align": "top"},
+    {"extent": (-8, 5, -4, 3), "textbox_pos": (0, -3.5), "textbox_align": "bottom"},
+    {"extent": (0, 8, -2, 6), "textbox_pos": (0, 5.5), "textbox_align": "top"},
 ]
 
 """
