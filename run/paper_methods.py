@@ -114,7 +114,7 @@ optimizer.time_iter = 0.1
 optimizer.time_step = 0.01
 optimizer.angle_amplitude = np.pi / 2
 optimizer.angle_heading = np.pi / 3
-run = optimizer.optimize_route(x0, y0, xn, yn)
+run = optimizer.optimize_route((x0, y0), (xn, yn))
 list_routes_plot = next(run)
 
 for list_routes in run:
@@ -224,7 +224,7 @@ for list_routes in run:
     list_routes_plot = deepcopy(list_routes)
 # Append goal
 route: Route = list_routes_plot[0]
-route.append_point_end(x=xn, y=yn, vel=optimizer.vel)
+route.append_point_end(p=(xn, yn), vel=optimizer.vel)
 
 plot_vectorfield()
 plot_routes([route])

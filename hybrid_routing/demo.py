@@ -222,7 +222,7 @@ remove_plot_lines_temporal()
 
 if do_run:
     # Build iteration over optimization
-    iter_optim = optimizer.optimize_route(x_start, y_start, x_end, y_end)
+    iter_optim = optimizer.optimize_route((x_start, y_start), (x_end, y_end))
     # Loop through optimization
     for list_routes in iter_optim:
         # Loop through the route segments
@@ -237,7 +237,7 @@ if do_run:
 
     # Once optimization finishes, append last point to best route
     route: Route = list_routes[0]
-    route.append_point_end(x=x_end, y=y_end, vel=vel)
+    route.append_point_end(p=(x_end, y_end), vel=vel)
     plt.plot(route.x, route.y, color="red", linestyle="--", alpha=0.7)
     plot.pyplot(fig=fig)
 

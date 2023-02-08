@@ -61,7 +61,7 @@ for pipe in list_pipes:
         dict_results = pipe.to_dict()
 
         # Decide filename
-        file = path_out / f"results-{k}-{vel}"
+        file = path_out / f"results_{k}_{vel}"
 
         # Store plot
         plt.figure(dpi=120)

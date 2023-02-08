@@ -150,13 +150,13 @@ class Pipeline:
         )
         # Run the optimizer until it converges
         for list_routes in self.optimizer.optimize_route(
-            self.x0, self.y0, self.xn, self.yn
+            (self.x0, self.y0), (self.xn, self.yn)
         ):
             pass
 
         # Take the best route
         route: Route = list_routes[0]
-        route.append_point_end(x=self.xn, y=self.yn, vel=self.optimizer.vel)
+        route.append_point_end(p=(self.xn, self.yn), vel=self.optimizer.vel)
 
         # Store parameters
         self.route_zivp = deepcopy(route)

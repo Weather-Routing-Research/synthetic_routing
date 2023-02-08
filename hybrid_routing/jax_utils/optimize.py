@@ -188,9 +188,7 @@ class Optimizer:
         )
 
     # TODO: Ensure spherical compatibility
-    def _optimize_by_closest(
-        self, x_start: float, y_start: float, x_end: float, y_end: float
-    ) -> List[Route]:
+    def _optimize_by_closest(self, p0: Tuple[float], pn: Tuple[float]) -> List[Route]:
         """
         System of ODE is from Zermelo's Navigation Problem
         https://en.wikipedia.org/wiki/Zermelo%27s_navigation_problem#General_solution)
@@ -225,8 +223,10 @@ class Optimizer:
             Returns a list with all paths generated within the search cone.
             The path that terminates closest to destination is on top.
         """
+        x_start, y_start = p0
+        x_end, y_end = pn
         # Compute angle between first and last point
-        cone_center = self.geometry.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
+        cone_center = self.geometry.angle_p0_to_p1(p0, pn)
 
         # Position now
         x = x_start
@@ -290,11 +290,12 @@ class Optimizer:
                 f"Distance from goal: {dist}"
             )
 
-    def _optimize_by_direction(
-        self, x_start: float, y_start: float, x_end: float, y_end: float
-    ) -> List[Route]:
+    def _optimize_by_direction(self, p0: Tuple[float], pn: Tuple[float]) -> List[Route]:
+        x_start, y_start = p0
+        x_end, y_end = pn
+
         # Compute angle between first and last point
-        cone_center = self.geometry.angle_p0_to_p1((x_start, y_start), (x_end, y_end))
+        cone_center = self.geometry.angle_p0_to_p1(p0, pn)
 
         # Position now
         x = x_start
@@ -429,18 +430,16 @@ class Optimizer:
                 f"Distance from goal: {dist}"
             )
 
-    def optimize_route(
-        self, x_start: float, y_start: float, x_end: float, y_end: float
-    ) -> List[Route]:
-        d = self.geometry.dist_p0_to_p1((x_start, y_start), (x_end, y_end))
+    def optimize_route(self, p0: Tuple[float], pn: Tuple[float]) -> List[Route]:
+        d = self.geometry.dist_p0_to_p1(p0, pn)
         if self.dist_min >= d:
             raise ValueError(
                 f"Minimum distance allowed is {self.dist_min} "
                 f"and distance to cover is {d}."
             )
         if self.method == "closest":
-            return self._optimize_by_closest(x_start, y_start, x_end, y_end)
+            return self._optimize_by_closest(p0, pn)
         elif self.method == "direction":
-            return self._optimize_by_direction(x_start, y_start, x_end, y_end)
+            return self._optimize_by_direction(p0, pn)
         else:
             raise ValueError(f"Method not identified: {self.method}")

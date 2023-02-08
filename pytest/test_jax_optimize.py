@@ -28,7 +28,7 @@ def test_optimize(use_rk: bool):
         use_rk=use_rk,
     )
 
-    iter_optim = optimizer.optimize_route(x_start, y_start, x_end, y_end)
+    iter_optim = optimizer.optimize_route((x_start, y_start), (x_end, y_end))
 
     for list_routes in iter_optim:
         route = list_routes[0]

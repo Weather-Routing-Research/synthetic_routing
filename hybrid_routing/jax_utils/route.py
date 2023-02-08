@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 import jax.numpy as jnp
 import numpy as np
@@ -118,7 +118,7 @@ class Route:
         # Compute distance
         self.d = self.geometry.dist_between_coords(self.x, self.y)
 
-    def append_point_end(self, x: float, y: float, vel: float):
+    def append_point_end(self, p: Tuple[float], vel: float):
         """Append an end point to the route and compute its timestamp.
         It does not take into account the effect of vectorfields.
 
@@ -131,9 +131,9 @@ class Route:
         vel : float
             Vessel velocity, typically in meters per second
         """
-        dist = self.geometry.dist_p0_to_p1((self.x[-1], self.y[-1]), (x, y))
+        dist = self.geometry.dist_p0_to_p1((self.x[-1], self.y[-1]), p)
         t = dist / vel + self.t[-1]
-        self.append_points(x, y, t)
+        self.append_points(p[0], p[1], t)
 
     def recompute_times(self, vel: float, vf: Vectorfield, interp: bool = True):
         """Given a vessel velocity and a vectorfield, recompute the

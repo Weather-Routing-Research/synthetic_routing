@@ -54,7 +54,7 @@ def main(
     images = []
     idx = 0
     # Generate one plot every 2 iterations
-    for list_routes in optimizer.optimize_route(q0[0], q0[1], q1[0], q1[1]):
+    for list_routes in optimizer.optimize_route(q0, q1):
         vectorfield.plot(x_min=-1, x_max=7, y_min=-1, y_max=7)
         for route in list_routes:
             plt.plot(route.x, route.y, color="green", alpha=0.6)
