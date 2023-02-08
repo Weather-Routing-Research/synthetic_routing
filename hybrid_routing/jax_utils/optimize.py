@@ -42,6 +42,7 @@ class Optimizer:
         num_angles: int = 5,
         vel: float = 5,
         dist_min: Optional[float] = None,
+        max_iter: int = 2000,
         use_rk: bool = False,
         method: str = "direction",
     ):
@@ -69,6 +70,8 @@ class Optimizer:
         dist_min : float, optional
             Minimum terminating distance around the destination (x_end, y_end),
             by default None
+        max_iter : int, optional
+            Maximum number of iterations allowed, by default 2000
         use_rk : bool, optional
             Use Runge-Kutta solver instead of odeint solver
         method: str, optional
@@ -111,6 +114,7 @@ class Optimizer:
         else:
             print("Non recognized method, using 'direction'.")
             self.method = "direction"
+        self.max_iter = max_iter
         self.exploration = None
 
     def asdict(self) -> Dict:
@@ -233,7 +237,12 @@ class Optimizer:
         # Initialize route best
         route_best: Route = None
 
-        while self.geometry.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min:
+        # Distance and number of iterations
+        dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
+        n_iter = 0
+        max_iter = self.max_iter
+
+        while (dist > self.dist_min) and (n_iter <= max_iter):
             # Get arrays of initial coordinates for these segments
             arr_x = np.repeat(x, self.num_angles)
             arr_y = np.repeat(y, self.num_angles)
@@ -267,8 +276,19 @@ class Optimizer:
             list_routes.insert(0, list_routes.pop(idx_best))
             yield list_routes
 
+            # If the optimization does not progress, kill the algorithm
             if x == x_old and y == y_old:
-                break
+                max_iter = n_iter
+
+            # Update distance and number of iterations
+            dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
+            n_iter += 1
+        else:
+            # Message when loop finishes
+            print(
+                f"Optimization finished after {n_iter} iterations. "
+                f"Distance from goal: {dist}"
+            )
 
     def _optimize_by_direction(
         self, x_start: float, y_start: float, x_end: float, y_end: float
@@ -280,7 +300,6 @@ class Optimizer:
         x = x_start
         y = y_start
         t = 0  # Time now
-        t_last = -1  # Time of last loop, used to avoid infinite loops
 
         # Initialize the routes
         # Each one starts with a different angle
@@ -301,11 +320,13 @@ class Optimizer:
         # We start in the exploration step, so next step is exploitation
         self.exploration = True  # Exploitation step / Exploration step
         idx_refine = 1  # Where the best segment start + 1
-        # The loop continues until the algorithm reaches the end or it gets stuck
-        while (
-            self.geometry.dist_p0_to_p1((x, y), (x_end, y_end)) > self.dist_min
-        ) and (t != t_last):
-            t_last = t  # Update time of last loop
+
+        # The loop continues until the algorithm reaches the end
+        dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
+        n_iter = 0  # Number of iterations
+        max_iter = self.max_iter
+
+        while (dist > self.dist_min) and (n_iter <= max_iter):
             # Get arrays of initial coordinates for these segments
             arr_x = np.array([route.x[-1] for route in list_routes])
             arr_y = np.array([route.y[-1] for route in list_routes])
@@ -386,18 +407,27 @@ class Optimizer:
                 # Update the time of the last point, will go backwards when changing
                 # from exploration to exploitation
                 t = route_new.t[-1]
-                continue
+            else:
+                # The best route will be the one closest to our destination
+                idx_best = self.min_dist_p0_to_p1(list_routes, (x_end, y_end))
+                route_best = list_routes[idx_best]
+                x, y = route_best.x[-1], route_best.y[-1]
+                t = max(route.t[-1] for route in list_routes)
 
-            # The best route will be the one closest to our destination
-            idx_best = self.min_dist_p0_to_p1(list_routes, (x_end, y_end))
-            route_best = list_routes[idx_best]
-            x, y = route_best.x[-1], route_best.y[-1]
-            t = max(route.t[-1] for route in list_routes)
+                # Yield list of routes with best route in first position
+                list_routes_yield = deepcopy(list_routes)
+                list_routes_yield.insert(0, list_routes_yield.pop(idx_best))
+                yield list_routes_yield
 
-            # Yield list of routes with best route in first position
-            list_routes_yield = deepcopy(list_routes)
-            list_routes_yield.insert(0, list_routes_yield.pop(idx_best))
-            yield list_routes_yield
+            # Update distance and number of iterations
+            dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
+            n_iter += 1
+        else:
+            # Message when loop finishes
+            print(
+                f"Optimization finished after {n_iter} iterations. "
+                f"Distance from goal: {dist}"
+            )
 
     def optimize_route(
         self, x_start: float, y_start: float, x_end: float, y_end: float
@@ -413,5 +443,4 @@ class Optimizer:
         elif self.method == "direction":
             return self._optimize_by_direction(x_start, y_start, x_end, y_end)
         else:
-            raise ValueError(f"Method not identified: {self.method}")
             raise ValueError(f"Method not identified: {self.method}")

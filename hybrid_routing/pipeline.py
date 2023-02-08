@@ -99,6 +99,7 @@ class Pipeline:
         num_angles: int = 20,
         vel: float = 1,
         dist_min: float = 0.1,
+        max_iter: int = 2000,
         use_rk: bool = True,
         method: str = "direction",
     ):
@@ -124,6 +125,8 @@ class Pipeline:
         dist_min : float, optional
             Minimum terminating distance around the destination (x_end, y_end),
             by default 0.1
+        max_iter : int, optional
+            Maximum number of iterations allowed for the optimizer, by default 2000
         use_rk : bool, optional
             Use Runge-Kutta solver instead of odeint solver, by default True
         method: str, optional
@@ -141,6 +144,7 @@ class Pipeline:
             num_angles=num_angles,
             vel=vel,
             dist_min=dist_min,
+            max_iter=max_iter,
             use_rk=use_rk,
             method=method,
         )
