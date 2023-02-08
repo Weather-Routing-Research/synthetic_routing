@@ -152,7 +152,11 @@ class Pipeline:
         for list_routes in self.optimizer.optimize_route(
             (self.x0, self.y0), (self.xn, self.yn)
         ):
-            pass
+            route = list_routes[0]
+            print(
+                "  (x, y, t) = "
+                f"({route.x[-1]:.2f}, {route.y[-1]:.2f}, {route.t[-1]:.0f})"
+            )
 
         # Take the best route
         route: Route = list_routes[0]
@@ -200,6 +204,7 @@ class Pipeline:
         for n in range(4):
             self.dnj.optimize_route(route, num_iter=num_iter)
             self._routes_dnj[n] = deepcopy(route)
+            print(f"  DNJ step {n} out of 5")
         # Last DNJ run
         self.dnj.optimize_route(route, num_iter=num_iter)
         route.recompute_times(self.vel, self.vectorfield, interp=False)
