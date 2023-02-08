@@ -1,7 +1,6 @@
 from typing import Optional, Tuple, Union
 
 import jax.numpy as jnp
-import numpy as np
 
 from hybrid_routing.geometry import Euclidean, Geometry
 from hybrid_routing.vectorfields.base import Vectorfield
@@ -73,15 +72,15 @@ class Route:
 
     @property
     def dt(self):
-        return -np.diff(self.t)
+        return -jnp.diff(self.t)
 
     @property
     def dx(self):
-        return -np.diff(self.x)
+        return -jnp.diff(self.x)
 
     @property
     def dy(self):
-        return -np.diff(self.y)
+        return -jnp.diff(self.y)
 
     @property
     def dxdt(self):
@@ -152,16 +151,16 @@ class Route:
         x, y = self.x, self.y
         if interp:
             # Interpolate route to x10 points to improve the precision
-            i = np.linspace(0, len(x), num=10 * len(x))
-            j = np.linspace(0, len(x), num=len(x))
-            x = np.interp(i, j, x)
-            y = np.interp(i, j, y)
+            i = jnp.linspace(0, len(x), num=10 * len(x))
+            j = jnp.linspace(0, len(x), num=len(x))
+            x = jnp.interp(i, j, x)
+            y = jnp.interp(i, j, y)
         # Angle over ground between points
         a_g = self.geometry.ang_between_coords(x, y)
         # Componentes of the velocity of vectorfield
         # We loop to avoid memory errors when using GPU
-        v_cx = np.zeros(len(x) - 1)
-        v_cy = np.zeros(len(y) - 1)
+        v_cx = jnp.zeros(len(x) - 1)
+        v_cy = jnp.zeros(len(y) - 1)
         for i in range(len(x) - 1):
             v_cx[i], v_cy[i] = vf.get_current(x[i], y[i])
         # Angle and module of the velocity of vectorfield
@@ -173,13 +172,13 @@ class Route:
         # The perpendicular component of the vessel velocity must compensate the vectorfield
         v_vg_perp = -v_cg_perp
         # Component of the vessel velocity parallel w.r.t. the direction over ground
-        v_vg_para = np.sqrt(np.power(vel, 2) - np.power(v_vg_perp, 2))
+        v_vg_para = jnp.sqrt(jnp.power(vel, 2) - jnp.power(v_vg_perp, 2))
         # Velocity over ground is the sum of vessel and vectorfield parallel components
         v_g = v_vg_para + v_cg_para
         # Time is distance divided by velocity over ground
-        t = np.divide(self.d, v_g)
+        t = jnp.divide(self.d, v_g)
         # Identify NaN and negative values
-        mask_nan = np.isnan(t)
+        mask_nan = jnp.isnan(t)
         mask_neg = t < 0
         if mask_nan.any():
             print(
@@ -187,7 +186,7 @@ class Route:
                 f"out of {len(t)} points. Consider raising vessel velocity over {vel}."
                 " NaN values were changed to max."
             )
-            t[mask_nan] = np.nanmax(t)
+            t[mask_nan] = jnp.nanmax(t)
         if mask_neg.any():
             tneg = t[t < 0]
             print(
@@ -195,12 +194,12 @@ class Route:
                 f" Worst is {min(tneg)}. Consider raising vessel velocity over {vel}."
                 " Time values lower than 0 were changed to max."
             )
-            t[mask_neg] = np.nanmax(t)
+            t[mask_neg] = jnp.nanmax(t)
 
         # Update route times
-        t = np.concatenate([[0], np.cumsum(t)])
+        t = jnp.concatenate([[0], jnp.cumsum(t)])
         if interp:
             # If we interpolated to x10 points, get the original ones
-            self.t = np.interp(j, i, t)
+            self.t = jnp.interp(j, i, t)
         else:
             self.t = t

@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Dict, List, Optional, Tuple
 
-import numpy as np
+import jax.numpy as jnp
 
 from hybrid_routing.geometry import Euclidean, Geometry, Spherical
 from hybrid_routing.jax_utils.route import Route
@@ -15,17 +15,17 @@ from hybrid_routing.vectorfields.base import Vectorfield
 
 def compute_thetas_in_cone(
     cone_center: float, angle_amplitude: float, num_angles: int
-) -> np.array:
+) -> jnp.array:
     # Define the search cone
     delta = 1e-4 if angle_amplitude <= 1e-4 else angle_amplitude / 2
     if num_angles > 1:
-        thetas = np.linspace(
+        thetas = jnp.linspace(
             cone_center - delta,
             cone_center + delta,
             num_angles,
         )
     else:
-        thetas = np.array([cone_center])
+        thetas = jnp.array([cone_center])
     return thetas
 
 
@@ -37,7 +37,7 @@ class Optimizer:
         vectorfield: Vectorfield,
         time_iter: float = 2,
         time_step: float = 0.1,
-        angle_amplitude: float = np.pi,
+        angle_amplitude: float = jnp.pi,
         angle_heading: Optional[float] = None,
         num_angles: int = 5,
         vel: float = 5,
@@ -136,7 +136,7 @@ class Optimizer:
 
         Parameters
         ----------
-        list_routes : List[np.array]
+        list_routes : List[jnp.array]
             List of routes, defined by (x, y, theta)
         pt_goal : _type_
             Goal point, defined by (x, y)
@@ -146,7 +146,7 @@ class Optimizer:
         int
             Index of the route that ends at the minimum distance to the goal.
         """
-        min_dist = np.inf
+        min_dist = jnp.inf
         for idx, route in enumerate(list_routes):
             dist = self.geometry.dist_p0_to_p1((route.x[-1], route.y[-1]), pt_goal)
             if dist < min_dist:
@@ -155,18 +155,18 @@ class Optimizer:
         return idx_best_point
 
     def solve_ivp(
-        self, x: np.array, y: np.array, theta: np.array, t: float = 0
+        self, x: jnp.array, y: jnp.array, theta: jnp.array, t: float = 0
     ) -> List[Route]:
         """Solve an initial value problem, given arrays of same length for
         x, y and theta (heading, w.r.t. x-axis)
 
         Parameters
         ----------
-        x : np.array
+        x : jnp.array
             Initial coordinate on x-axis
-        y : np.array
+        y : jnp.array
             Initial coordinate on y-axis
-        theta : np.array
+        theta : jnp.array
             Initial heading w.r.t. x-axis, in radians
         t : float, optional
             Initial time, by default 0
@@ -244,8 +244,8 @@ class Optimizer:
 
         while (dist > self.dist_min) and (n_iter <= max_iter):
             # Get arrays of initial coordinates for these segments
-            arr_x = np.repeat(x, self.num_angles)
-            arr_y = np.repeat(y, self.num_angles)
+            arr_x = jnp.repeat(x, self.num_angles)
+            arr_y = jnp.repeat(y, self.num_angles)
             arr_theta = compute_thetas_in_cone(
                 cone_center, self.angle_amplitude, self.num_angles
             )
@@ -329,9 +329,9 @@ class Optimizer:
 
         while (dist > self.dist_min) and (n_iter <= max_iter):
             # Get arrays of initial coordinates for these segments
-            arr_x = np.array([route.x[-1] for route in list_routes])
-            arr_y = np.array([route.y[-1] for route in list_routes])
-            arr_theta = np.array([route.theta[-1] for route in list_routes])
+            arr_x = jnp.array([route.x[-1] for route in list_routes])
+            arr_y = jnp.array([route.y[-1] for route in list_routes])
+            arr_theta = jnp.array([route.theta[-1] for route in list_routes])
 
             # Compute the new route segments
             list_segments = self.solve_ivp(arr_x, arr_y, arr_theta, t=t)

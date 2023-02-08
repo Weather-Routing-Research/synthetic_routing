@@ -1,17 +1,19 @@
 from typing import List
 
-import numpy as np
-from scipy.integrate import odeint
+import jax.numpy as jnp
+from jax.experimental.ode import odeint
 
 from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.vectorfields.base import Vectorfield
 
+# from scipy.integrate import odeint
+
 
 def solve_ode_zermelo(
     vectorfield: Vectorfield,
-    x: np.array,
-    y: np.array,
-    thetas: np.array,
+    x: jnp.array,
+    y: jnp.array,
+    thetas: jnp.array,
     time_start: float = 0,
     time_end: float = 2,
     time_step: float = 0.1,
@@ -26,11 +28,11 @@ def solve_ode_zermelo(
     ----------
     vectorfield : Vectorfield
         Background vectorfield for the ship to set sail on
-    x : np.array
+    x : jnp.array
         x-coordinate of the starting positions
-    y : np.array
+    y : jnp.array
         y-coordinate of the starting positions
-    thetas : np.array
+    thetas : jnp.array
         Heading of the route (angle) in radians
     time_start : float, optional
         Start time of the iteration, by default 0
@@ -47,8 +49,9 @@ def solve_ode_zermelo(
     List[Route]
         Returns a list with all paths generated within the search cone.
     """
+    print("This")
     # Define the time steps
-    t = np.arange(time_start, time_end + time_step, time_step)
+    t = jnp.arange(time_start, time_end + time_step, time_step)
 
     list_routes: List[Route] = [None] * len(thetas)
     for idx, theta in enumerate(thetas):
@@ -67,9 +70,9 @@ def solve_ode_zermelo(
 
 def solve_discretized_zermelo(
     vectorfield: Vectorfield,
-    x: np.array,
-    y: np.array,
-    thetas: np.array,
+    x: jnp.array,
+    y: jnp.array,
+    thetas: jnp.array,
     time_start: float = 0,
     time_end: float = 2,
     time_step: float = 0.1,
@@ -82,11 +85,11 @@ def solve_discretized_zermelo(
     ----------
     vectorfield : Vectorfield
         The vectorfield (background waves) for the ship to sail on
-    x : np.array
+    x : jnp.array
         x-coordinate of the starting positions
-    y : np.array
+    y : jnp.array
         y-coordinate of the starting positions
-    thetas : np.array
+    thetas : jnp.array
         Heading of the route (angle) in radians
     time_end : float, optional
         The total time for the ship to travel at each iteration, by default 2
@@ -102,7 +105,7 @@ def solve_discretized_zermelo(
         All points of the paths are of Route object.
     """
 
-    t = np.arange(time_start, time_end + time_step, time_step)
+    t = jnp.arange(time_start, time_end + time_step, time_step)
     list_routes: List[Route] = [None] * len(thetas)
 
     for idx, theta in enumerate(thetas):
@@ -112,8 +115,8 @@ def solve_discretized_zermelo(
         # (x, y) points will be updated during the iteration
         x_temp, y_temp = x[idx], y[idx]
         # Compute the vessel velocity components
-        v_x = vel * np.cos(theta)
-        v_y = vel * np.sin(theta)
+        v_x = vel * jnp.cos(theta)
+        v_y = vel * jnp.sin(theta)
         # TODO: Ensure spherical compatibility
         # Loop through the time steps
         for idx2, _ in enumerate(t):
@@ -134,9 +137,9 @@ def solve_discretized_zermelo(
 
 def solve_rk_zermelo(
     vectorfield: Vectorfield,
-    x: np.array,
-    y: np.array,
-    thetas: np.array,
+    x: jnp.array,
+    y: jnp.array,
+    thetas: jnp.array,
     time_start: float = 0,
     time_end: float = 2,
     time_step: float = 0.1,
@@ -152,11 +155,11 @@ def solve_rk_zermelo(
     ----------
     vectorfield : Vectorfield
         Background vectorfield for the ship to set sail on
-    x : np.array
+    x : jnp.array
         x-coordinate of the starting positions
-    y : np.array
+    y : jnp.array
         y-coordinate of the starting positions
-    thetas : np.array
+    thetas : jnp.array
         Heading of the route (angle) in radians
     time_start : float, optional
         Start time of the iteration, by default 0
@@ -174,32 +177,32 @@ def solve_rk_zermelo(
         Returns a list with all paths generated within the search cone.
     """
     # Define the time steps
-    arr_t = np.arange(time_start, time_end + time_step, time_step)
+    arr_t = jnp.arange(time_start, time_end + time_step, time_step)
 
     # Initializes the arrays containing the coordinates
-    arr_q = [np.stack((x, y, thetas))] * len(arr_t)
+    arr_q = [jnp.stack((x, y, thetas))] * len(arr_t)
     # Update the coordinates following the RK algorithm
     for idx, t0 in enumerate(arr_t[:-1]):
         q0 = arr_q[idx]
-        k1 = np.asarray(vectorfield.ode_zermelo(q0, t0, vel=vel))
-        k2 = np.asarray(
+        k1 = jnp.asarray(vectorfield.ode_zermelo(q0, t0, vel=vel))
+        k2 = jnp.asarray(
             vectorfield.ode_zermelo(
                 q0 + k1 * time_step / 2, t0 + time_step / 2, vel=vel
             )
         )
-        k3 = np.asarray(
+        k3 = jnp.asarray(
             vectorfield.ode_zermelo(
                 q0 + k2 * time_step / 2, t0 + time_step / 2, vel=vel
             )
         )
-        k4 = np.asarray(
+        k4 = jnp.asarray(
             vectorfield.ode_zermelo(q0 + k3 * time_step, t0 + time_step, vel=vel)
         )
         q1 = q0 + time_step * (k1 + 2 * k2 + 2 * k3 + k4) / 6
         arr_q[idx + 1] = q1
 
     # Shape is (num_time_steps, 3, num_angles) where 3 = (x, y, theta)
-    arr_q = np.asarray(arr_q)
+    arr_q = jnp.asarray(arr_q)
     # Initialize list of routes and store one route per theta
     list_routes: List[Route] = [None] * len(x)
     for idx in range(len(x)):
