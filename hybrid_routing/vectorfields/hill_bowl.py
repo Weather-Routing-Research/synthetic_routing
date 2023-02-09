@@ -12,7 +12,7 @@ class HillBowl(Vectorfield):
         dv/dx = 2 * x * cos(x^2 + y^2),  dv/dy = 2 * y * cos(x^2 + y^2)
     """
 
-    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         return jnp.asarray([jnp.ones(x.shape), jnp.sin(x**2 + y**2)])
 
     def _ode_zermelo_euclidean(self, p, t, vel=jnp.float16(1)):

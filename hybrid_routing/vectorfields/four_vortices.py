@@ -1,6 +1,8 @@
-from hybrid_routing.vectorfields.base import Vectorfield
-import jax.numpy as jnp
 from typing import Iterable
+
+import jax.numpy as jnp
+
+from hybrid_routing.vectorfields.base import Vectorfield
 
 
 def R(a: float, b: float, x: float, y: float) -> Iterable[float]:
@@ -31,7 +33,7 @@ class FourVortices(Vectorfield):
     """Vectorfield example demonstrated in Figure 2 in https://arxiv.org/pdf/2109.05559.pdf,
     implements Vectorfield class."""
 
-    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         field = 1.7 * (
             jnp.negative(R(2, 2, x, y))
             + jnp.negative(R(4, 4, x, y))

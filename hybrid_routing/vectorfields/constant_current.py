@@ -1,5 +1,6 @@
-from hybrid_routing.vectorfields.base import Vectorfield
 import jax.numpy as jnp
+
+from hybrid_routing.vectorfields.base import Vectorfield
 
 
 class ConstantCurrent(Vectorfield):
@@ -17,7 +18,7 @@ class ConstantCurrent(Vectorfield):
     def du(self, x: float, y: float) -> float:
         return (0, 0)
 
-    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         u = jnp.full_like(x, 0.2)
         v = jnp.full_like(x, -0.2)
         return jnp.stack([u, v])

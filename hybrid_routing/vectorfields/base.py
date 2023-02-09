@@ -25,18 +25,19 @@ class Vectorfield(ABC):
     is_discrete: bool = False
 
     def __init__(self, spherical: bool = False):
+        self.get_current = jit(self._get_current)
         self._dv = jit(jacrev(self.get_current, argnums=1))
         self._du = jit(jacfwd(self.get_current, argnums=0))
         self.spherical = spherical
         if spherical:
-            self.ode_zermelo = self._ode_zermelo_spherical
+            self.ode_zermelo = jit(self._ode_zermelo_spherical)
             self.geometry = Spherical()
         else:
-            self.ode_zermelo = self._ode_zermelo_euclidean
+            self.ode_zermelo = jit(self._ode_zermelo_euclidean)
             self.geometry = Euclidean()
 
     @abstractmethod
-    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         pass
 
     def get_current_rad(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:

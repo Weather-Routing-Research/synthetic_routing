@@ -12,7 +12,7 @@ class Swirlys(Vectorfield):
         dv/dx = 1,                      dv/dy = 2/3 cos(y)
     """
 
-    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         return jnp.asarray([jnp.cos(2 * x - y - 6), 2 * jnp.sin(y) / 3 + x - 3])
 
     def _ode_zermelo_euclidean(self, p, t, vel=jnp.float16(1)):

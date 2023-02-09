@@ -1,5 +1,6 @@
-from hybrid_routing.vectorfields.base import Vectorfield
 import jax.numpy as jnp
+
+from hybrid_routing.vectorfields.base import Vectorfield
 
 
 class Sink(Vectorfield):
@@ -18,5 +19,5 @@ class Sink(Vectorfield):
     def du(self, x: float, y: float) -> float:
         return (-1 / 25, 0)
 
-    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         return jnp.asarray([-(x - 8) / 25, -(y - 8) / 25])

@@ -1,6 +1,8 @@
 from typing import Iterable
-from hybrid_routing.vectorfields.base import Vectorfield
+
 import jax.numpy as jnp
+
+from hybrid_routing.vectorfields.base import Vectorfield
 
 
 class Source(Vectorfield):
@@ -10,5 +12,5 @@ class Source(Vectorfield):
     def du(self, x: float, y: float) -> float:
         return (1 / 75, 0)
 
-    def get_current(self, x: jnp.array, y: jnp.array) -> Iterable[float]:
+    def _get_current(self, x: jnp.array, y: jnp.array) -> Iterable[float]:
         return jnp.asarray([(x - 5) / 25, (y - 5) / 25])
