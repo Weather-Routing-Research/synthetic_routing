@@ -1,4 +1,8 @@
+from functools import partial
+from typing import Tuple
+
 import jax.numpy as jnp
+from jax import jit
 
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -12,11 +16,14 @@ class Circular(Vectorfield):
         dv/dx = -0.05,  dv/dy = 0
     """
 
-    def dv(self, x: float, y: float) -> float:
-        return (-0.05, 0)
+    @partial(jit, static_argnums=(0,))
+    def du(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
+        return jnp.asarray([-0.05]), jnp.asarray([0])
 
-    def du(self, x: float, y: float) -> float:
-        return (0, 0.05)
+    @partial(jit, static_argnums=(0,))
+    def dv(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
+        return jnp.asarray([0]), jnp.asarray([0.05])
 
-    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    @partial(jit, static_argnums=(0,))
+    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         return jnp.asarray([0.05 * (y + 1), 0.05 * (-x - 3)])

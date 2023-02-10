@@ -1,8 +1,10 @@
+from functools import partial
 from pathlib import Path
 from typing import Union
 
 import jax.numpy as jnp
 import pandas as pd
+from jax import jit
 
 from hybrid_routing.geometry.spherical import DEG2RAD
 from hybrid_routing.vectorfields.base import VectorfieldDiscrete
@@ -73,6 +75,7 @@ class VectorfieldReal(VectorfieldDiscrete):
         df_y = pd.read_csv(path / (name + "-lat.csv"), index_col=0)
         return cls(df_x, df_y, radians=radians)
 
+    @partial(jit, static_argnums=(0,))
     def is_land(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
         """Indicates the presence of land at a given point (x,y) on the grid.
 

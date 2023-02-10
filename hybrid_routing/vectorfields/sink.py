@@ -1,4 +1,8 @@
+from functools import partial
+from typing import Tuple
+
 import jax.numpy as jnp
+from jax import jit
 
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -13,11 +17,14 @@ class Sink(Vectorfield):
         dv/dx = 0      ,    dv/dy = -1/25
     """
 
-    def dv(self, x: float, y: float) -> float:
-        return (0, -1 / 25)
+    @partial(jit, static_argnums=(0,))
+    def dv(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
+        return jnp.asarray([0]), jnp.asarray([-1 / 25])
 
-    def du(self, x: float, y: float) -> float:
-        return (-1 / 25, 0)
+    @partial(jit, static_argnums=(0,))
+    def du(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
+        return jnp.asarray([-1 / 25]), jnp.asarray([0])
 
-    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    @partial(jit, static_argnums=(0,))
+    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         return jnp.asarray([-(x - 8) / 25, -(y - 8) / 25])

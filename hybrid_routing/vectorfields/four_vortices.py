@@ -1,12 +1,16 @@
+from functools import partial
 from typing import Iterable
 
 import jax.numpy as jnp
+from jax import jit
 
 from hybrid_routing.vectorfields.base import Vectorfield
 
 
+@jit
 def R(a: float, b: float, x: float, y: float) -> Iterable[float]:
-    """Coefficient subroutine for the coefficient used in the paper. Pair (a, b) gives a local vortex.
+    """Coefficient subroutine for the coefficient used in the paper. Pair (a, b) gives
+    a local vortex.
 
     Parameters
     ----------
@@ -33,7 +37,8 @@ class FourVortices(Vectorfield):
     """Vectorfield example demonstrated in Figure 2 in https://arxiv.org/pdf/2109.05559.pdf,
     implements Vectorfield class."""
 
-    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    @partial(jit, static_argnums=(0,))
+    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         field = 1.7 * (
             jnp.negative(R(2, 2, x, y))
             + jnp.negative(R(4, 4, x, y))

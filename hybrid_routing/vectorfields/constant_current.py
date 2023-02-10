@@ -1,4 +1,8 @@
+from functools import partial
+from typing import Tuple
+
 import jax.numpy as jnp
+from jax import jit
 
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -12,13 +16,16 @@ class ConstantCurrent(Vectorfield):
         dv/dx = 0,      dv/dy = 0
     """
 
-    def dv(self, x: float, y: float) -> float:
-        return (0, 0)
+    @partial(jit, static_argnums=(0,))
+    def dv(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
+        return jnp.asarray([0]), jnp.asarray([0])
 
-    def du(self, x: float, y: float) -> float:
-        return (0, 0)
+    @partial(jit, static_argnums=(0,))
+    def du(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
+        return jnp.asarray([0]), jnp.asarray([0])
 
-    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    @partial(jit, static_argnums=(0,))
+    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         u = jnp.full_like(x, 0.2)
         v = jnp.full_like(x, -0.2)
         return jnp.stack([u, v])

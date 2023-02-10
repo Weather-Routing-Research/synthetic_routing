@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from functools import partial
 from typing import Iterable, Tuple
 
 import jax.numpy as jnp
@@ -25,7 +26,6 @@ class Vectorfield(ABC):
     is_discrete: bool = False
 
     def __init__(self, spherical: bool = False):
-        self.get_current = jit(self._get_current)
         self._dv = jit(jacrev(self.get_current, argnums=1))
         self._du = jit(jacfwd(self.get_current, argnums=0))
         self.spherical = spherical
@@ -37,9 +37,10 @@ class Vectorfield(ABC):
             self.geometry = Euclidean()
 
     @abstractmethod
-    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         pass
 
+    @partial(jit, static_argnums=(0,))
     def get_current_rad(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
         """Takes the current values (u,v) at a given point (x,y) on the grid.
         Returns radians per second.
@@ -86,14 +87,17 @@ class Vectorfield(ABC):
         The value of dv/dx, dv/dy, du/dx, du/dy, with respect to the call.
     """
 
+    @partial(jit, static_argnums=(0,))
     def du(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
         out = jnp.asarray([self._du(x, y) for x, y in zip(x.ravel(), y.ravel())])
         return out[:, 0].reshape(x.shape), out[:, 1].reshape(x.shape)
 
+    @partial(jit, static_argnums=(0,))
     def dv(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
         out = jnp.asarray([self._dv(x, y) for x, y in zip(x.ravel(), y.ravel())])
         return out[:, 0].reshape(x.shape), out[:, 1].reshape(x.shape)
 
+    @partial(jit, static_argnums=(0,))
     def _ode_zermelo_euclidean(
         self,
         p: Iterable[float],
@@ -133,6 +137,7 @@ class Vectorfield(ABC):
 
         return [dxdt, dydt, dthetadt]
 
+    @partial(jit, static_argnums=(0,))
     def _ode_zermelo_spherical(
         self,
         p: Iterable[float],
@@ -214,6 +219,7 @@ class Vectorfield(ABC):
                 self, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max, step=step
             )
 
+    @partial(jit, static_argnums=(0,))
     def is_land(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
         """Just a placeholder function. Indicates that no point has land."""
         return jnp.full_like(x, False)
@@ -292,6 +298,7 @@ class VectorfieldDiscrete(Vectorfield):
         cls.is_discrete = True
         return cls
 
+    @partial(jit, static_argnums=(0,))
     def _weight_coordinates(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
         """Weights the influence of each coordinate of the grid at point (x,y)
         on the grid.
@@ -334,6 +341,7 @@ class VectorfieldDiscrete(Vectorfield):
         w = wx * wy  # (P, X, Y)
         return w
 
+    @partial(jit, static_argnums=(0,))
     def get_current(self, x: jnp.ndarray, y: jnp.ndarray) -> Tuple[jnp.ndarray]:
         """Takes the current values (u,v) at a given point (x,y) on the grid.
         Returns meter per second.

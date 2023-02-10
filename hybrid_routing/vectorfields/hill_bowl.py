@@ -1,4 +1,8 @@
+from functools import partial
+from typing import Iterable
+
 import jax.numpy as jnp
+from jax import jit
 
 from hybrid_routing.vectorfields.base import Vectorfield
 
@@ -12,10 +16,17 @@ class HillBowl(Vectorfield):
         dv/dx = 2 * x * cos(x^2 + y^2),  dv/dy = 2 * y * cos(x^2 + y^2)
     """
 
-    def _get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
+    @partial(jit, static_argnums=(0,))
+    def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
         return jnp.asarray([jnp.ones(x.shape), jnp.sin(x**2 + y**2)])
 
-    def _ode_zermelo_euclidean(self, p, t, vel=jnp.float16(1)):
+    @partial(jit, static_argnums=(0,))
+    def _ode_zermelo_euclidean(
+        self,
+        p: Iterable[float],
+        t: Iterable[float],
+        vel: jnp.float16 = jnp.float16(0.1),
+    ) -> Iterable[float]:
         x, y, theta = p
         vector_field = self.get_current(x, y)
         dxdt = vel * jnp.cos(theta) + vector_field[0]
