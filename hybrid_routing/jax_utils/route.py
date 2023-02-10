@@ -199,7 +199,7 @@ class Route:
             t[mask_neg] = jnp.nanmax(t)
 
         # Update route times
-        t = jnp.concatenate([[0], jnp.cumsum(t)])
+        t = jnp.concatenate([jnp.asarray([0]), jnp.cumsum(t)])
         if interp:
             # If we interpolated to x10 points, get the original ones
             self.t = jnp.interp(j, i, t)
