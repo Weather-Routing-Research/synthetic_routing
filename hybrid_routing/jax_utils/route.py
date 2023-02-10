@@ -162,7 +162,9 @@ class Route:
         v_cx = jnp.zeros(len(x) - 1)
         v_cy = jnp.zeros(len(y) - 1)
         for i in range(len(x) - 1):
-            v_cx[i], v_cy[i] = vf.get_current(x[i], y[i])
+            a, b = vf.get_current(x[i], y[i])
+            v_cx = v_cx.at[i].set(a)
+            v_cy = v_cy.at[i].set(b)
         # Angle and module of the velocity of vectorfield
         a_c, v_c = self.geometry.components_to_ang_mod(v_cx, v_cy)
         # Angle of the vectorfield w.r.t. the direction over ground
