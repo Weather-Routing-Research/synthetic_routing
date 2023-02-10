@@ -64,3 +64,21 @@ def test_real_vectorfield():
     u, v = vf.get_current(x, y)
     np.testing.assert_allclose(u, np.diag(vf.u), rtol=1e-4)
     np.testing.assert_allclose(v, np.diag(vf.v), rtol=1e-4)
+
+
+def test_land():
+    m = np.random.uniform(low=-5, high=5, size=(10, 10))
+    m[-2, -2] = np.nan  # In point (3, 3)
+    df = pd.DataFrame(
+        m,
+        index=np.arange(start=-5, stop=5, step=1),
+        columns=np.arange(start=-5, stop=5, step=1),
+    )
+    vf = VectorfieldReal(df, df, radians=False)
+
+    x = jnp.array([2, 2.5, 3, 3, 3, 3.5, 4])
+    y = jnp.array([2, 2.5, 2.5, 3, 3.5, 3.5, 4])
+
+    land = vf.is_land(x, y)
+    expect = jnp.array([False, True, True, True, True, True, False])
+    assert (land == expect).all()
