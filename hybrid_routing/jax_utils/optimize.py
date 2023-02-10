@@ -291,15 +291,10 @@ class Optimizer:
             )
 
     def _optimize_by_direction(self, p0: Tuple[float], pn: Tuple[float]) -> List[Route]:
-        x_start, y_start = p0
-        x_end, y_end = pn
-
         # Compute angle between first and last point
         cone_center = self.geometry.angle_p0_to_p1(p0, pn)
 
-        # Position now
-        x = x_start
-        y = y_start
+        pt = p0  # Position now
         t = 0  # Time now
 
         # Initialize the routes
@@ -308,8 +303,7 @@ class Optimizer:
             cone_center, self.angle_amplitude, self.num_angles
         )
         list_routes: List[Route] = [
-            Route(x_start, y_start, t, theta, geometry=self.geometry)
-            for theta in arr_theta
+            Route(p0[0], p0[1], t, theta, geometry=self.geometry) for theta in arr_theta
         ]
         # Initialize the best route as the middle one (avoids UnboundLocalError)
         route_best = deepcopy(list_routes[len(list_routes) // 2])
@@ -323,7 +317,7 @@ class Optimizer:
         idx_refine = 1  # Where the best segment start + 1
 
         # The loop continues until the algorithm reaches the end
-        dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
+        dist = self.geometry.dist_p0_to_p1(pt, pn)
         n_iter = 0  # Number of iterations
         max_iter = self.max_iter
 
@@ -346,7 +340,7 @@ class Optimizer:
                 # Compute angle between route and goal
                 # We keep routes which heading is inside search cone
                 theta_goal = self.geometry.angle_p0_to_p1(
-                    (route_new.x[-1], route_new.y[-1]), (x_end, y_end)
+                    (route_new.x[-1], route_new.y[-1]), pn
                 )
                 delta_theta = abs(route_new.theta[-1] - theta_goal)
                 cond_theta = delta_theta <= (self.angle_heading)
@@ -373,7 +367,7 @@ class Optimizer:
                     # the end of the best segment, using a cone centered
                     # around the direction to the goal
                     # Recompute the cone center using best route
-                    cone_center = self.geometry.angle_p0_to_p1((x, y), (x_end, y_end))
+                    cone_center = self.geometry.angle_p0_to_p1(pt, pn)
                     # Generate new arr_theta
                     arr_theta = compute_thetas_in_cone(
                         cone_center, self.angle_amplitude, self.num_angles
@@ -410,9 +404,9 @@ class Optimizer:
                 t = route_new.t[-1]
             else:
                 # The best route will be the one closest to our destination
-                idx_best = self.min_dist_p0_to_p1(list_routes, (x_end, y_end))
+                idx_best = self.min_dist_p0_to_p1(list_routes, pn)
                 route_best = list_routes[idx_best]
-                x, y = route_best.x[-1], route_best.y[-1]
+                pt = route_best.x[-1], route_best.y[-1]
                 t = max(route.t[-1] for route in list_routes)
 
             # Yield list of routes with best route in first position
@@ -421,7 +415,7 @@ class Optimizer:
             yield list_routes_yield
 
             # Update distance and number of iterations
-            dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
+            dist = self.geometry.dist_p0_to_p1(pt, pn)
             n_iter += 1
         else:
             # Message when loop finishes
