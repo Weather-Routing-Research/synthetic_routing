@@ -286,17 +286,25 @@ class VectorfieldDiscrete(Vectorfield):
         step: float = 1,
     ):
         # Copy all atributes of the original vectorfield into this one
-        cls.__dict__.update(vectorfield.__dict__)
+        cls.spherical = vectorfield.spherical
+        cls.ode_zermelo = vectorfield.ode_zermelo
+        cls.geometry = vectorfield.geometry
+        # Compute some other attributes
         cls.arr_x = jnp.arange(x_min, x_max, step)
         cls.arr_y = jnp.arange(y_min, y_max, step)
         mat_x, mat_y = jnp.meshgrid(cls.arr_x, cls.arr_y)
         u, v = vectorfield.get_current(mat_x, mat_y)
         cls.u, cls.v = u.T, v.T
+        cls.land = jnp.zeros(u.shape)
+        # Compute the average step between X and Y coordinates
+        # We are assuming this step is constant!
+        cls._dx = jnp.abs(jnp.mean(jnp.diff(cls.arr_x)))
+        cls._dy = jnp.abs(jnp.mean(jnp.diff(cls.arr_y)))
         # Define methods to get closest indexes
         cls.closest_idx = jnp.vectorize(lambda x: jnp.argmin(jnp.abs(cls.arr_x - x)))
         cls.closest_idy = jnp.vectorize(lambda y: jnp.argmin(jnp.abs(cls.arr_y - y)))
         cls.is_discrete = True
-        return cls
+        return cls()
 
     @partial(jit, static_argnums=(0,))
     def _weight_coordinates(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
@@ -409,6 +417,8 @@ class VectorfieldDiscrete(Vectorfield):
         if do_color:
             # Velocity module
             m = (self.u**2 + self.v**2) ** (1 / 2)
+            # Mask land
+            m = np.ma.masked_where(self.land == 1, m)
             plt.matshow(
                 m[jnp.ix_(idy, idx)],
                 origin="lower",
