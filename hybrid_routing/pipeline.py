@@ -116,7 +116,7 @@ class Pipeline:
         angle_amplitude : float, optional
             The search cone range in radians, by default pi
         angle_heading : float, optional
-            Maximum deviation allower when optimizing direction,
+            Maximum deviation allowed when optimizing direction,
             by default pi/2
         num_angles : int, optional
             Number of initial search angles, by default 20
