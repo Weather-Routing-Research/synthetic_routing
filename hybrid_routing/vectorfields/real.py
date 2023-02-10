@@ -40,7 +40,7 @@ class VectorfieldReal(VectorfieldDiscrete):
         v = jnp.asarray(df_y.values)
 
         # Land mask, change NaN to 0's
-        self.land = jnp.isnan(u) | jnp.isnan(v)
+        self.land = (jnp.isnan(u) | jnp.isnan(v)).astype(int)
         self.u = jnp.nan_to_num(u)
         self.v = jnp.nan_to_num(v)
 
