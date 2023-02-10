@@ -155,7 +155,12 @@ class Optimizer:
         return idx_best_point
 
     def solve_ivp(
-        self, x: jnp.array, y: jnp.array, theta: jnp.array, t: float = 0
+        self,
+        x: jnp.array,
+        y: jnp.array,
+        theta: jnp.array,
+        t: float = 0,
+        time_iter: float = 1,
     ) -> List[Route]:
         """Solve an initial value problem, given arrays of same length for
         x, y and theta (heading, w.r.t. x-axis)
@@ -182,12 +187,11 @@ class Optimizer:
             y,
             theta,
             time_start=t,
-            time_end=t + self.time_iter,
+            time_end=t + time_iter,
             time_step=self.time_step,
             vel=self.vel,
         )
 
-    # TODO: Ensure spherical compatibility
     def _optimize_by_closest(self, p0: Tuple[float], pn: Tuple[float]) -> List[Route]:
         """
         System of ODE is from Zermelo's Navigation Problem
@@ -223,34 +227,35 @@ class Optimizer:
             Returns a list with all paths generated within the search cone.
             The path that terminates closest to destination is on top.
         """
-        x_start, y_start = p0
-        x_end, y_end = pn
         # Compute angle between first and last point
         cone_center = self.geometry.angle_p0_to_p1(p0, pn)
 
-        # Position now
-        x = x_start
-        y = y_start
-        # Time now
-        t = 0
+        pt = p0  # Position now
+        t = 0  # Time now
 
         # Initialize route best
         route_best: Route = None
 
         # Distance and number of iterations
-        dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
+        dist = self.geometry.dist_p0_to_p1(pt, pn)
         n_iter = 0
         max_iter = self.max_iter
+        # Make a copy of these parameters to tune them in case the optimization
+        # does not converge
+        dist_min = self.dist_min
+        time_iter = self.time_iter
 
-        while (dist > self.dist_min) and (n_iter <= max_iter):
+        while (dist > dist_min) and (n_iter <= max_iter):
             # Get arrays of initial coordinates for these segments
-            arr_x = jnp.repeat(x, self.num_angles)
-            arr_y = jnp.repeat(y, self.num_angles)
+            arr_x = jnp.repeat(pt[0], self.num_angles)
+            arr_y = jnp.repeat(pt[1], self.num_angles)
             arr_theta = compute_thetas_in_cone(
                 cone_center, self.angle_amplitude, self.num_angles
             )
 
-            list_routes = self.solve_ivp(arr_x, arr_y, arr_theta, t=t)
+            list_routes = self.solve_ivp(
+                arr_x, arr_y, arr_theta, t=t, time_iter=time_iter
+            )
 
             # The routes outputted start at the closest point
             # We append those segments to the best route, if we have it
@@ -263,25 +268,38 @@ class Optimizer:
                     list_routes[idx] = route
 
             # Update the closest points and best route
-            x_old, y_old = x, y
-            idx_best = self.min_dist_p0_to_p1(list_routes, (x_end, y_end))
+            pt_1 = pt
+            idx_best = self.min_dist_p0_to_p1(list_routes, pn)
             route_best = deepcopy(list_routes[idx_best])
-            x, y = route_best.x[-1], route_best.y[-1]
+            pt = route_best.x[-1], route_best.y[-1]
             t = route_best.t[-1]
 
             # Recompute the cone center
-            cone_center = self.geometry.angle_p0_to_p1((x, y), (x_end, y_end))
+            cone_center = self.geometry.angle_p0_to_p1(pt, pn)
 
             # Move best route to first position
             list_routes.insert(0, list_routes.pop(idx_best))
             yield list_routes
 
-            # If the optimization does not progress, kill the algorithm
-            if x == x_old and y == y_old:
-                max_iter = n_iter
+            # If the optimization does not progress, that means all routes are
+            # getting over the goal. Decrease the iteration time or
+            # increase the minimum distance
+            if pt[0] == pt_1[0] and pt[1] == pt_1[1]:
+                if time_iter == self.time_step:
+                    dist_min *= 10
+                    print(
+                        "[WARN] Not converging! "
+                        f"Minimum distance increased to {dist_min}. "
+                    )
+                else:
+                    time_iter = min(self.time_step, time_iter / 2)
+                    print(
+                        "[WARN] Not converging! "
+                        f"Iteration time decreased to {time_iter}. "
+                    )
 
             # Update distance and number of iterations
-            dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
+            dist = self.geometry.dist_p0_to_p1(pt, pn)
             n_iter += 1
         else:
             # Message when loop finishes
@@ -319,16 +337,23 @@ class Optimizer:
         # The loop continues until the algorithm reaches the end
         dist = self.geometry.dist_p0_to_p1(pt, pn)
         n_iter = 0  # Number of iterations
+        n_iter_step = 0  # Number of iterations in current step
         max_iter = self.max_iter
+        # Make a copy of these parameters to tune them in case the optimization
+        # does not converge
+        dist_min = self.dist_min
+        time_iter = self.time_iter
 
-        while (dist > self.dist_min) and (n_iter <= max_iter):
+        while (dist > dist_min) and (n_iter <= max_iter):
             # Get arrays of initial coordinates for these segments
             arr_x = jnp.array([route.x[-1] for route in list_routes])
             arr_y = jnp.array([route.y[-1] for route in list_routes])
             arr_theta = jnp.array([route.theta[-1] for route in list_routes])
 
             # Compute the new route segments
-            list_segments = self.solve_ivp(arr_x, arr_y, arr_theta, t=t)
+            list_segments = self.solve_ivp(
+                arr_x, arr_y, arr_theta, t=t, time_iter=time_iter
+            )
 
             # Develop each route of our previous iteration,
             # following its current heading
@@ -362,6 +387,24 @@ class Optimizer:
             if len(list_stop) == len(list_routes):
                 # Change next step from exploitation <-> exploration
                 self.exploration = not self.exploration
+                if n_iter_step == 0:
+                    # If the last step had no iterations, that means all routes are
+                    # getting over the goal. Decrease the iteration time or
+                    # increase the minimum distance
+                    if time_iter == self.time_step:
+                        dist_min *= 10
+                        print(
+                            "[WARN] Not converging! "
+                            f"Minimum distance increased to {dist_min}. "
+                        )
+                    else:
+                        time_iter = min(self.time_step, time_iter / 2)
+                        print(
+                            "[WARN] Not converging! "
+                            f"Iteration time decreased to {time_iter}. "
+                        )
+                else:
+                    n_iter_step = 0
                 if self.exploration:
                     # Exploration step: New routes are generated starting from
                     # the end of the best segment, using a cone centered
@@ -408,6 +451,7 @@ class Optimizer:
                 route_best = list_routes[idx_best]
                 pt = route_best.x[-1], route_best.y[-1]
                 t = max(route.t[-1] for route in list_routes)
+                n_iter_step += 1  # Number of iterations in current step increases
 
             # Yield list of routes with best route in first position
             list_routes_yield = deepcopy(list_routes)
@@ -416,7 +460,7 @@ class Optimizer:
 
             # Update distance and number of iterations
             dist = self.geometry.dist_p0_to_p1(pt, pn)
-            n_iter += 1
+            n_iter += 1  # Total number of iterations increases
         else:
             # Message when loop finishes
             print(
