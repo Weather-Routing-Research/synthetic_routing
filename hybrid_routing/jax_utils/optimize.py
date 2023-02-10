@@ -292,7 +292,7 @@ class Optimizer:
                         f"Minimum distance increased to {dist_min}. "
                     )
                 else:
-                    time_iter = min(self.time_step, time_iter / 2)
+                    time_iter = max(self.time_step, time_iter / 2)
                     print(
                         "[WARN] Not converging! "
                         f"Iteration time decreased to {time_iter}. "
@@ -398,7 +398,7 @@ class Optimizer:
                             f"Minimum distance increased to {dist_min}. "
                         )
                     else:
-                        time_iter = min(self.time_step, time_iter / 2)
+                        time_iter = max(self.time_step, time_iter / 2)
                         print(
                             "[WARN] Not converging! "
                             f"Iteration time decreased to {time_iter}. "
