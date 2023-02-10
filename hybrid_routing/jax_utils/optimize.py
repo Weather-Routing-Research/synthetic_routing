@@ -415,10 +415,10 @@ class Optimizer:
                 x, y = route_best.x[-1], route_best.y[-1]
                 t = max(route.t[-1] for route in list_routes)
 
-                # Yield list of routes with best route in first position
-                list_routes_yield = deepcopy(list_routes)
-                list_routes_yield.insert(0, list_routes_yield.pop(idx_best))
-                yield list_routes_yield
+            # Yield list of routes with best route in first position
+            list_routes_yield = deepcopy(list_routes)
+            list_routes_yield.insert(0, list_routes_yield.pop(idx_best))
+            yield list_routes_yield
 
             # Update distance and number of iterations
             dist = self.geometry.dist_p0_to_p1((x, y), (x_end, y_end))
