@@ -18,11 +18,11 @@ class Circular(Vectorfield):
 
     @partial(jit, static_argnums=(0,))
     def du(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
-        return jnp.asarray([-0.05]), jnp.asarray([0])
+        return jnp.asarray([0]), jnp.asarray([0.05])
 
     @partial(jit, static_argnums=(0,))
     def dv(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
-        return jnp.asarray([0]), jnp.asarray([0.05])
+        return jnp.asarray([-0.05]), jnp.asarray([0])
 
     @partial(jit, static_argnums=(0,))
     def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
