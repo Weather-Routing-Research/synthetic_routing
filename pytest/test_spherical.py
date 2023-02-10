@@ -29,7 +29,7 @@ def test_dist_p0_to_p1(p0: Tuple[float], p1: Tuple[float], d: float):
         ((0, 0), (0, 10), np.pi / 2),
         ((0, 0), (10, 0), 0),
         ((-10, -10), (10, 10), np.pi / 4),
-        ((180, 0), (-180, 0), 0),
+        ((180, 0), (-180, 0), np.pi),
     ],
 )
 def test_angle_p0_to_p1(p0: Tuple[float], p1: Tuple[float], a: float):
