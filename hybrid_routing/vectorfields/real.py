@@ -92,5 +92,5 @@ class VectorfieldReal(VectorfieldDiscrete):
             Boolean array
         """
         w = self._weight_coordinates(x, y)
-        b: jnp.ndarray = (self.land * w).sum(axis=(-2, -1))  # (P, )
-        return b.at[b > 0].set(1).astype(bool)
+        b = (self.land * w).sum(axis=(-2, -1))  # (P, )
+        return jnp.where(b > 0, True, False)
