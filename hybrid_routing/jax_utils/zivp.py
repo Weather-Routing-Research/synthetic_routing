@@ -3,10 +3,9 @@ from typing import List
 import jax.numpy as jnp
 from jax.experimental.ode import odeint
 
+# from scipy.integrate import odeint
 from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.vectorfields.base import Vectorfield
-
-# from scipy.integrate import odeint
 
 
 def solve_ode_zermelo(
@@ -49,19 +48,18 @@ def solve_ode_zermelo(
     List[Route]
         Returns a list with all paths generated within the search cone.
     """
-    print("This")
     # Define the time steps
     t = jnp.arange(time_start, time_end + time_step, time_step)
 
     list_routes: List[Route] = [None] * len(thetas)
     for idx, theta in enumerate(thetas):
         p = [x[idx], y[idx], theta]
-        sol = odeint(vectorfield.ode_zermelo, p, t, args=(vel,))
+        sol = odeint(vectorfield.ode_zermelo, p, t, vel)
         list_routes[idx] = Route(
-            x=sol[:, 0],
-            y=sol[:, 1],
+            x=sol[0],
+            y=sol[1],
             t=t,
-            theta=sol[:, 2],
+            theta=sol[2],
             geometry=vectorfield.geometry,
         )
 
