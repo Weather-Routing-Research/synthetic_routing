@@ -56,8 +56,8 @@ def solve_ode_zermelo(
         p = [x[idx], y[idx], theta]
         sol = odeint(vectorfield.ode_zermelo, p, t, vel)
         list_routes[idx] = Route(
-            x=sol[0],
-            y=sol[1],
+            x=sol[0].astype(float),
+            y=sol[1].astype(float),
             t=t,
             theta=sol[2],
             geometry=vectorfield.geometry,
