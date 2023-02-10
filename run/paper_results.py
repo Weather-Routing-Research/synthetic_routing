@@ -4,14 +4,18 @@ Generate all the figures used in the paper. Results section
 
 import json
 from pathlib import Path
+from threading import Thread
+from typing import List
 
 import matplotlib.pyplot as plt
 
 from hybrid_routing.pipeline import Pipeline
 
+max_thread = 6  # Maximum number of threads allowed
+
 list_pipe = [
-    Pipeline(p0=(3, 2), pn=(-7, 2), key="Circular"),
-    Pipeline(p0=(0, 0), pn=(6, 2), key="FourVortices"),  # Ferraro et al.
+    dict(p0=(3, 2), pn=(-7, 2), key="Circular"),
+    dict(p0=(0, 0), pn=(6, 2), key="FourVortices"),  # Ferraro et al.
 ]
 list_plot = [
     {"extent": (-8, 4, -4, 3), "textbox_pos": (0, -3.5), "textbox_align": "bottom"},
@@ -31,7 +35,11 @@ if not path_out.exists():
 Run pipelines
 """
 
-for idx, pipe in enumerate(list_pipe):
+
+def run_pipeline(dict_pipe: dict, dict_plot: dict):
+    print(f"Initializing: {dict_pipe['key']}")
+    pipe = Pipeline(**dict_pipe)
+
     pipe.solve_zivp(vel=1, time_iter=0.5, time_step=0.025)
     pipe.solve_dnj(num_iter=1000, time_step=0.01)
 
@@ -43,11 +51,7 @@ for idx, pipe in enumerate(list_pipe):
 
     # Store plot
     plt.figure(dpi=120)
-    # Define plot extent
-    xmin, xmax = pipe.route_zivp.x.min(), pipe.route_zivp.x.max()
-    ymin, ymax = pipe.route_zivp.y.min(), pipe.route_zivp.y.max()
-    extent = (xmin - 1, xmax + 1, ymin - 1, ymax + 1)
-    pipe.plot(**list_plot[idx])
+    pipe.plot(**dict_plot)
     plt.savefig(file.with_suffix(".png"))
     plt.close()
 
@@ -56,3 +60,18 @@ for idx, pipe in enumerate(list_pipe):
         json.dump(dict_results, outfile)
 
     print(f"Done {k} vectorfield")
+
+# Maximum number of threads cannot be higher than number of processes
+max_thread = min(max_thread, len(list_pipe))
+
+# Initialize list of threads and index
+threads: List[Thread] = [None for i in range(max_thread)]
+n_thread = 0
+for idx, dict_pipe in enumerate(list_pipe):
+    threads[n_thread] = Thread(target=run_pipeline, args=(dict_pipe, list_plot[idx]))
+    threads[n_thread].start()
+    n_thread += 1
+    # If maximum index is reached, wait for all threads to finish
+    if n_thread == max_thread:
+        [t.join() for t in threads]
+        n_thread = 0
