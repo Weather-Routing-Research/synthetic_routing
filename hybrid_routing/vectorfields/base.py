@@ -370,8 +370,8 @@ class VectorfieldDiscrete(Vectorfield):
 
         # Use the weights to compute the velocity component
         # relative to those points
-        u = (self.u * w).sum(axis=(-2, -1))  # (P, )
-        v = (self.v * w).sum(axis=(-2, -1))  # (P, )
+        u = (self.u.T * w).sum(axis=(-2, -1))  # (P, )
+        v = (self.v.T * w).sum(axis=(-2, -1))  # (P, )
 
         return u, v
 
