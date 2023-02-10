@@ -59,7 +59,7 @@ def run_pipeline(dict_pipe: dict, vel: float):
     pipe.solve_zivp(
         vel=vel,
         time_iter=3600,
-        time_step=360,
+        time_step=600,  # Do not go below 10 min (600 s)
         dist_min=10000,
         num_angles=20,
         angle_amplitude=np.pi / 2,
