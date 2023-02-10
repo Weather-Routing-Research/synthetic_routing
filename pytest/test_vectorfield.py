@@ -44,12 +44,17 @@ def test_ode_zermelo(x: float, theta: float, vel: float):
 
 
 def test_real_vectorfield():
-    df = pd.DataFrame(
-        np.random.uniform(low=-5, high=5, size=(10, 10)),
+    u = pd.DataFrame(
+        np.random.uniform(low=0, high=5, size=(10, 10)),
         index=np.arange(start=-5, stop=5, step=1),
         columns=np.arange(start=-5, stop=5, step=1),
     )
-    vf = VectorfieldReal(df, df, radians=False)
+    v = pd.DataFrame(
+        np.random.uniform(low=-5, high=0, size=(10, 10)),
+        index=np.arange(start=-5, stop=5, step=1),
+        columns=np.arange(start=-5, stop=5, step=1),
+    )
+    vf = VectorfieldReal(u, v, radians=False)
 
     # Test one point
     x = jnp.array(vf.arr_x[5])
