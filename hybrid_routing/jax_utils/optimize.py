@@ -379,7 +379,7 @@ class Optimizer:
                 delta_theta = abs(route_new.theta[-1] - theta_goal)
                 cond_theta = delta_theta <= (self.angle_heading)
                 # Check if the route crosses land. If not, we keep it
-                is_land = self.vectorfield.is_land(route_new.x[1:], route_new.y[1:])
+                is_land = self.vectorfield.is_land(route_new.x, route_new.y)
                 cond_land = not is_land.any()
                 # Check both conditions
                 if cond_theta and cond_land:
