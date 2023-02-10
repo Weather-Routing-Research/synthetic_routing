@@ -7,6 +7,7 @@ from pathlib import Path
 from threading import Thread
 from typing import List
 
+import matplotlib
 import matplotlib.pyplot as plt
 
 from hybrid_routing.pipeline import Pipeline
@@ -21,6 +22,9 @@ list_plot = [
     {"extent": (-8, 4, -4, 3), "textbox_pos": (0, -3.5), "textbox_align": "bottom"},
     {"extent": (-1, 7, -1, 6), "textbox_pos": (0, 5.5), "textbox_align": "top"},
 ]
+
+# https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
+matplotlib.use("Agg")
 
 """
 Create output folder
@@ -61,6 +65,7 @@ def run_pipeline(dict_pipe: dict, dict_plot: dict):
 
     print(f"Done {k} vectorfield")
 
+
 # Maximum number of threads cannot be higher than number of processes
 max_thread = min(max_thread, len(list_pipe))
 
@@ -73,5 +78,7 @@ for idx, dict_pipe in enumerate(list_pipe):
     n_thread += 1
     # If maximum index is reached, wait for all threads to finish
     if n_thread == max_thread:
+        [t.join() for t in threads]
+        n_thread = 0
         [t.join() for t in threads]
         n_thread = 0

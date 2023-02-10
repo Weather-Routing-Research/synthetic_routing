@@ -8,6 +8,7 @@ from pathlib import Path
 from threading import Thread
 from typing import List
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -32,6 +33,9 @@ list_pipes = [
     ),
 ]
 list_vel = [10, 6, 3]
+
+# https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
+matplotlib.use("Agg")
 
 """
 Create output folder
@@ -97,4 +101,5 @@ for dict_pipe in list_pipes:
         # If maximum index is reached, wait for all threads to finish
         if n_thread == max_thread:
             [t.join() for t in threads]
+            n_thread = 0
             n_thread = 0
