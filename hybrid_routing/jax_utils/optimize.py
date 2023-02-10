@@ -130,7 +130,9 @@ class Optimizer:
             "method": self.method,
         }
 
-    def min_dist_p0_to_p1(self, list_routes: List[Route], pt_goal: Tuple) -> int:
+    def min_dist_p0_to_p1(
+        self, list_routes: List[Route], pt_goal: Tuple, skip: Optional[List[int]] = None
+    ) -> int:
         """Out of a list of routes, returns the index of the route the ends
         at the minimum distance to the goal.
 
@@ -138,8 +140,10 @@ class Optimizer:
         ----------
         list_routes : List[jnp.array]
             List of routes, defined by (x, y, theta)
-        pt_goal : _type_
+        pt_goal : Tuple
             Goal point, defined by (x, y)
+        skip : List[int], optional
+            If given, skip these indices
 
         Returns
         -------
@@ -147,7 +151,10 @@ class Optimizer:
             Index of the route that ends at the minimum distance to the goal.
         """
         min_dist = jnp.inf
+        skip = [] if skip is None else skip
         for idx, route in enumerate(list_routes):
+            if idx in skip:
+                continue
             dist = self.geometry.dist_p0_to_p1((route.x[-1], route.y[-1]), pt_goal)
             if dist < min_dist:
                 min_dist = dist
@@ -192,6 +199,7 @@ class Optimizer:
             vel=self.vel,
         )
 
+    # TODO: Add land condition
     def _optimize_by_closest(self, p0: Tuple[float], pn: Tuple[float]) -> List[Route]:
         """
         System of ODE is from Zermelo's Navigation Problem
@@ -328,6 +336,7 @@ class Optimizer:
 
         # Initialize list of routes to stop (outside of angle threshold)
         list_stop: List[int] = []
+        list_land: List[int] = []
         # Define whether the next step is exploitation or exploration, and the
         # exploitation index
         # We start in the exploration step, so next step is exploitation
@@ -382,6 +391,10 @@ class Optimizer:
                     )
                 else:
                     list_stop.append(idx)
+                    # If the route has been stopped for reaching land,
+                    # add its index in the land list
+                    if not cond_land:
+                        list_land.append(idx)
 
             # If all routes have been stopped, generate new ones
             if len(list_stop) == len(list_routes):
@@ -438,6 +451,7 @@ class Optimizer:
                 # Reinitialize route lists
                 list_routes: List[Route] = []
                 list_stop: List[int] = []
+                list_land: List[int] = []
                 # Fill new list of routes
                 for theta in arr_theta:
                     route_new.theta = route_new.theta.at[-1].set(theta)
@@ -447,7 +461,8 @@ class Optimizer:
                 t = route_new.t[-1]
             else:
                 # The best route will be the one closest to our destination
-                idx_best = self.min_dist_p0_to_p1(list_routes, pn)
+                # and does not traverse land
+                idx_best = self.min_dist_p0_to_p1(list_routes, pn, skip=list_land)
                 route_best = list_routes[idx_best]
                 pt = route_best.x[-1], route_best.y[-1]
                 t = max(route.t[-1] for route in list_routes)
