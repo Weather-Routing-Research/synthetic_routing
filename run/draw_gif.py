@@ -160,7 +160,7 @@ def main(
         plot_routes_and_save(
             list_routes=[list_routes[0]],
             fout=path_img / f"{idx:03d}.png",
-            title="ZIVP (result)",
+            title="DNJ (result)",
             color=color,
         )
         idx += 1
