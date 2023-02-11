@@ -64,7 +64,7 @@ def main(
     title += " Runge-Kutta" if use_rk else " ODEINT"
     title += " " + optimizer.method
 
-    color = "white" if do_color else "green"
+    color = "orange" if do_color else "green"
 
     # Build folder with images
     path_img = Path("img_optim")
