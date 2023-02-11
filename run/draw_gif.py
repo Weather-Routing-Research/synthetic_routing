@@ -142,7 +142,7 @@ def main(
     # SMOOTHING DNJ
     ####################################################################################
 
-    dnj = DNJ(vectorfield, time_step=time_step, optimize_for="fuel")
+    dnj = DNJ(vectorfield, time_step=time_iter, optimize_for="fuel")
 
     for _ in range(20):
         route = list_routes[0]
