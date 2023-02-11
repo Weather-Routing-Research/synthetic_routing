@@ -141,9 +141,9 @@ class Route:
         self.x = jnp.interp(i, j, self.x)
         self.y = jnp.interp(i, j, self.y)
         self.theta = jnp.interp(i, j, self.theta)
-        self.dist = self.geometry.dist_between_coords(self.x, self.y)
+        self.d = self.geometry.dist_between_coords(self.x, self.y)
         if vel:
-            self.t = self.dist / vel + self.t[0]
+            self.t = self.d / vel + self.t[0]
         else:
             self.t = jnp.interp(i, j, self.t)
 
