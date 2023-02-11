@@ -85,7 +85,7 @@ class Pipeline:
         else:
             self.vel = vel
         # Recompute times
-        route.recompute_times(vel, self.vectorfield, interp=False)
+        route.recompute_times(vel, self.vectorfield)
         # Update route and optimizer
         self.route_zivp = route
         self.optimizer = Optimizer(self.vectorfield, vel=self.vel)
@@ -102,6 +102,7 @@ class Pipeline:
         max_iter: int = 2000,
         use_rk: bool = True,
         method: str = "direction",
+        interp: Optional[int] = None,
     ):
         """Solve the Zermelo Initial Value Problem
 
@@ -162,14 +163,16 @@ class Pipeline:
         route: Route = list_routes[0]
         route.append_point_end(p=(self.xn, self.yn), vel=self.optimizer.vel)
 
+        # Interpolate to `interp` points
+        if interp:
+            route.interpolate(interp, vel=vel)
+
         # Store parameters
         self.route_zivp = deepcopy(route)
         self.vel = vel
 
         # Recompute times
-        self.route_zivp.recompute_times(
-            self.optimizer.vel, self.vectorfield, interp=False
-        )
+        self.route_zivp.recompute_times(self.optimizer.vel, self.vectorfield)
 
     def solve_dnj(
         self,
@@ -207,7 +210,7 @@ class Pipeline:
             print(f"  DNJ step {n} out of 5")
         # Last DNJ run
         self.dnj.optimize_route(route, num_iter=num_iter)
-        route.recompute_times(self.vel, self.vectorfield, interp=False)
+        route.recompute_times(self.vel, self.vectorfield)
         self.route_dnj = deepcopy(route)
 
     def to_dict(self) -> Dict:

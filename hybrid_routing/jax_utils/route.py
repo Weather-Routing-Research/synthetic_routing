@@ -134,7 +134,20 @@ class Route:
         t = dist / vel + self.t[-1]
         self.append_points(p[0], p[1], t)
 
-    def recompute_times(self, vel: float, vf: Vectorfield, interp: bool = True):
+    def interpolate(self, n: int, vel: float = None):
+        """Interpolate route to `n` points"""
+        i = jnp.linspace(0, len(self), num=n)
+        j = jnp.linspace(0, len(self), num=len(self))
+        self.x = jnp.interp(i, j, self.x)
+        self.y = jnp.interp(i, j, self.y)
+        self.theta = jnp.interp(i, j, self.theta)
+        self.dist = self.geometry.dist_between_coords(self.x, self.y)
+        if vel:
+            self.t = self.dist / vel + self.t[0]
+        else:
+            self.t = jnp.interp(i, j, self.t)
+
+    def recompute_times(self, vel: float, vf: Vectorfield, interp: int = None):
         """Given a vessel velocity and a vectorfield, recompute the
         times for each coordinate contained in the route
 
@@ -145,16 +158,10 @@ class Route:
         vf : Vectorfield
             Vectorfield
         interp : bool, optional
-            Interpolate route points to x10 more before recomputing times.
+            Interpolate route points to `n` more before recomputing times.
             This should improve the accuracy, by default True
         """
         x, y = self.x, self.y
-        if interp:
-            # Interpolate route to x10 points to improve the precision
-            i = jnp.linspace(0, len(x), num=10 * len(x))
-            j = jnp.linspace(0, len(x), num=len(x))
-            x = jnp.interp(i, j, x)
-            y = jnp.interp(i, j, y)
         # Angle over ground between points
         a_g = self.geometry.ang_between_coords(x, y)
         # Componentes of the velocity of vectorfield
@@ -199,9 +206,4 @@ class Route:
             t[mask_neg] = jnp.nanmax(t)
 
         # Update route times
-        t = jnp.concatenate([jnp.asarray([0]), jnp.cumsum(t)])
-        if interp:
-            # If we interpolated to x10 points, get the original ones
-            self.t = jnp.interp(j, i, t)
-        else:
-            self.t = t
+        self.t = jnp.concatenate([jnp.asarray([0]), jnp.cumsum(t)])
