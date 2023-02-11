@@ -58,14 +58,15 @@ def run_pipeline(dict_pipe: dict, vel: float):
 
     pipe.solve_zivp(
         vel=vel,
-        time_iter=3600,
+        time_iter=3600,  # 1 hour (3600 s)
         time_step=600,  # Do not go below 10 min (600 s)
         dist_min=10000,
-        num_angles=20,
+        num_angles=40,
         angle_amplitude=np.pi / 2,
         angle_heading=np.pi / 4,
+        interp=200,
     )
-    pipe.solve_dnj(num_iter=5, time_step=3600)
+    pipe.solve_dnj(num_iter=500, time_step=3600)
 
     # Store in dictionary
     k = pipe.key.lower().replace(" ", "-")
