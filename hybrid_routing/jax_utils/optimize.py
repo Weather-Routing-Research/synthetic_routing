@@ -388,16 +388,19 @@ class Optimizer:
                         t=route_new.t[1:],
                         theta=route_new.theta[1:],
                     )
-                else:
-                    list_stop.append(idx)
+                elif not cond_land:
                     # If the route has been stopped for reaching land,
                     # cut the last 10% of it
-                    if not cond_land:
-                        idx = max(1, int(9 * len(route) / 10))
-                        route.x = route.x[:idx]
-                        route.y = route.y[:idx]
-                        route.t = route.t[:idx]
-                        route.theta = route.theta[:idx]
+                    icut = max(1, int(9 * len(route) / 10))
+                    route.x = route.x[:icut]
+                    route.y = route.y[:icut]
+                    route.t = route.t[:icut]
+                    route.theta = route.theta[:icut]
+                    # Add the route to the stopped list
+                    list_stop.append(idx)
+                else:
+                    # Add the route to the stopped list
+                    list_stop.append(idx)
 
             # If all routes have been stopped, generate new ones
             if len(list_stop) == len(list_routes):
