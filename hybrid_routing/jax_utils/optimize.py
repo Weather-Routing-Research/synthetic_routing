@@ -336,7 +336,6 @@ class Optimizer:
 
         # Initialize list of routes to stop (outside of angle threshold)
         list_stop: List[int] = []
-        list_land: List[int] = []
         # Define whether the next step is exploitation or exploration, and the
         # exploitation index
         # We start in the exploration step, so next step is exploitation
@@ -392,9 +391,13 @@ class Optimizer:
                 else:
                     list_stop.append(idx)
                     # If the route has been stopped for reaching land,
-                    # add its index in the land list
+                    # cut the last 10% of it
                     if not cond_land:
-                        list_land.append(idx)
+                        idx = max(1, int(9 * len(route) / 10))
+                        route.x = route.x[:idx]
+                        route.y = route.y[:idx]
+                        route.t = route.t[:idx]
+                        route.theta = route.theta[:idx]
 
             # If all routes have been stopped, generate new ones
             if len(list_stop) == len(list_routes):
@@ -451,7 +454,6 @@ class Optimizer:
                 # Reinitialize route lists
                 list_routes: List[Route] = []
                 list_stop: List[int] = []
-                list_land: List[int] = []
                 # Fill new list of routes
                 for theta in arr_theta:
                     route_new.theta = route_new.theta.at[-1].set(theta)
@@ -462,7 +464,7 @@ class Optimizer:
             else:
                 # The best route will be the one closest to our destination
                 # and does not traverse land
-                idx_best = self.min_dist_p0_to_p1(list_routes, pn, skip=list_land)
+                idx_best = self.min_dist_p0_to_p1(list_routes, pn)
                 route_best = list_routes[idx_best]
                 pt = route_best.x[-1], route_best.y[-1]
                 t = max(route.t[-1] for route in list_routes)
