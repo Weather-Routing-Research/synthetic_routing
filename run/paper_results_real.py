@@ -10,8 +10,8 @@ from typing import List
 
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
 
+from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.pipeline import Pipeline
 
 max_thread = 6  # Maximum number of threads allowed
@@ -62,8 +62,8 @@ def run_pipeline(dict_pipe: dict, vel: float):
         time_step=600,  # Do not go below 10 min (600 s)
         dist_min=10000,
         num_angles=40,
-        angle_amplitude=np.pi / 2,
-        angle_heading=np.pi / 4,
+        angle_amplitude=120 * DEG2RAD,
+        angle_heading=60 * DEG2RAD,
         interp=200,
     )
     pipe.solve_dnj(num_iter=500, time_step=3600)
