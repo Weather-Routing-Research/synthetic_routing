@@ -46,7 +46,7 @@ def main(
     ####################################################################################
 
     # Import vectorfield
-    if vf == "Real":
+    if vf.lower() == "real":
         vectorfield = VectorfieldReal.from_folder("./data", "real-land", radians=True)
         q0 = (43.49 * DEG2RAD, -1.66 * DEG2RAD)
         q1 = (98.14 * DEG2RAD, 10.21 * DEG2RAD)
