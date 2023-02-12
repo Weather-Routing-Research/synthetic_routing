@@ -7,7 +7,7 @@ import imageio.v2 as imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import typer
-
+from typing import Optional
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.jax_utils import DNJ, Optimizer, Route
 from hybrid_routing.vectorfields import VectorfieldReal
@@ -25,6 +25,7 @@ def main(
     num_angles: int = 20,
     vel: float = 1,
     dist_min: float = 0.1,
+    time_dnj: Optional[float] = None,
     do_color: bool = False,
     path_out: str = "output/",
 ):
@@ -118,7 +119,7 @@ def main(
     idx = 0
     # Generate one plot every 10 iterations
     for list_routes in optimizer.optimize_route(q0, q1):
-        if idx % 10 == 0:
+        if idx % 5 == 0:
             n = "exploration" if optimizer.exploration else "exploitation"
             plot_routes_and_save(
                 list_routes=list_routes,
@@ -142,7 +143,8 @@ def main(
     # SMOOTHING DNJ
     ####################################################################################
 
-    dnj = DNJ(vectorfield, time_step=time_iter, optimize_for="fuel")
+    time_dnj = time_iter if time_dnj is None else time_dnj
+    dnj = DNJ(vectorfield, time_step=time_dnj, optimize_for="fuel")
 
     for n in range(40):
         route = list_routes[0]
