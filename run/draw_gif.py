@@ -144,13 +144,13 @@ def main(
 
     dnj = DNJ(vectorfield, time_step=time_iter, optimize_for="fuel")
 
-    for _ in range(20):
+    for n in range(40):
         route = list_routes[0]
-        dnj.optimize_route(route, num_iter=50)
+        dnj.optimize_route(route, num_iter=200)
         plot_routes_and_save(
             list_routes=[route],
             fout=path_img / f"{idx:03d}.png",
-            title="DNJ",
+            title=f"DNJ ({int(n * 200)} steps)",
             color=color,
         )
         idx += 1
@@ -174,7 +174,7 @@ def main(
     if not path_out.exists():
         path_out.mkdir()
     # Convert images to gif and delete images
-    imageio.mimsave(path_out / "optimizer.gif", images)
+    imageio.mimsave(path_out / f"{vf}_{vel:2.0f}.gif", images)
     shutil.rmtree(path_img)
 
 
