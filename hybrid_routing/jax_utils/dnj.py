@@ -21,6 +21,23 @@ class DNJ:
         time_step: float = 0.1,
         optimize_for: str = "fuel",
     ):
+        """Initialize the DNJ algorithm
+
+        Parameters
+        ----------
+        vectorfield : Vectorfield
+            Vector field where we are optimizing the route
+        time_step : float, optional
+            Time step between points. For the method to work properly,
+            must be the same as the route, by default 0.1
+        optimize_for : str, optional
+            Optimization target, either "fuel" or "time", by default "fuel"
+
+        Raises
+        ------
+        ValueError
+            When `optimize_for` is not valid
+        """
         self.vectorfield = vectorfield
         self.time_step = time_step
         self.optimize_for = optimize_for
