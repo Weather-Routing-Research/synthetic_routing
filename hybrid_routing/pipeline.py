@@ -196,7 +196,7 @@ class Pipeline:
         if self.route_zivp is None:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
         # Apply DNJ
-        time_step = np.mean(np.diff(self.route_zivp.t))
+        time_step = float(np.mean(np.diff(self.route_zivp.t)))
         self.dnj = DNJ(self.vectorfield, time_step=time_step, optimize_for=optimize_for)
         # Apply DNJ in loop
         num_iter = num_iter // 5
