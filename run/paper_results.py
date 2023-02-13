@@ -80,5 +80,3 @@ for idx, dict_pipe in enumerate(list_pipe):
     if n_thread == max_thread:
         [t.join() for t in threads]
         n_thread = 0
-        [t.join() for t in threads]
-        n_thread = 0

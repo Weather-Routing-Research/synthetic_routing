@@ -103,4 +103,3 @@ for dict_pipe in list_pipes:
         if n_thread == max_thread:
             [t.join() for t in threads]
             n_thread = 0
-            n_thread = 0
