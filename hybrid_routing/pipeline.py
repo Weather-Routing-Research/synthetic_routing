@@ -154,10 +154,10 @@ class Pipeline:
             (self.x0, self.y0), (self.xn, self.yn)
         ):
             route = list_routes[0]
-            print(
-                "  (x, y, t) = "
-                f"({route.x[-1]:.2f}, {route.y[-1]:.2f}, {route.t[-1]:.0f})"
-            )
+            # print(
+            #     "  (x, y, t) = "
+            #     f"({route.x[-1]:.2f}, {route.y[-1]:.2f}, {route.t[-1]:.0f})"
+            # )
 
         # Take the best route
         route: Route = list_routes[0]
