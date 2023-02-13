@@ -99,7 +99,7 @@ class DNJ:
 
     def asdict(self) -> Dict:
         return {
-            "time_step": self.time_step,
+            "time_step": float(self.time_step),
             "optimize_for": self.optimize_for,
         }
 
