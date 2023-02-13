@@ -12,7 +12,6 @@ from hybrid_routing.pipeline import Pipeline
 def main(
     path_json: str,
     path_out: Optional[str] = None,
-    time_step: float = 3600,
     num_iter: int = 2000,
 ):
     path_json: Path = Path(path_json)
@@ -61,7 +60,7 @@ def main(
         )
         pipe.add_route(route, vel=dict_json["vel"])
         print(f"\nDNJ redo, {num_iter} iterations")
-        pipe.solve_dnj(num_iter=num_iter, time_step=time_step, optimize_for="time")
+        pipe.solve_dnj(num_iter=num_iter, optimize_for="time")
 
         route_dnj = pipe.route_dnj
         print(f"  Time (h): {route_dnj.t[-1] / 3600:.1f}")
