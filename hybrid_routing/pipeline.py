@@ -207,7 +207,7 @@ class Pipeline:
         for n in range(4):
             self.dnj.optimize_route(route, num_iter=num_iter)
             self._routes_dnj[n] = deepcopy(route)
-            print(f"  DNJ step {n} out of 5")
+            print(f"  DNJ step {n+1} out of 5")
         # Last DNJ run
         self.dnj.optimize_route(route, num_iter=num_iter)
         route.recompute_times(self.vel, self.vectorfield)
