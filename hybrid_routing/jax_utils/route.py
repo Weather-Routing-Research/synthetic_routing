@@ -175,14 +175,15 @@ class Route:
         a_cg = a_c - a_g
         # Components of the vectorfield w.r.t. the direction over ground
         v_cg_para, v_cg_perp = self.geometry.ang_mod_to_components(a_cg, v_c)
-        # The perpendicular component of the vessel velocity must compensate the vectorfield
+        # The perpendicular component of the vessel velocity must compensate the
+        # vector field
         v_vg_perp = -v_cg_perp
         # Component of the vessel velocity parallel w.r.t. the direction over ground
         v_vg_para = jnp.sqrt(jnp.power(vel, 2) - jnp.power(v_vg_perp, 2))
         # Velocity over ground is the sum of vessel and vectorfield parallel components
         v_g = v_vg_para + v_cg_para
         # Time is distance divided by velocity over ground
-        t = jnp.divide(self.d, v_g)
+        t: jnp.ndarray = jnp.divide(self.d, v_g)
         # Identify NaN and negative values
         mask_nan = jnp.isnan(t)
         mask_neg = t < 0
@@ -192,7 +193,7 @@ class Route:
                 f"out of {len(t)} points. Consider raising vessel velocity over {vel}."
                 " NaN values were changed to max."
             )
-            t[mask_nan] = jnp.nanmax(t)
+            t = t.at[mask_nan].set(jnp.nanmax(t))
         if mask_neg.any():
             tneg = t[t < 0]
             print(
@@ -200,7 +201,7 @@ class Route:
                 f" Worst is {min(tneg)}. Consider raising vessel velocity over {vel}."
                 " Time values lower than 0 were changed to max."
             )
-            t[mask_neg] = jnp.nanmax(t)
+            t = t.at[mask_neg].set(jnp.nanmax(t))
 
         # Update route times
         self.t = jnp.concatenate([jnp.asarray([0]), jnp.cumsum(t)])
