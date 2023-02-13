@@ -309,7 +309,7 @@ class Pipeline:
 
         if self.si_units:
             p0 = (self.x0 / DEG2RAD, self.y0 / DEG2RAD)
-            pn = (self.x0 / DEG2RAD, self.yn / DEG2RAD)
+            pn = (self.xn / DEG2RAD, self.yn / DEG2RAD)
         else:
             p0 = (self.x0, self.y0)
             pn = (self.xn, self.yn)
