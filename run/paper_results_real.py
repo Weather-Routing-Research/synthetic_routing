@@ -66,7 +66,7 @@ def run_pipeline(dict_pipe: dict, vel: float):
         angle_heading=60 * DEG2RAD,
         interp=200,
     )
-    pipe.solve_dnj(num_iter=500, time_step=3600)
+    pipe.solve_dnj(num_iter=500)
 
     # Store in dictionary
     k = pipe.key.lower().replace(" ", "-")

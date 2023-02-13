@@ -45,7 +45,7 @@ def run_pipeline(dict_pipe: dict, dict_plot: dict):
     pipe = Pipeline(**dict_pipe)
 
     pipe.solve_zivp(vel=1, time_iter=0.5, time_step=0.025, interp=200)
-    pipe.solve_dnj(num_iter=1000, time_step=0.01)
+    pipe.solve_dnj(num_iter=10000, optimize_for="time")
 
     k = pipe.key.lower().replace(" ", "-")
     dict_results = pipe.to_dict()

@@ -177,7 +177,6 @@ class Pipeline:
     def solve_dnj(
         self,
         num_iter: int = 5,
-        time_step: float = 0.01,
         optimize_for: str = "time",
     ):
         """Solve the Discrete Newton-Jacobi, using the route from ZIVP
@@ -186,8 +185,6 @@ class Pipeline:
         ----------
         num_iter : int, optional
             Number of DNJ iterations, by default 5
-        time_step : float, optional
-            Time step, by default 0.01
         optimize_for : str, optional
             Optimization criteria, by default "time"
 
@@ -199,6 +196,7 @@ class Pipeline:
         if self.route_zivp is None:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
         # Apply DNJ
+        time_step = np.mean(np.diff(self.route_zivp.t))
         self.dnj = DNJ(self.vectorfield, time_step=time_step, optimize_for=optimize_for)
         # Apply DNJ in loop
         num_iter = num_iter // 5
