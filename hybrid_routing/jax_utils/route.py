@@ -147,7 +147,7 @@ class Route:
         else:
             self.t = jnp.interp(i, j, self.t)
 
-    def recompute_times(self, vel: float, vf: Vectorfield, interp: int = None):
+    def recompute_times(self, vel: float, vf: Vectorfield):
         """Given a vessel velocity and a vectorfield, recompute the
         times for each coordinate contained in the route
 
@@ -157,9 +157,6 @@ class Route:
             Vessel velocity
         vf : Vectorfield
             Vectorfield
-        interp : bool, optional
-            Interpolate route points to `n` more before recomputing times.
-            This should improve the accuracy, by default True
         """
         x, y = self.x, self.y
         # Angle over ground between points

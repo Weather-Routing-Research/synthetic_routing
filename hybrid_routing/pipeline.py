@@ -102,7 +102,7 @@ class Pipeline:
         max_iter: int = 2000,
         use_rk: bool = True,
         method: str = "direction",
-        interp: Optional[int] = None,
+        num_points: Optional[int] = None,
     ):
         """Solve the Zermelo Initial Value Problem
 
@@ -163,9 +163,9 @@ class Pipeline:
         route: Route = list_routes[0]
         route.append_point_end(p=(self.xn, self.yn), vel=self.optimizer.vel)
 
-        # Interpolate to `interp` points
-        if interp:
-            route.interpolate(interp, vel=vel)
+        # Interpolate to `num_points` points
+        if num_points:
+            route.interpolate(num_points, vel=vel)
 
         # Store parameters
         self.route_zivp = deepcopy(route)

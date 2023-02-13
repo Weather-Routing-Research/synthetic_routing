@@ -32,7 +32,7 @@ list_pipes = [
         si_units=True,
     ),
 ]
-list_vel = [10, 6, 3]
+list_vel = [6, 3, 1]
 
 # https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
 matplotlib.use("Agg")
@@ -58,15 +58,15 @@ def run_pipeline(dict_pipe: dict, vel: float):
 
     pipe.solve_zivp(
         vel=vel,
-        time_iter=3600,  # 1 hour (3600 s)
+        time_iter=14400,  # 4 hour (4 * 3600 s)
         time_step=600,  # Do not go below 10 min (600 s)
         dist_min=10000,
-        num_angles=40,
-        angle_amplitude=120 * DEG2RAD,
-        angle_heading=60 * DEG2RAD,
-        interp=200,
+        num_angles=21,
+        angle_amplitude=180 * DEG2RAD,
+        angle_heading=90 * DEG2RAD,
+        num_points=200,
     )
-    pipe.solve_dnj(num_iter=500)
+    pipe.solve_dnj(num_iter=2000)
 
     # Store in dictionary
     k = pipe.key.lower().replace(" ", "-")
