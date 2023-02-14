@@ -59,7 +59,7 @@ def main(
         module = import_module("hybrid_routing.vectorfields")
         vectorfield: Vectorfield = getattr(module, vf)()
         if discrete:
-            vectorfield = vectorfield.discretize(-1, 7, -1, 7, step=1 / 12)
+            vectorfield = vectorfield.discretize(-7, 7, -7, 7, step=1 / 12)
         q0 = (0, 0)
         q1 = (6, 2)
         xlim = (-1, 7)
