@@ -1,4 +1,5 @@
 from copy import deepcopy
+from importlib import import_module
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -46,8 +47,7 @@ class Pipeline:
         self.si_units = si_units
 
         if path is None:
-            module = __import__("hybrid_routing")
-            module = getattr(module, "vectorfields")
+            module = import_module("hybrid_routing.vectorfields")
             self.vectorfield: Vectorfield = getattr(module, key)()
             self.real = False
         else:
@@ -321,4 +321,5 @@ class Pipeline:
             plt.xlim(xmin, xmax)
             plt.ylim(ymin, ymax)
 
+        plt.tight_layout()
         plt.tight_layout()

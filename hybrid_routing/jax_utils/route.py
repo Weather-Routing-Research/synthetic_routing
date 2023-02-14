@@ -1,3 +1,4 @@
+from importlib import import_module
 from typing import Optional, Tuple, Union
 
 import jax.numpy as jnp
@@ -29,8 +30,7 @@ class Route:
         if isinstance(geometry, Geometry):
             self.geometry = geometry
         elif isinstance(geometry, str):
-            module = __import__("hybrid_routing")
-            module = getattr(module, "geometry")
+            module = import_module("hybrid_routing.geometry")
             self.geometry: Geometry = getattr(module, geometry)()
         else:
             self.geometry = Euclidean()

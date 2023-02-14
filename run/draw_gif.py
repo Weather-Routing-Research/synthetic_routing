@@ -1,13 +1,14 @@
 import os
 import shutil
+from importlib import import_module
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import imageio.v2 as imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import typer
-from typing import Optional
+
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.jax_utils import DNJ, Optimizer, Route
 from hybrid_routing.vectorfields import VectorfieldReal
@@ -55,8 +56,7 @@ def main(
         ylim = (-25 * DEG2RAD, 30 * DEG2RAD)
         step = DEG2RAD
     else:
-        module = __import__("hybrid_routing")
-        module = getattr(module, "vectorfields")
+        module = import_module("hybrid_routing.vectorfields")
         vectorfield: Vectorfield = getattr(module, vf)()
         if discretized:
             vectorfield = vectorfield.discretize(-1, 7, -1, 7)
