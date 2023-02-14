@@ -1,9 +1,17 @@
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-
 import pytest
-from hybrid_routing.vectorfields import Circular, NoCurrent, VectorfieldReal
+
+from hybrid_routing.vectorfields import (
+    Circular,
+    ConstantCurrent,
+    NoCurrent,
+    Sink,
+    Source,
+    VectorfieldReal,
+)
+from hybrid_routing.vectorfields.base import Vectorfield
 
 
 def test_no_current_vectorfield():
@@ -43,6 +51,15 @@ def test_ode_zermelo(x: float, theta: float, vel: float):
     np.testing.assert_allclose(dt_euc, dt_sph * rad2m, rtol=1e-5)
 
 
+@pytest.mark.parametrize(
+    "vf", [Circular(), Sink(), Source(), ConstantCurrent(), NoCurrent()]
+)
+def test_jacobian(vf: Vectorfield):
+    vf_dis = vf.discretize(x_min=-2, x_max=2, y_min=-2, y_max=2, step=0.01)
+    np.testing.assert_allclose(vf.du(0.0, 0.0), vf_dis.du(0.0, 0.0), rtol=1e-3)
+    np.testing.assert_allclose(vf.dv(0.0, 0.0), vf_dis.dv(0.0, 0.0), rtol=1e-3)
+
+
 def test_real_vectorfield():
     u = pd.DataFrame(
         np.random.uniform(low=0, high=5, size=(10, 10)),
@@ -80,6 +97,13 @@ def test_land():
         columns=np.arange(start=-5, stop=5, step=1),
     )
     vf = VectorfieldReal(df, df, radians=False)
+
+    x = jnp.array([2, 2.5, 3, 3, 3, 3.5, 4])
+    y = jnp.array([2, 2.5, 2.5, 3, 3.5, 3.5, 4])
+
+    land = vf.is_land(x, y)
+    expect = jnp.array([False, True, True, True, True, True, False])
+    assert (land == expect).all()
 
     x = jnp.array([2, 2.5, 3, 3, 3, 3.5, 4])
     y = jnp.array([2, 2.5, 2.5, 3, 3.5, 3.5, 4])
