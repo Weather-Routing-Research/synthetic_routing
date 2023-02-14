@@ -294,7 +294,7 @@ class VectorfieldDiscrete(Vectorfield):
         cls.arr_y = jnp.arange(y_min, y_max, step)
         mat_x, mat_y = jnp.meshgrid(cls.arr_x, cls.arr_y)
         u, v = vectorfield.get_current(mat_x, mat_y)
-        cls.u, cls.v = u.T, v.T
+        cls.u, cls.v = u, v
         cls.land = jnp.zeros(u.shape)
         # Compute the average step between X and Y coordinates
         # We are assuming this step is constant!

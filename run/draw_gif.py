@@ -17,7 +17,7 @@ from hybrid_routing.vectorfields.base import Vectorfield
 
 def main(
     vf: str = "FourVortices",
-    discretized: bool = True,
+    discrete: bool = False,
     use_rk: bool = True,
     method: str = "direction",
     time_iter: float = 0.2,
@@ -31,7 +31,7 @@ def main(
     path_out: str = "output/",
 ):
     suptitle = vf
-    suptitle += " Discretized" if discretized else ""
+    suptitle += " Discretized" if discrete else ""
     suptitle += " Runge-Kutta" if use_rk else " ODEINT"
     suptitle += " " + method
 
@@ -58,13 +58,13 @@ def main(
     else:
         module = import_module("hybrid_routing.vectorfields")
         vectorfield: Vectorfield = getattr(module, vf)()
-        if discretized:
-            vectorfield = vectorfield.discretize(-1, 7, -1, 7)
+        if discrete:
+            vectorfield = vectorfield.discretize(-1, 7, -1, 7, step=1 / 12)
         q0 = (0, 0)
         q1 = (6, 2)
         xlim = (-1, 7)
         ylim = (-1, 7)
-        step = 1
+        step = 0.2
 
     ####################################################################################
     #  Helper function to plot the routes
