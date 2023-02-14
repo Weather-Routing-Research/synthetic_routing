@@ -20,7 +20,7 @@ def main(
     discrete: bool = False,
     use_rk: bool = True,
     method: str = "direction",
-    time_iter: float = 0.2,
+    time_iter: float = 0.1,
     time_step: float = 0.01,
     angle_amplitude: float = np.pi,
     num_angles: int = 20,
@@ -59,12 +59,12 @@ def main(
         module = import_module("hybrid_routing.vectorfields")
         vectorfield: Vectorfield = getattr(module, vf)()
         if discrete:
-            vectorfield = vectorfield.discretize(-7, 7, -7, 7, step=1 / 12)
+            vectorfield = vectorfield.discretize(-10, 10, -10, 10, step=1 / 12)
         q0 = (0, 0)
         q1 = (6, 2)
         xlim = (-1, 7)
         ylim = (-1, 7)
-        step = 0.2
+        step = 0.4
 
     ####################################################################################
     #  Helper function to plot the routes
@@ -144,7 +144,7 @@ def main(
     ####################################################################################
 
     time_dnj = time_iter if time_dnj is None else time_dnj
-    dnj = DNJ(vectorfield, time_step=time_dnj, optimize_for="fuel")
+    dnj = DNJ(vectorfield, time_step=time_dnj, optimize_for="time")
 
     for n in range(40):
         route = list_routes[0]
