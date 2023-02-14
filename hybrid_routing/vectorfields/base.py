@@ -90,12 +90,12 @@ class Vectorfield(ABC):
     @partial(jit, static_argnums=(0,))
     def du(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
         out = jnp.asarray([self._du(x, y) for x, y in zip(x.ravel(), y.ravel())])
-        return out[:, 0].reshape(x.shape), out[:, 1].reshape(x.shape)
+        return out[:, 0].reshape(x.shape), -out[:, 1].reshape(x.shape)
 
     @partial(jit, static_argnums=(0,))
     def dv(self, x: jnp.array, y: jnp.array) -> Tuple[jnp.array]:
         out = jnp.asarray([self._dv(x, y) for x, y in zip(x.ravel(), y.ravel())])
-        return out[:, 0].reshape(x.shape), out[:, 1].reshape(x.shape)
+        return -out[:, 0].reshape(x.shape), out[:, 1].reshape(x.shape)
 
     @partial(jit, static_argnums=(0,))
     def _ode_zermelo_euclidean(
@@ -222,7 +222,7 @@ class Vectorfield(ABC):
     @partial(jit, static_argnums=(0,))
     def is_land(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
         """Just a placeholder function. Indicates that no point has land."""
-        return jnp.full_like(x, False)
+        return jnp.tile(False, x.shape)
 
     def plot(
         self,
