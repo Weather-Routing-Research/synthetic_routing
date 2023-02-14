@@ -26,6 +26,6 @@ class ConstantCurrent(Vectorfield):
 
     @partial(jit, static_argnums=(0,))
     def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
-        u = jnp.full_like(x, 0.2)
-        v = jnp.full_like(x, -0.2)
+        u = jnp.tile(0.2, x.shape)
+        v = jnp.tile(-0.2, x.shape)
         return jnp.stack([u, v])

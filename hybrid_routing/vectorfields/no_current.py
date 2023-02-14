@@ -26,7 +26,6 @@ class NoCurrent(Vectorfield):
 
     @partial(jit, static_argnums=(0,))
     def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
-        u = jnp.full_like(x, 0.0)
-        v = jnp.full_like(x, 0.0)
-        return jnp.stack([u, v])
+        u = jnp.zeros(x.shape)
+        v = jnp.zeros(x.shape)
         return jnp.stack([u, v])
