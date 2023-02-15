@@ -18,8 +18,8 @@ matplotlib.use("Agg")
 max_thread = 6  # Maximum number of threads allowed
 
 list_benchmark = [
-    dict(p0=(3, 2), pn=(-7, 2), key="Circular"),
-    dict(p0=(0, 0), pn=(6, 2), key="FourVortices"),  # Ferraro et al.
+    dict(p0=(3, 2), pn=(-7, 2), key="Circular", si_units=False),
+    dict(p0=(0, 0), pn=(6, 2), key="FourVortices", si_units=False),  # Ferraro et al.
 ]
 dict_plot = {
     "Circular": {
