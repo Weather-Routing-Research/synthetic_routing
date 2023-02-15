@@ -322,4 +322,3 @@ class Pipeline:
             plt.ylim(ymin, ymax)
 
         plt.tight_layout()
-        plt.tight_layout()
