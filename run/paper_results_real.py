@@ -54,7 +54,7 @@ max_thread = min(max_thread, len(list_benchmark) * len(list_vel))
 list_pipes: List[Pipeline] = [None for n in range(max_thread)]
 
 
-def run_pipeline(idx: int, dict_pipe: dict, vel: float):
+def run_pipeline(n_thread: int, dict_pipe: dict, vel: float):
     print(f"Initializing: {dict_pipe['key']}, vel = {vel}")
     pipe = Pipeline(**dict_pipe)
 
@@ -70,6 +70,9 @@ def run_pipeline(idx: int, dict_pipe: dict, vel: float):
     )
     pipe.solve_dnj(num_iter=2000)
 
+    # Append pipeline to list
+    list_pipes[n_thread] = pipe
+
     # Decide filename
     file = path_out / pipe.filename
 
@@ -79,8 +82,6 @@ def run_pipeline(idx: int, dict_pipe: dict, vel: float):
         json.dump(dict_results, outfile)
 
     print(f"Done {pipe.filename} vectorfield, {vel} m/s\n---")
-
-    list_pipes[idx] = pipe
 
 
 # Initialize list of threads and index

@@ -50,33 +50,32 @@ max_thread = min(max_thread, len(list_benchmark))
 list_pipes: List[Pipeline] = [None for n in range(max_thread)]
 
 
-def run_pipeline(idx: int, dict_pipe: dict):
+def run_pipeline(n_thread: int, dict_pipe: dict):
     print(f"Initializing: {dict_pipe['key']}")
     pipe = Pipeline(**dict_pipe)
 
     pipe.solve_zivp(vel=1, time_iter=0.1, time_step=0.01, num_points=200)
     pipe.solve_dnj(num_iter=10000, optimize_for="time")
 
-    dict_results = pipe.to_dict()
+    # Append pipeline to list
+    list_pipes[n_thread] = pipe
 
     # Define filename
     file = path_out / pipe.filename
 
     # Store dictionary
     with open(file.with_suffix(".json"), "w") as outfile:
+        dict_results = pipe.to_dict()
         json.dump(dict_results, outfile)
 
     print(f"Done {pipe.filename} vectorfield")
-
-    # Append pipeline to list
-    list_pipes[idx] = pipe
 
 
 # Initialize list of threads and index
 threads: List[Thread] = [None for i in range(max_thread)]
 n_thread = 0
 
-for _, dict_pipe in enumerate(list_benchmark):
+for dict_pipe in list_benchmark:
     threads[n_thread] = Thread(target=run_pipeline, args=(n_thread, dict_pipe))
     threads[n_thread].start()
     n_thread += 1
