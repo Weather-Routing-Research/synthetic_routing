@@ -68,7 +68,7 @@ plt.savefig(path_out / "results-dnj-fourvortices.png")
 plt.close()
 
 # Store results
-t = [route.t[-1] for route in list_routes]
+t = [int(route.t[-1]) for route in list_routes]
 dict_results["FourVortices"] = {
     "Times": t,
     "Time best": min(t),
