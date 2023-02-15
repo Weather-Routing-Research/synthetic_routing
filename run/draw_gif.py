@@ -26,7 +26,6 @@ def main(
     num_angles: int = 20,
     vel: float = 1,
     dist_min: float = 0.1,
-    time_dnj: Optional[float] = None,
     do_color: bool = False,
     path_out: str = "output/",
 ):
@@ -143,8 +142,7 @@ def main(
     # SMOOTHING DNJ
     ####################################################################################
 
-    time_dnj = time_iter if time_dnj is None else time_dnj
-    dnj = DNJ(vectorfield, time_step=time_dnj, optimize_for="time")
+    dnj = DNJ(vectorfield, time_step=time_step, optimize_for="time")
 
     for n in range(40):
         route = list_routes[0]
