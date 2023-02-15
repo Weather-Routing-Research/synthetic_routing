@@ -8,7 +8,6 @@ from pathlib import Path
 from threading import Thread
 from typing import List
 
-import matplotlib
 import matplotlib.pyplot as plt
 
 from hybrid_routing.geometry import DEG2RAD
@@ -16,7 +15,7 @@ from hybrid_routing.pipeline import Pipeline
 
 max_thread = 6  # Maximum number of threads allowed
 
-list_pipes = [
+list_benchmark = [
     dict(
         p0=(-79.7, 32.7),
         pn=(-29.5, 38.5),
@@ -34,9 +33,6 @@ list_pipes = [
 ]
 list_vel = [6, 3, 1]
 
-# https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
-matplotlib.use("Agg")
-
 """
 Create output folder
 """
@@ -51,8 +47,14 @@ if not path_out.exists():
 Run pipelines
 """
 
+# Maximum number of threads cannot be higher than number of processes
+max_thread = min(max_thread, len(list_benchmark) * len(list_vel))
 
-def run_pipeline(dict_pipe: dict, vel: float):
+# Initialize list of pipelines
+list_pipes: List[Pipeline] = [None for n in range(max_thread)]
+
+
+def run_pipeline(idx: int, dict_pipe: dict, vel: float):
     print(f"Initializing: {dict_pipe['key']}, vel = {vel}")
     pipe = Pipeline(**dict_pipe)
 
@@ -68,38 +70,40 @@ def run_pipeline(dict_pipe: dict, vel: float):
     )
     pipe.solve_dnj(num_iter=2000)
 
-    # Store in dictionary
-    k = pipe.key.lower().replace(" ", "-")
-    dict_results = pipe.to_dict()
-
     # Decide filename
-    file = path_out / f"results_{k}_{vel}"
+    file = path_out / pipe.filename
 
-    # Store plot
-    plt.figure(dpi=120)
-    pipe.plot()
-    plt.savefig(file.with_suffix(".png"))
-    plt.close()
-
-    # Store dictionary
+    # Store in dictionary (json)
     with open(file.with_suffix(".json"), "w") as outfile:
+        dict_results = pipe.to_dict()
         json.dump(dict_results, outfile)
 
     print(f"Done {k} vectorfield, {vel} m/s\n---")
 
+    list_pipes[idx] = pipe
 
-# Maximum number of threads cannot be higher than number of processes
-max_thread = min(max_thread, len(list_pipes) * len(list_vel))
 
 # Initialize list of threads and index
 threads: List[Thread] = [None for i in range(max_thread)]
 n_thread = 0
-for dict_pipe in list_pipes:
+
+for dict_pipe in list_benchmark:
     for vel in list_vel:
-        threads[n_thread] = Thread(target=run_pipeline, args=(dict_pipe, vel))
+        threads[n_thread] = Thread(target=run_pipeline, args=(n_thread, dict_pipe, vel))
         threads[n_thread].start()
         n_thread += 1
         # If maximum index is reached, wait for all threads to finish
         if n_thread == max_thread:
-            [t.join() for t in threads]
+            # Plot each thread independently, to avoid overlaps
+            for n_thread, t in enumerate(threads):
+                t.join()  # Waits for thread to finish before plotting
+                pipe = list_pipes[n_thread]  # Get the associated pipeline
+                # Decide filename
+                file = path_out / pipe.filename
+                # Plot results and store
+                plt.figure(dpi=120)
+                pipe.plot()
+                plt.savefig(file.with_suffix(".png"))
+                plt.close()
+            # Reset thread number
             n_thread = 0

@@ -63,6 +63,10 @@ class Pipeline:
         self.route_dnj: Route = None
         self._routes_dnj: List[Route] = [None] * 4
 
+    @property
+    def filename(self):
+        return f"{self.key.lower().replace(' ', '_')}_{self.vel::03d}"
+
     def add_route(self, route: Union[Route, Dict], vel: Optional[float] = None):
         """Adds a route, skipping the ZIVP step
 
