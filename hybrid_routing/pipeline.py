@@ -14,6 +14,8 @@ from hybrid_routing.vectorfields.base import Vectorfield
 
 
 class Pipeline:
+    _num_dnj: int = 10
+
     def __init__(
         self,
         p0: Tuple[float],
@@ -61,7 +63,7 @@ class Pipeline:
         self.route_zivp: Route = None
         self.dnj: DNJ = None
         self.route_dnj: Route = None
-        self._routes_dnj: List[Route] = [None] * 4
+        self._routes_dnj: List[Route] = [None] * self._num_dnj
 
     @property
     def filename(self):
@@ -203,17 +205,17 @@ class Pipeline:
         time_step = float(np.mean(np.diff(self.route_zivp.t)))
         self.dnj = DNJ(self.vectorfield, time_step=time_step, optimize_for=optimize_for)
         # Apply DNJ in loop
-        num_iter = num_iter // 5
+        num_iter = num_iter // self._num_dnj
         route = deepcopy(self.route_zivp)
         # Intermediate steps
-        for n in range(4):
+        for n in range(self._num_dnj):
             self.dnj.optimize_route(route, num_iter=num_iter)
+            route.recompute_times(self.vel, self.vectorfield)
             self._routes_dnj[n] = deepcopy(route)
-            print(f"  DNJ step {n+1} out of 5")
-        # Last DNJ run
-        self.dnj.optimize_route(route, num_iter=num_iter)
-        route.recompute_times(self.vel, self.vectorfield)
-        self.route_dnj = deepcopy(route)
+            print(f"  DNJ step {n+1} out of 10")
+        # Take the one with lowest time
+        _, idx = min((route.t[-1], idx) for (idx, route) in enumerate(self._routes_dnj))
+        self.route_dnj = self._routes_dnj[idx]
 
     def to_dict(self) -> Dict:
         if self.route_zivp is None:
