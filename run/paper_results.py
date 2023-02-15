@@ -66,7 +66,7 @@ def run_pipeline(idx: int, dict_pipe: dict):
     with open(file.with_suffix(".json"), "w") as outfile:
         json.dump(dict_results, outfile)
 
-    print(f"Done {pipe.key} vectorfield")
+    print(f"Done {pipe.filename} vectorfield")
 
     # Append pipeline to list
     list_pipes[idx] = pipe

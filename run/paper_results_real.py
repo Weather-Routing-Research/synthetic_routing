@@ -78,7 +78,7 @@ def run_pipeline(idx: int, dict_pipe: dict, vel: float):
         dict_results = pipe.to_dict()
         json.dump(dict_results, outfile)
 
-    print(f"Done {k} vectorfield, {vel} m/s\n---")
+    print(f"Done {pipe.filename} vectorfield, {vel} m/s\n---")
 
     list_pipes[idx] = pipe
 
