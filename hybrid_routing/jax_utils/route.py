@@ -179,7 +179,7 @@ class Route:
         # Angle and module of the velocity of vectorfield
         a_c, v_c = self.geometry.components_to_ang_mod(v_cx, v_cy)
         # Angle of the vectorfield w.r.t. the direction over ground
-        a_cg = a_g - a_c  # TODO: Ensure this difference is done right
+        a_cg = a_c - a_g
         # Components of the vectorfield w.r.t. the direction over ground
         v_cg_para, v_cg_perp = self.geometry.ang_mod_to_components(a_cg, v_c)
         # The perpendicular component of the vessel velocity must compensate the

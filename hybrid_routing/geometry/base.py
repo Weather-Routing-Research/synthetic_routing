@@ -45,7 +45,7 @@ class Geometry:
         self, x: jnp.ndarray, y: jnp.ndarray
     ) -> Tuple[jnp.ndarray]:
         """Gets vector components, returns angle (rad) and module"""
-        a = jnp.arctan2(x, y)
+        a = jnp.arctan2(y, x)
         m = jnp.sqrt(x**2 + y**2)
         return a, m
 
@@ -54,6 +54,6 @@ class Geometry:
         self, a: jnp.ndarray, m: jnp.ndarray
     ) -> Tuple[jnp.ndarray]:
         """Gets angle (rad) and module, returns vector components"""
-        x = m * jnp.sin(a)
-        y = m * jnp.cos(a)
+        x = m * jnp.cos(a)
+        y = m * jnp.sin(a)
         return x, y
