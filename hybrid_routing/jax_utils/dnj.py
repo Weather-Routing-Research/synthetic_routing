@@ -8,6 +8,8 @@ from jax import grad, jacfwd, jacrev, jit, random, vmap
 from hybrid_routing.jax_utils.route import Route
 from hybrid_routing.vectorfields.base import Vectorfield
 
+KEY = random.PRNGKey(42)
+
 
 # defines the hessian of our functions
 def hessian(f: Callable, argnums: int = 0):
@@ -158,7 +160,7 @@ class DNJRandomGuess:
         x_end, y_end = q1
         list_routes: List[Route] = [None] * num_routes
         # Randomly select number of segments per route
-        num_segments = random.randint(2, 5, num_routes)
+        num_segments = random.randint(KEY, (num_routes,), minval=2, maxval=5)
         for idx_route in range(num_routes):
             # We first will choose the bounding points of each segment
             x_pts = [x_start]
@@ -170,9 +172,13 @@ class DNJRandomGuess:
                 dy = y_end - y_pts[-1]
                 ang = jnp.arctan2(dy, dx)
                 # Randomly select angle deviation
-                ang_dev = random.uniform(-0.5, 0.5, 1) * angle_amplitude
+                ang_dev = (
+                    random.uniform(KEY, (1,), minval=-0.5, maxval=0.5) * angle_amplitude
+                )
                 # Randomly select the distance travelled
-                d = jnp.sqrt(dx**2 + dy**2) * random.uniform(0.1, 0.9, 1)
+                d = jnp.sqrt(dx**2 + dy**2) * random.uniform(
+                    KEY, (1,), minval=0.1, maxval=0.9
+                )
                 # Get the final point of the segment
                 x_pts.append(x_pts[-1] + d * jnp.cos(ang + ang_dev))
                 y_pts.append(y_pts[-1] + d * jnp.sin(ang + ang_dev))

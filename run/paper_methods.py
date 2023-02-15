@@ -13,7 +13,6 @@ from mpl_toolkits.axes_grid1.inset_locator import mark_inset, zoomed_inset_axes
 from hybrid_routing.jax_utils.dnj import DNJ
 from hybrid_routing.jax_utils.optimize import (
     Optimizer,
-    compute_cone_center,
     compute_thetas_in_cone,
 )
 from hybrid_routing.jax_utils.route import Route
@@ -143,7 +142,7 @@ def plot_routes(list_routes: List[Route]):
 plot_routes(list_routes_plot)
 
 # Compute angles
-cone_center = compute_cone_center(x0, y0, xn, yn)
+cone_center = optimizer.geometry.angle_p0_to_p1((x0, y0), (xn, yn))
 arr_theta = compute_thetas_in_cone(
     cone_center, optimizer.angle_amplitude, optimizer.num_angles
 )
