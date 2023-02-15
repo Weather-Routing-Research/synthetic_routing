@@ -108,12 +108,17 @@ class Route:
         t : jnp.array
             Timestamp of each point, typically in seconds
         """
-        self.x = jnp.concatenate([self.x, jnp.atleast_1d(x)])
-        self.y = jnp.concatenate([self.y, jnp.atleast_1d(y)])
-        t = t if t is not None else self.t + jnp.arange(0, len(x), 1)
-        self.t = jnp.concatenate([self.t, jnp.atleast_1d(t)])
-        theta = theta if theta is not None else jnp.tile(self.theta[-1], x.shape)
-        self.theta = jnp.concatenate([self.theta, jnp.atleast_1d(theta)])
+        x, y = jnp.atleast_1d(x), jnp.atleast_1d(y)
+        self.x = jnp.concatenate([self.x, x])
+        self.y = jnp.concatenate([self.y, y])
+        t = jnp.atleast_1d(t) if t is not None else self.t + jnp.arange(0, len(x), 1)
+        self.t = jnp.concatenate([self.t, t])
+        theta = (
+            jnp.atleast_1d(theta)
+            if theta is not None
+            else jnp.tile(self.theta[-1], x.shape)
+        )
+        self.theta = jnp.concatenate([self.theta, theta])
         # Compute distance
         self.d = self.geometry.dist_between_coords(self.x, self.y)
 
