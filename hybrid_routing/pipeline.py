@@ -252,7 +252,12 @@ class Pipeline:
             ymin = self.vectorfield.arr_y.min()
             ymax = self.vectorfield.arr_y.max()
         else:
-            xmin, xmax, ymin, ymax = [-5, 5, -5, 5]
+            xmin, xmax, ymin, ymax = [
+                self.route_dnj.x.min() * 0.9,
+                self.route_dnj.x.max() * 1.1,
+                self.route_dnj.y.min() * 0.9,
+                self.route_dnj.y.max() * 1.1,
+            ]
 
         if self.real:
             self.vectorfield.plot(
