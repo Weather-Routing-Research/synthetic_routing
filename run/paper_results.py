@@ -7,9 +7,13 @@ from pathlib import Path
 from threading import Thread
 from typing import List
 
+import matplotlib
 import matplotlib.pyplot as plt
 
 from hybrid_routing.pipeline import Pipeline
+
+# https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
+matplotlib.use("Agg")
 
 max_thread = 6  # Maximum number of threads allowed
 
@@ -93,4 +97,5 @@ for dict_pipe in list_benchmark:
             plt.savefig(file.with_suffix(".png"))
             plt.close()
         # Reset thread number
+        n_thread = 0
         n_thread = 0

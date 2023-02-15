@@ -8,10 +8,14 @@ from pathlib import Path
 from threading import Thread
 from typing import List
 
+import matplotlib
 import matplotlib.pyplot as plt
 
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.pipeline import Pipeline
+
+# https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
+matplotlib.use("Agg")
 
 max_thread = 6  # Maximum number of threads allowed
 
@@ -31,7 +35,7 @@ list_benchmark = [
         si_units=True,
     ),
 ]
-list_vel = [6, 3, 1]
+list_vel = [10, 6, 3]
 
 """
 Create output folder
@@ -107,4 +111,5 @@ for dict_pipe in list_benchmark:
                 plt.savefig(file.with_suffix(".png"))
                 plt.close()
             # Reset thread number
+            n_thread = 0
             n_thread = 0
