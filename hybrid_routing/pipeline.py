@@ -171,12 +171,12 @@ class Pipeline:
         if num_points:
             route.interpolate(num_points, vel=vel)
 
+        # Recompute times
+        route.recompute_times(vel, self.vectorfield)
+
         # Store parameters
         self.route_zivp = deepcopy(route)
         self.vel = vel
-
-        # Recompute times
-        self.route_zivp.recompute_times(self.optimizer.vel, self.vectorfield)
 
     def solve_dnj(
         self,
