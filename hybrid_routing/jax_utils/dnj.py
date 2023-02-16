@@ -75,6 +75,8 @@ class DNJ:
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
                 """Cost function that penalizes time.
+                It assumes that the vectorfield velocity module is always lower than 1
+                Ref.: https://doi.org/10.1016/j.ifacol.2021.11.097
 
                 Parameters
                 ----------
@@ -88,7 +90,6 @@ class DNJ:
                 jnp.array
                     Cost of this state
                 """
-                # https://doi.org/10.1016/j.ifacol.2021.11.097
                 w = get_current(x[0], x[1])
                 alpha = 1 - (w[0] ** 2 + w[1] ** 2)
                 cost = (
