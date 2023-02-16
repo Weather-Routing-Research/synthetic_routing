@@ -52,6 +52,21 @@ class DNJ:
         if optimize_for == "fuel":
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
+                """Cost function that penalizes fuel consumption. It outputs lower values
+                the more the vessel velocity is oriented with the vector field
+
+                Parameters
+                ----------
+                x : jnp.array
+                    Vessel coordinates (x, y) in space units (radians)
+                xp : jnp.array
+                    Veseel velocities (u, v) in space units / time units (radians / second)
+
+                Returns
+                -------
+                jnp.array
+                    Cost of this state
+                """
                 w = get_current(x[0], x[1])
                 cost = jnp.sqrt((xp[0] - w[0]) ** 2 + (xp[1] - w[1]) ** 2)
                 return cost
@@ -59,6 +74,21 @@ class DNJ:
         elif optimize_for == "time":
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
+                """Cost function that penalizes time.
+
+                Parameters
+                ----------
+                x : jnp.array
+                    Vessel coordinates (x, y) in space units (radians)
+                xp : jnp.array
+                    Veseel velocities (u, v) in space units / time units (radians / second)
+
+                Returns
+                -------
+                jnp.array
+                    Cost of this state
+                """
+                # https://doi.org/10.1016/j.ifacol.2021.11.097
                 w = get_current(x[0], x[1])
                 alpha = 1 - (w[0] ** 2 + w[1] ** 2)
                 cost = (
