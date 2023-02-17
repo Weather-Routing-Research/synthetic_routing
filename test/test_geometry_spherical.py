@@ -1,9 +1,9 @@
 from typing import Tuple
 
 import numpy as np
-
 import pytest
-from hybrid_routing.geometry.spherical import DEG2RAD, Spherical
+
+from hybrid_routing.geometry import DEG2RAD, Spherical
 
 
 @pytest.mark.parametrize(
@@ -26,10 +26,12 @@ def test_dist_p0_to_p1(p0: Tuple[float], p1: Tuple[float], d: float):
 @pytest.mark.parametrize(
     ("p0", "p1", "a"),
     [
-        ((0, 0), (0, 10), np.pi / 2),
-        ((0, 0), (10, 0), 0),
-        ((-10, -10), (10, 10), np.pi / 4),
-        ((180, 0), (-180, 0), np.pi),
+        ((0, 0), (1, 0), 0),
+        ((0, 0), (np.sqrt(3), 1), 30),
+        ((0, 0), (1, 1), 45),
+        ((0, 0), (1, np.sqrt(3)), 60),
+        ((0, 0), (0, 1), 90),
+        ((0, 0), (-1, 0), 180),
     ],
 )
 def test_angle_p0_to_p1(p0: Tuple[float], p1: Tuple[float], a: float):
@@ -37,7 +39,7 @@ def test_angle_p0_to_p1(p0: Tuple[float], p1: Tuple[float], a: float):
     p0 = [x * DEG2RAD for x in p0]
     p1 = [x * DEG2RAD for x in p1]
     ang = Spherical().angle_p0_to_p1(p0, p1)
-    np.testing.assert_allclose(ang, a, rtol=0.1)
+    np.testing.assert_allclose(ang, a * DEG2RAD, rtol=0.1)
 
 
 def test_dist_between_coords():
@@ -52,5 +54,5 @@ def test_angle_between_coords():
     lon = np.array([0, 1, 0, 0, 0]) * DEG2RAD
     lat = np.array([0, 0, 0, 1, 0]) * DEG2RAD
     angle = Spherical().ang_between_coords(lon, lat)
-    expected = np.array([0, np.pi, np.pi / 2, -np.pi / 2])
+    expected = np.array([0, 180, 90, -90]) * DEG2RAD
     np.testing.assert_allclose(angle, expected, rtol=0.001)
