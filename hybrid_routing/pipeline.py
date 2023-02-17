@@ -264,14 +264,24 @@ class Pipeline:
         dict_return = {
             "key": self.key,
             "real": self.real,
-            "vel": self.vel,
-            "route_zivp": self.route_zivp.asdict(),
-            "route_dnj": self.route_dnj.asdict(),
+            "vel": float(self.vel),
+            "time": {
+                "zivp": float(self.route_zivp.t[-1]),
+                "dnj": float(self.route_dnj.t[-1]),
+            },
+            "dist": {
+                "zivp": float(self.route_zivp.d.sum()),
+                "dnj": float(self.route_dnj.d.sum()),
+            },
+            "route": {"zivp": self.route_zivp.asdict(), "dnj": self.route_dnj.asdict()},
             "optimizer": self.optimizer.asdict(),
             "dnj": self.dnj.asdict(),
         }
         if self.geodesic is not None:
-            dict_return.update({"geodesic": self.geodesic.asdict()})
+            dict_return["route"].update({"geodesic": self.geodesic.asdict()})
+            dict_return["time"].update({"geodesic": float(self.geodesic.t[-1])})
+            dict_return["dist"].update({"geodesic": float(self.geodesic.d.sum())})
+
         return dict_return
 
     def plot(

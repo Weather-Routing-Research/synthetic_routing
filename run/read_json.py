@@ -20,7 +20,7 @@ def main(
         dict_json: dict = json.load(file)
 
     # Route from ZIVP
-    dict_route = dict_json["route_zivp"]
+    dict_route = dict_json["route"]["zivp"]
 
     route = Route(
         x=dict_route["x"],
@@ -35,7 +35,7 @@ def main(
     print(f"  Distance (km): {route.d.sum() / 1000:.1f}")
 
     # Route from DNJ
-    dict_route = dict_json["route_dnj"]
+    dict_route = dict_json["route"]["dnj"]
 
     route_dnj = Route(
         x=dict_route["x"],
@@ -50,8 +50,8 @@ def main(
     print(f"  Distance (km): {route_dnj.d.sum() / 1000:.1f}")
 
     # Route from geodesic
-    if "geodesic" in dict_route.keys():
-        dict_route = dict_json["geodesic"]
+    try:
+        dict_route = dict_json["route"]["geodesic"]
 
         route_geod = Route(
             x=dict_route["x"],
@@ -64,6 +64,8 @@ def main(
         print("\nGeodesic")
         print(f"  Time (h): {route_geod.t[-1] / 3600:.1f}")
         print(f"  Distance (km): {route_geod.d.sum() / 1000:.1f}")
+    except KeyError:
+        pass
 
     if path_out:
         path_out: Path = Path(path_out)
