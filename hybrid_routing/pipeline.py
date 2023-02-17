@@ -2,7 +2,7 @@ from copy import deepcopy
 from importlib import import_module
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
-
+import time
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -65,6 +65,7 @@ class Pipeline:
         self.route_dnj: Route = None
         self._routes_dnj: List[Route] = [None] * self._num_dnj
         self.geodesic: Route = None
+        self._timeit: Dict[str, int] = {}
 
     @property
     def filename(self):
@@ -161,14 +162,11 @@ class Pipeline:
             method=method,
         )
         # Run the optimizer until it converges
+        tic = time.process_time()  # We want to time this process
         for list_routes in self.optimizer.optimize_route(
             (self.x0, self.y0), (self.xn, self.yn)
         ):
             route = list_routes[0]
-            # print(
-            #     "  (x, y, t) = "
-            #     f"({route.x[-1]:.2f}, {route.y[-1]:.2f}, {route.t[-1]:.0f})"
-            # )
 
         # Take the best route
         route: Route = list_routes[0]
@@ -181,7 +179,8 @@ class Pipeline:
         # Recompute times
         route.recompute_times(vel, self.vectorfield)
 
-        # Store parameters
+        # Store parameters, and computation time
+        self._timeit.update({"zivp": int(time.process_time() - tic)})
         self.route_zivp = deepcopy(route)
         self.vel = vel
 
@@ -206,6 +205,7 @@ class Pipeline:
             method=self.optimizer.method,
         )
         # Run the optimizer until it converges
+        tic = time.process_time()  # We want to time this process
         for list_routes in optimizer.optimize_route(
             (self.x0, self.y0), (self.xn, self.yn)
         ):
@@ -216,7 +216,8 @@ class Pipeline:
         route.append_point_end((self.xn, self.yn), vel=self.vel)
         route.interpolate(n=len(self.route_zivp), vel=self.vel)
         route.recompute_times(vel=self.vel, vf=self.vectorfield)
-        # Store the route as the geodesic
+        # Store the route as the geodesic, and computation time
+        self._timeit.update({"geodesic": int(time.process_time() - tic)})
         self.geodesic = route
 
     def solve_dnj(
@@ -244,6 +245,7 @@ class Pipeline:
         time_step = float(np.mean(np.diff(self.route_zivp.t)))
         self.dnj = DNJ(self.vectorfield, time_step=time_step, optimize_for=optimize_for)
         # Apply DNJ in loop
+        tic = time.process_time()  # We want to time this process
         num_iter = num_iter // self._num_dnj
         route = deepcopy(self.route_zivp)
         # Intermediate steps
@@ -252,6 +254,8 @@ class Pipeline:
             route.recompute_times(self.vel, self.vectorfield)
             self._routes_dnj[n] = deepcopy(route)
             print(f"  DNJ step {n+1} out of 10")
+        # Store the computation time
+        self._timeit.update({"dnj": int(time.process_time() - tic)})
         # Take the one with lowest time
         _, idx = min((route.t[-1], idx) for (idx, route) in enumerate(self._routes_dnj))
         self.route_dnj = self._routes_dnj[idx]
@@ -273,6 +277,7 @@ class Pipeline:
                 "zivp": float(self.route_zivp.d.sum()),
                 "dnj": float(self.route_dnj.d.sum()),
             },
+            "timeit": self._timeit,
             "route": {"zivp": self.route_zivp.asdict(), "dnj": self.route_dnj.asdict()},
             "optimizer": self.optimizer.asdict(),
             "dnj": self.dnj.asdict(),
