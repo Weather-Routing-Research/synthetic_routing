@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from hybrid_routing.geometry import DEG2RAD
+from hybrid_routing.geometry import DEG2RAD, Geometry
 from hybrid_routing.optimization import DNJ, Optimizer, Route
 from hybrid_routing.utils.plot import plot_textbox, plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
@@ -64,10 +64,15 @@ class Pipeline:
         self.dnj: DNJ = None
         self.route_dnj: Route = None
         self._routes_dnj: List[Route] = [None] * self._num_dnj
+        self.geodesic: Route = None
 
     @property
     def filename(self):
         return f"{self.key.lower().replace(' ', '_')}_{self.vel:03d}"
+
+    @property
+    def geometry(self) -> Geometry:
+        return self.vectorfield.geometry
 
     def add_route(self, route: Union[Route, Dict], vel: Optional[float] = None):
         """Adds a route, skipping the ZIVP step
@@ -85,7 +90,7 @@ class Pipeline:
             route = Route(**route)
         # Compute velocity
         if vel is None:
-            d = self.vectorfield.geometry.dist_between_coords(route.x, route.y)
+            d = self.geometry.dist_between_coords(route.x, route.y)
             vel = d / route.dt
             self.vel = np.mean(vel)
         else:
@@ -180,6 +185,40 @@ class Pipeline:
         self.route_zivp = deepcopy(route)
         self.vel = vel
 
+    def compute_geodesic(self):
+        """Builds the route of minimum distance between the two points"""
+        if self.route_zivp is None:
+            raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
+        # First compute the total distance to travel
+        dist = self.geometry.dist_p0_to_p1((self.x0, self.y0), (self.xn, self.yn))
+        # Initialize the optimizer
+        optimizer = Optimizer(
+            self.vectorfield,
+            time_iter=1 / 20,
+            time_step=1 / 100,  # Whole travel takes 1 unit of time
+            angle_amplitude=20 * DEG2RAD,  # Small angle
+            angle_heading=20 * DEG2RAD,
+            num_angles=11,  # Allow some variation to avoid land
+            vel=dist,  # Very high to ignore currents
+            dist_min=dist / 20,
+            max_iter=self.optimizer.max_iter,
+            use_rk=self.optimizer.use_rk,
+            method=self.optimizer.method,
+        )
+        # Run the optimizer until it converges
+        for list_routes in optimizer.optimize_route(
+            (self.x0, self.y0), (self.xn, self.yn)
+        ):
+            pass
+        # Take best route, append final point, interpolate to N points
+        # and compute the real velocity and time of this journey
+        route: Route = list_routes[0]
+        route.append_point_end((self.xn, self.yn), vel=self.vel)
+        route.interpolate(n=len(self.route_zivp), vel=self.vel)
+        route.recompute_times(vel=self.vel, vf=self.vectorfield)
+        # Store the route as the geodesic
+        self.geodesic = route
+
     def solve_dnj(
         self,
         num_iter: int = 5,
@@ -222,7 +261,7 @@ class Pipeline:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
         if self.route_dnj is None:
             raise AttributeError("DNJ step is missing. Run `solve_dnj` first.")
-        return {
+        dict_return = {
             "key": self.key,
             "real": self.real,
             "vel": self.vel,
@@ -231,6 +270,9 @@ class Pipeline:
             "optimizer": self.optimizer.asdict(),
             "dnj": self.dnj.asdict(),
         }
+        if self.geodesic is not None:
+            dict_return.update({"geodesic": self.geodesic.asdict()})
+        return dict_return
 
     def plot(
         self,

@@ -68,10 +68,11 @@ def run_pipeline(n_thread: int, dict_pipe: dict, vel: float):
         time_step=600,  # Do not go below 10 min (600 s)
         dist_min=10000,
         num_angles=21,
-        angle_amplitude=180 * DEG2RAD,
-        angle_heading=90 * DEG2RAD,
+        angle_amplitude=90 * DEG2RAD,
+        angle_heading=45 * DEG2RAD,
         num_points=200,
     )
+    pipe.compute_geodesic()
     pipe.solve_dnj(num_iter=2000)
 
     # Append pipeline to list

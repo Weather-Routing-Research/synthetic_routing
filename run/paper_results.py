@@ -59,6 +59,7 @@ def run_pipeline(n_thread: int, dict_pipe: dict):
     pipe = Pipeline(**dict_pipe)
 
     pipe.solve_zivp(vel=1, time_iter=0.1, time_step=0.01, num_points=200)
+    pipe.compute_geodesic()
     pipe.solve_dnj(num_iter=10000, optimize_for="time")
 
     # Append pipeline to list
