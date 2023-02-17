@@ -21,7 +21,6 @@
   </a>
 </p>
 
-
 <!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary>Table of Contents</summary>
@@ -59,13 +58,11 @@
 
 This is an ocean vessel path finding algorithm that optimizes fuel consumption and travel time between destinations. We achieve this by combining the locally optimal solution found by the classic Zermelo's Navigation Problem and applies a discretized Jacobi-Newton method for path smoothing and global optimization.
 
-
 ## Structure
 
 The repository is structured into the following directories:
 
 - `/hybrid_routing`: where the python code is.
-
 
 ## Contributing
 
@@ -77,27 +74,30 @@ In addition, all docstrings shall be in the numpy format.
 
 # Getting Started
 
-This package is purely written in Python and it depends on [Scipy](https://scipy.org/), [Numpy](https://numpy.org/), and Google's [JAX](https://github.com/google/jax) with their dependencies. 
+This package is purely written in Python and it depends on [Scipy](https://scipy.org/), [Numpy](https://numpy.org/), and Google's [JAX](https://github.com/google/jax) with their dependencies.
 All packages and dependencies are listed in [requirements.txt](./requirements.txt).
 
 ## Install dependencies
 
 There are two install options, we recommend installing an environment using [`conda`](https://docs.conda.io/en/latest/miniconda.html#installing). However it would work with a regular `pip` install.
 
-- Conda: 
-  ```
+- Conda:
+
+  ```cmd
   conda env create -f environment.yml --force
   ```
+
   Make sure to activate the conda environment once installation is finished.
-- Pip: 
-  ```
+- Pip:
+
+  ```cmd
   pip install -r requirements.txt
   pip install -e .[dev]
   ```
 
 you can also use `make install`.
 
-The difference between `conda` and `pip` is that conda will create an isolated environment while pip will install all the dependencies in the current Python env. This might be a conda environment or any other Python env created by other tools. If you already have the dependencies installed, you can update it to reflect the last version of the packages in the `requirements.txt` with `pip-sync`. 
+The difference between `conda` and `pip` is that conda will create an isolated environment while pip will install all the dependencies in the current Python env. This might be a conda environment or any other Python env created by other tools. If you already have the dependencies installed, you can update it to reflect the last version of the packages in the `requirements.txt` with `pip-sync`.
 
 ## GPU support
 
@@ -142,7 +142,7 @@ Add abstract dependency to `setup.py`. If neccessary, add version requirements b
 
 The library is structured as follows.
 
-### Vector Fields
+## Vector Fields
 
 The module [hybrid_routing.vectorfields](./hybrid_routing/vectorfields/) contains all the different `Vectorfield` classes used in our study. Each `Vectorfield` implements a synthetic field of sea currents.
 
@@ -174,6 +174,7 @@ Here is the expected plot output:
 The module [hybrid_routing.jax_utils](./hybrid_routing/jax_utils/) implements all the functions to optimize a route by using JAX.
 
 Example and set up of `optimize_route`:
+
 ```python
   from hybrid_routing.jax_utils.optimize import optimize_route
   from hybrid_routing.vectorfields import NoCurrent
@@ -220,36 +221,38 @@ The diagram below illustrates the setup: \
 
 ### Web
 
-```
+```cmd
 ---SECTION UNDER CONSTRUCTION---
 ```
+
 The module [hybrid_routing.web](./hybrid_routing/web/) contains the utils used to deploy our demo. You can learn more about this in our [demo section](#demo).
 
 ## Demo
 
 With the `hybrid-routing` environment active, you can initialize the web application by running the following command:
 
-```
+```cmd
 streamlit run hybrid_routing/demo.py --server.port 8501
 ```
 
-The demo will start at port 8501 (you can change the port to anyone you prefer). Then you can access the web in your PC by going to http://localhost:8501
+The demo will start at port 8501 (you can change the port to anyone you prefer). Then you can access the web in your PC by going to [http://localhost:8501]
 
 ## Contact
 
-Official website: https://smartshipping.es/
+Official website: [https://smartshipping.es/]
 
 Robert Milson - rmilson@dal.ca
 
 Project link: [https://github.com/daniprec/hybrid_ivp](https://github.com/daniprec/hybrid_ivp)
 
 ## Acknowledgements & References
-* [Daniel Precioso](https://www.linkedin.com/in/daniel-precioso-garcelan/)
-* [Robert Milson](https://www.dal.ca/faculty/science/math-stats/faculty-staff/our-faculty/mathematics/robert-milson.html)
-* [Louis Bu](https://github.com/ShrimpyLouis/)
-* [Zermelo Navigation Problem](https://en.wikipedia.org/wiki/Zermelo's_navigation_problem)
-* [Parallel iterative methods for variational integration applied to navigation problems](https://arxiv.org/abs/2109.05559)
-* [Google: JAX](https://github.com/google/jax)
+
+- [Daniel Precioso](https://www.linkedin.com/in/daniel-precioso-garcelan/)
+- [Robert Milson](https://www.dal.ca/faculty/science/math-stats/faculty-staff/our-faculty/mathematics/robert-milson.html)
+- [Louis Bu](https://github.com/ShrimpyLouis/)
+- [Zermelo Navigation Problem](https://en.wikipedia.org/wiki/Zermelo's_navigation_problem)
+- [Parallel iterative methods for variational integration applied to navigation problems](https://arxiv.org/abs/2109.05559)
+- [Google: JAX](https://github.com/google/jax)
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/daniprec/hybrid_ivp.svg?style=for-the-badge

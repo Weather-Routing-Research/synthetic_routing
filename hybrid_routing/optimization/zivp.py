@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from jax.experimental.ode import odeint
 
 # from scipy.integrate import odeint
-from hybrid_routing.jax_utils.route import Route
+from hybrid_routing.optimization.route import Route
 from hybrid_routing.vectorfields.base import Vectorfield
 
 

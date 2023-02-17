@@ -10,12 +10,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset, zoomed_inset_axes
 
-from hybrid_routing.jax_utils.dnj import DNJ
-from hybrid_routing.jax_utils.optimize import (
-    Optimizer,
-    compute_thetas_in_cone,
-)
-from hybrid_routing.jax_utils.route import Route
+from hybrid_routing.optimization.dnj import DNJ
+from hybrid_routing.optimization.optimize import Optimizer, compute_thetas_in_cone
+from hybrid_routing.optimization.route import Route
 from hybrid_routing.vectorfields import Circular
 
 """

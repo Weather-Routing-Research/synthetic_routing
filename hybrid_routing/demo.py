@@ -24,9 +24,9 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from PIL import Image
 
-from hybrid_routing.jax_utils.dnj import DNJ, DNJRandomGuess
-from hybrid_routing.jax_utils.optimize import Optimizer
-from hybrid_routing.jax_utils.route import Route
+from hybrid_routing.optimization.dnj import DNJ, DNJRandomGuess
+from hybrid_routing.optimization.optimize import Optimizer
+from hybrid_routing.optimization.route import Route
 from hybrid_routing.vectorfields import *
 from hybrid_routing.vectorfields.base import Vectorfield
 

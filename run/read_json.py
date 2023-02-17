@@ -5,7 +5,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import typer
 
-from hybrid_routing.jax_utils import Route
+from hybrid_routing.optimization import Route
 from hybrid_routing.pipeline import Pipeline
 
 

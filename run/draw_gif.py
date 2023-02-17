@@ -2,7 +2,7 @@ import os
 import shutil
 from importlib import import_module
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import imageio.v2 as imageio
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ import numpy as np
 import typer
 
 from hybrid_routing.geometry import DEG2RAD
-from hybrid_routing.jax_utils import DNJ, Optimizer, Route
+from hybrid_routing.optimization import DNJ, Optimizer, Route
 from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
 

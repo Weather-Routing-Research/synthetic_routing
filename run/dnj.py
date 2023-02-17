@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import typer
 
-from hybrid_routing.jax_utils.dnj import DNJRandomGuess
+from hybrid_routing.optimization.dnj import DNJRandomGuess
 from hybrid_routing.vectorfields import FourVortices
 
 

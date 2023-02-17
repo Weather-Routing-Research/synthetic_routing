@@ -5,7 +5,7 @@ from typing import Callable, Dict, List, Tuple
 import jax.numpy as jnp
 from jax import grad, jacfwd, jacrev, jit, random, vmap
 
-from hybrid_routing.jax_utils.route import Route
+from hybrid_routing.optimization.route import Route
 from hybrid_routing.vectorfields.base import Vectorfield
 
 KEY = random.PRNGKey(42)
@@ -52,15 +52,16 @@ class DNJ:
         if optimize_for == "fuel":
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
-                """Cost function that penalizes fuel consumption. It outputs lower values
-                the more the vessel velocity is oriented with the vector field
+                """Cost function that penalizes fuel consumption. It outputs lower
+                values the more the vessel velocity is oriented with the vector field
 
                 Parameters
                 ----------
                 x : jnp.array
                     Vessel coordinates (x, y) in space units (radians)
                 xp : jnp.array
-                    Veseel velocities (u, v) in space units / time units (radians / second)
+                    Veseel velocities (u, v) in space units / time units
+                    (radians / second)
 
                 Returns
                 -------
@@ -83,7 +84,8 @@ class DNJ:
                 x : jnp.array
                     Vessel coordinates (x, y) in space units (radians)
                 xp : jnp.array
-                    Veseel velocities (u, v) in space units / time units (radians / second)
+                    Veseel velocities (u, v) in space units / time units
+                    (radians / second)
 
                 Returns
                 -------

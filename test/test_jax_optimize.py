@@ -1,9 +1,9 @@
 import numpy as np
-
 import pytest
-from hybrid_routing.jax_utils.dnj import DNJ
-from hybrid_routing.jax_utils.optimize import Optimizer
-from hybrid_routing.jax_utils.route import Route
+
+from hybrid_routing.optimization.dnj import DNJ
+from hybrid_routing.optimization.optimize import Optimizer
+from hybrid_routing.optimization.route import Route
 from hybrid_routing.vectorfields.constant_current import ConstantCurrent
 
 

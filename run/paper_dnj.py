@@ -8,7 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from hybrid_routing.jax_utils.dnj import DNJRandomGuess
+from hybrid_routing.optimization.dnj import DNJRandomGuess
 from hybrid_routing.vectorfields import FourVortices
 
 """

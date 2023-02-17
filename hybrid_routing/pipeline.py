@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from hybrid_routing.geometry import DEG2RAD
-from hybrid_routing.jax_utils import DNJ, Optimizer, Route
+from hybrid_routing.optimization import DNJ, Optimizer, Route
 from hybrid_routing.utils.plot import plot_textbox, plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
