@@ -46,6 +46,5 @@ class Spherical(Geometry):
         gvec = jnp.array(
             [-a2 * b1 + a1 * b2, -(a1 * a2 + b1 * b2) * c1 + (a1**2 + b1**2) * c2]
         )
-        gd = self.dist_p0_to_p1(p0, p1)
-        vector = gvec * gd / jnp.clip(jnp.abs(gvec), a_min=1e-20, a_max=None)
-        return jnp.arctan2(vector[1], vector[0])
+        gvec_norm = gvec / jnp.clip(jnp.abs(gvec), a_min=1e-20, a_max=None)
+        return jnp.arctan2(gvec_norm[1], gvec_norm[0])
