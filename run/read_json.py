@@ -49,6 +49,22 @@ def main(
     print(f"  Time (h): {route_dnj.t[-1] / 3600:.1f}")
     print(f"  Distance (km): {route_dnj.d.sum() / 1000:.1f}")
 
+    # Route from geodesic
+    if "geodesic" in dict_route.keys():
+        dict_route = dict_json["geodesic"]
+
+        route_geod = Route(
+            x=dict_route["x"],
+            y=dict_route["y"],
+            t=dict_route["t"],
+            theta=dict_route["theta"],
+            geometry=dict_route["geometry"],
+        )
+
+        print("\nGeodesic")
+        print(f"  Time (h): {route_geod.t[-1] / 3600:.1f}")
+        print(f"  Distance (km): {route_geod.d.sum() / 1000:.1f}")
+
     if path_out:
         path_out: Path = Path(path_out)
         path = "./data" if bool(dict_json["real"]) else None
