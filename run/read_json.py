@@ -74,7 +74,13 @@ def open_json_and_plot(
     print(f"  Time (h): {route_geod.t[-1] / 3600:.1f}")
     print(f"  Distance (km): {route_geod.d.sum() / 1000:.1f}")
 
-    plot_routes([route, route_dnj, route_geod], pipe.vectorfield, vel=pipe.vel)
+    plot_routes(
+        [route, route_dnj, route_geod],
+        pipe.vectorfield,
+        labels=["ZIVP", "DNJ", "Circum."],
+        vel=pipe.vel,
+        alpha=0.6,
+    )
     name = path_json.stem
     plt.savefig(path_out / (name.lower().replace(" ", "_") + "_compare.png"))
     plt.close()
