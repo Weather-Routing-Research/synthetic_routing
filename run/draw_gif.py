@@ -76,10 +76,7 @@ def main(
         color: str = "black",
     ):
         vectorfield.plot(
-            x_min=xlim[0],
-            x_max=xlim[1],
-            y_min=ylim[0],
-            y_max=ylim[1],
+            extent=(xlim[0], xlim[1], ylim[0], ylim[1]),
             step=step,
             do_color=do_color,
         )

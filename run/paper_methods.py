@@ -53,9 +53,7 @@ Run Runge-Kutta method and plot its result
 # We encapsulate this code into a function because we are reusing it later
 def plot_vectorfield():
     plt.figure(figsize=(5, 5))
-    optimizer.vectorfield.plot(
-        x_min=-8, x_max=18, y_min=-8, y_max=18, color="grey", alpha=0.8
-    )
+    optimizer.vectorfield.plot(extent=(-8, 18, -8, 18), color="grey", alpha=0.8)
     plt.gca().set_aspect("equal")
     ticks = np.arange(-5, 20, 5)
     plt.xticks(ticks)
@@ -256,9 +254,7 @@ plt.scatter(route.x[0], route.y[0], c="green", s=20, zorder=10)
 fig = plt.gcf()
 ax = plt.gca()
 axins = zoomed_inset_axes(ax, zoom=2.5, loc="center right")
-optimizer.vectorfield.plot(
-    x_min=2, x_max=7, y_min=11, y_max=16, color="grey", alpha=0.8, scale=2
-)
+optimizer.vectorfield.plot(extent=(2, 7, 11, 16), color="grey", alpha=0.8, scale=2)
 
 # Goal point and original route (plot both in normal and zoom)
 for axis in [ax, axins]:

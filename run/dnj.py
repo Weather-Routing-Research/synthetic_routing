@@ -41,7 +41,7 @@ def main(
         list_routes = next(dnj_random_guess)
         # Accelerate the number of iterations
         dnj_random_guess.num_iter = idx + 2
-        vectorfield.plot(x_min=-1, x_max=7, y_min=-1, y_max=7)
+        vectorfield.plot(extent=(-1, 7, -1, 7))
         for route in list_routes:
             plt.plot(route.x, route.y, color="green")
         plt.scatter([q0[0], q1[0]], [q0[1], q1[1]], c="red")

@@ -48,9 +48,7 @@ list_routes = next(dnj)
 
 # Initialize figure with vectorfield
 plt.figure(figsize=(5, 5))
-vectorfield.plot(
-    x_min=-2, x_max=8, y_min=-2, y_max=8, step=0.25, color="grey", alpha=0.8
-)
+vectorfield.plot(extent=(2, 8, -2, 8), step=0.25, color="grey", alpha=0.8)
 plt.gca().set_aspect("equal")
 ticks = np.arange(-2, 7, 1)
 plt.xticks(ticks)

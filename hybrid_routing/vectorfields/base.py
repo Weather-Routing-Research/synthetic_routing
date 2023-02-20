@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Iterable, Tuple
+from typing import Iterable, Optional, Tuple
 
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
@@ -226,10 +226,7 @@ class Vectorfield(ABC):
 
     def plot(
         self,
-        x_min: float = -4,
-        x_max: float = 4,
-        y_min: float = -4,
-        y_max: float = 4,
+        extent: Optional[Tuple[float]] = None,
         step: float = 1,
         do_color: bool = False,
         **kwargs
@@ -238,19 +235,15 @@ class Vectorfield(ABC):
 
         Parameters
         ----------
-        x_min : float, optional
-            Left limit of X axes, by default 0
-        x_max : float, optional
-            Right limit of X axes, by default 125
-        y_min : float, optional
-            Bottom limit of Y axes, by default 0
-        y_max : float, optional
-            Up limit of Y axes, by default 125
+        extent : Tuple[float]
         step : float, optional
             Distance between points to plot, by default .5
         do_color : bool, optional
             Plot a background color indicating the strength of the current
         """
+        if extent is None:
+            extent = (-4, 4, -4, 4)
+        x_min, x_max, y_min, y_max = extent
         # Quiver
         x, y = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
         u, v = self.get_current(x, y)
@@ -377,10 +370,7 @@ class VectorfieldDiscrete(Vectorfield):
 
     def plot(
         self,
-        x_min: float = -4,
-        x_max: float = 4,
-        y_min: float = -4,
-        y_max: float = 4,
+        extent: Optional[Tuple[float]] = None,
         step: float = 1,
         do_color: bool = False,
         **kwargs
@@ -389,19 +379,19 @@ class VectorfieldDiscrete(Vectorfield):
 
         Parameters
         ----------
-        x_min : float, optional
-            Left limit of X axes, by default 0
-        x_max : float, optional
-            Right limit of X axes, by default 125
-        y_min : float, optional
-            Bottom limit of Y axes, by default 0
-        y_max : float, optional
-            Up limit of Y axes, by default 125
+        extent : Tuple[float]
         step : float, optional
             Distance between points to plot (in radians), by default 1
         do_color : bool, optional
             Plot a background color indicating the strength of the current
         """
+        if extent is None:
+            x_min = self.arr_x.min()
+            x_max = self.arr_x.max()
+            y_min = self.arr_y.min()
+            y_max = self.arr_y.max()
+        else:
+            x_min, x_max, y_min, y_max = extent
         # Compute the step for the discrete arrays
         s = int(max(1, step // np.mean(np.abs(np.diff(self.arr_x)))))
         idx = jnp.argwhere((self.arr_x >= x_min) & (self.arr_x <= x_max)).flatten()

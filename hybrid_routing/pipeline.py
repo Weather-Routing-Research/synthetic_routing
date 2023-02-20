@@ -1,8 +1,9 @@
+import time
 from copy import deepcopy
 from importlib import import_module
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
-import time
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -301,49 +302,42 @@ class Pipeline:
             raise AttributeError("DNJ step is missing. Run `solve_dnj` first.")
 
         # Vectorfield
-        if extent is not None:
-            xmin, xmax, ymin, ymax = extent
-        elif self.real:
-            xmin = self.vectorfield.arr_x.min()
-            xmax = self.vectorfield.arr_x.max()
-            ymin = self.vectorfield.arr_y.min()
-            ymax = self.vectorfield.arr_y.max()
-        else:
-            xmin, xmax, ymin, ymax = [
-                self.route_dnj.x.min() * 0.9,
-                self.route_dnj.x.max() * 1.1,
-                self.route_dnj.y.min() * 0.9,
-                self.route_dnj.y.max() * 1.1,
-            ]
-
         if self.real:
+            if extent is None:
+                extent = (
+                    self.vectorfield.arr_x.min(),
+                    self.vectorfield.arr_x.max(),
+                    self.vectorfield.arr_y.min(),
+                    self.vectorfield.arr_y.max(),
+                )
             self.vectorfield.plot(
-                step=1 * DEG2RAD,
+                extent=extent,
+                step=DEG2RAD,
                 color="grey",
                 alpha=0.8,
                 do_color=True,
-                x_min=xmin,
-                x_max=xmax,
-                y_min=ymin,
-                y_max=ymax,
             )
             plot_ticks_radians_to_degrees(step=5)
             # Times to hours
             times = (self.route_zivp.t[-1] / 3600, self.route_dnj.t[-1] / 3600)
         else:
+            if extent is None:
+                extent = (
+                    self.route_dnj.x.min() - 1,
+                    self.route_dnj.x.max() + 1,
+                    self.route_dnj.y.min() - 1,
+                    self.route_dnj.y.max() + 1,
+                )
             self.vectorfield.plot(
+                extent=extent,
                 step=0.25,
                 color="grey",
                 alpha=0.8,
                 do_color=False,
-                x_min=xmin,
-                x_max=xmax,
-                y_min=ymin,
-                y_max=ymax,
             )
-            xticks = np.arange(xmin, xmax, 1)
+            xticks = np.arange(extent[0], extent[1], 1)
             plt.xticks(xticks)
-            yticks = np.arange(ymin, ymax, 1)
+            yticks = np.arange(extent[2], extent[3], 1)
             plt.yticks(yticks)
             # Times in not unit
             times = (self.route_zivp.t[-1], self.route_dnj.t[-1])
@@ -385,8 +379,7 @@ class Pipeline:
         plot_textbox(p0, pn, times, pos=textbox_pos, align=textbox_align)
 
         # Set plot limits
-        if extent is not None:
-            plt.xlim(xmin, xmax)
-            plt.ylim(ymin, ymax)
+        plt.xlim(extent[0], extent[1])
+        plt.ylim(extent[2], extent[3])
 
         plt.tight_layout()

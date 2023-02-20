@@ -137,10 +137,7 @@ def plot_routes(
     ymax = max([max(r.y) for r in list_route])
 
     vectorfield.plot(
-        x_min=xmin - 2 * step,
-        x_max=xmax + 2 * step,
-        y_min=ymin - 2 * step,
-        y_max=ymax + 2 * step,
+        extent=(xmin - 2 * step, xmax + 2 * step, ymin - 2 * step, ymax + 2 * step),
         step=step,
         do_color=True,
         **kwargs,
