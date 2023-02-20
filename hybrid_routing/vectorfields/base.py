@@ -8,7 +8,7 @@ import numpy as np
 from jax import jacfwd, jacrev, jit
 
 from hybrid_routing.geometry import Euclidean, Geometry, Spherical
-from hybrid_routing.geometry.spherical import RAD2M
+from hybrid_routing.geometry.spherical import DEG2RAD, RAD2M
 
 
 class Vectorfield(ABC):
@@ -431,4 +431,8 @@ class VectorfieldDiscrete(Vectorfield):
                 alpha=0.75 * kwargs.get("alpha", 1),
             )
         # Plot the quiver
+        if "units" not in kwargs.keys():
+            kwargs["units"] = "xy"
+        if str(self.geometry).lower() == "spherical" and "scale" not in kwargs.keys():
+            kwargs["scale"] = float(1 / DEG2RAD)
         plt.quiver(xx, yy, u, v, **kwargs)
