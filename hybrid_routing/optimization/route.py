@@ -31,7 +31,7 @@ class Route:
             self.geometry = geometry
         elif isinstance(geometry, str):
             module = import_module("hybrid_routing.geometry")
-            self.geometry: Geometry = getattr(module, geometry)()
+            self.geometry: Geometry = getattr(module, geometry.capitalize())()
         else:
             self.geometry = Euclidean()
 
