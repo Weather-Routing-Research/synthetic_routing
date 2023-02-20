@@ -42,8 +42,7 @@ Create output folder
 """
 
 # Custom folder for this date
-today = dt.date.today().strftime("%y-%m-%d")
-path_out: Path = Path(f"output/{today}")
+path_out: Path = Path("output/")
 if not path_out.exists():
     path_out.mkdir()
 
