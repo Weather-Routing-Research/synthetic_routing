@@ -267,7 +267,7 @@ class Vectorfield(ABC):
                 m,
                 origin="lower",
                 extent=[x_min, x_max, y_min, y_max],
-                alpha=0.6,
+                alpha=0.75 * kwargs.get("alpha", 1),
             )
         plt.quiver(x, y, u, v, **kwargs)
 
@@ -428,7 +428,7 @@ class VectorfieldDiscrete(Vectorfield):
                     self.arr_y[idy[0]],
                     self.arr_y[idy[-1]],
                 ],
-                alpha=0.6,
+                alpha=0.75 * kwargs.get("alpha", 1),
             )
         # Plot the quiver
         plt.quiver(xx, yy, u, v, **kwargs)
