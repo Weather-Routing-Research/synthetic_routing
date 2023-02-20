@@ -5,6 +5,9 @@ import numpy as np
 from matplotlib.axes import Axes
 
 from hybrid_routing.geometry import DEG2RAD
+from hybrid_routing.optimization import Route
+from hybrid_routing.vectorfields import VectorfieldReal
+from hybrid_routing.vectorfields.base import Vectorfield
 
 
 def plot_ticks_radians_to_degrees(
@@ -90,3 +93,72 @@ def plot_textbox(
         verticalalignment=align,
         bbox=dict_bbox,
     )
+
+
+def plot_routes(
+    list_route: List[Route],
+    vectorfield: Vectorfield,
+    vel: Optional[int] = None,
+    legend: bool = True,
+):
+    """Plot a list of routes, adding its time and distance to the legend. If the
+    vector field is real, both the vector field and the routes are assumed to have
+    SI units (meters, seconds, radians).
+
+    Parameters
+    ----------
+    list_route : List[Route]
+        List of routes to plot
+    vectorfield : Vectorfield
+        Vectorfield where the routes are plotted on
+    vel : Optional[int], optional
+        Velocity to recompute times, by default None
+    legend : bool, optional
+        Add the legend with times and distances, by default True
+    """
+    # If the vector field is real, we will use SI units
+    si_units = isinstance(vectorfield, VectorfieldReal)
+    if si_units:
+        step = DEG2RAD
+        prop_time = 1 / 3600
+        prop_dist = 1 / 1000
+    else:
+        step = 1
+        prop_time = 1
+        prop_dist = 1
+
+    # Limits of the vector field
+    xmin = min([min(r.x) for r in list_route])
+    xmax = max([max(r.x) for r in list_route])
+    ymin = min([min(r.y) for r in list_route])
+    ymax = max([max(r.y) for r in list_route])
+
+    vectorfield.plot(
+        x_min=xmin - 2 * step,
+        x_max=xmax + 2 * step,
+        y_min=ymin - 2 * step,
+        y_max=ymax + 2 * step,
+        step=step,
+        do_color=True,
+        alpha=0.8,
+    )
+
+    # Loop over and plot the routes
+    for route in list_route:
+        if vel:
+            route.recompute_times(vel, vectorfield)
+        time = route.t[-1] * prop_time
+        dist = sum(route.d) * prop_dist
+
+        # Plot route
+        if si_units:
+            label = f"{dist:.2f} km | {time:.2f} h"
+        else:
+            label = f"dist = {dist:.2f} | t = {time:.2f}"
+        plt.plot(route.x, route.y, linewidth=3, label=label)
+
+    if si_units:
+        plot_ticks_radians_to_degrees(step=5)
+
+    if legend:
+        plt.legend()
