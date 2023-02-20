@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
+from matplotlib.pylab import cm
 
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.optimization import Route
@@ -99,7 +100,9 @@ def plot_routes(
     list_route: List[Route],
     vectorfield: Vectorfield,
     vel: Optional[int] = None,
+    step: int = 1,
     legend: bool = True,
+    **kwargs,
 ):
     """Plot a list of routes, adding its time and distance to the legend. If the
     vector field is real, both the vector field and the routes are assumed to have
@@ -119,11 +122,11 @@ def plot_routes(
     # If the vector field is real, we will use SI units
     si_units = isinstance(vectorfield, VectorfieldReal)
     if si_units:
-        step = DEG2RAD
+        step = step * DEG2RAD
         prop_time = 1 / 3600
         prop_dist = 1 / 1000
     else:
-        step = 1
+        step = step
         prop_time = 1
         prop_dist = 1
 
@@ -140,11 +143,14 @@ def plot_routes(
         y_max=ymax + 2 * step,
         step=step,
         do_color=True,
-        alpha=0.8,
+        **kwargs,
     )
 
+    # Use a scale of colors distinct from the color map
+    colors = cm.gist_heat(np.linspace(0.1, 0.9, len(list_route)))
+
     # Loop over and plot the routes
-    for route in list_route:
+    for idx, route in enumerate(list_route):
         if vel:
             route.recompute_times(vel, vectorfield)
         time = route.t[-1] * prop_time
@@ -155,7 +161,7 @@ def plot_routes(
             label = f"{dist:.2f} km | {time:.2f} h"
         else:
             label = f"dist = {dist:.2f} | t = {time:.2f}"
-        plt.plot(route.x, route.y, linewidth=3, label=label)
+        plt.plot(route.x, route.y, color=colors[idx], linewidth=3, label=label)
 
     if si_units:
         plot_ticks_radians_to_degrees(step=5)
