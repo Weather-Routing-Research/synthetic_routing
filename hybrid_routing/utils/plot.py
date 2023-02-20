@@ -7,7 +7,6 @@ from matplotlib.pylab import cm
 
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.optimization import Route
-from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
 
 
@@ -99,6 +98,7 @@ def plot_textbox(
 def plot_routes(
     list_route: List[Route],
     vectorfield: Vectorfield,
+    labels: Optional[List[str]] = None,
     vel: Optional[int] = None,
     step: int = 1,
     legend: bool = True,
@@ -120,7 +120,7 @@ def plot_routes(
         Add the legend with times and distances, by default True
     """
     # If the vector field is real, we will use SI units
-    si_units = isinstance(vectorfield, VectorfieldReal)
+    si_units = str(vectorfield.geometry).lower() == "spherical"
     if si_units:
         step = step * DEG2RAD
         prop_time = 1 / 3600
@@ -161,10 +161,20 @@ def plot_routes(
             label = f"{dist:.2f} km | {time:.2f} h"
         else:
             label = f"dist = {dist:.2f} | t = {time:.2f}"
+        if labels:
+            label = labels[idx] + " | " + label
         plt.plot(route.x, route.y, color=colors[idx], linewidth=3, label=label)
 
     if si_units:
         plot_ticks_radians_to_degrees(step=5)
 
     if legend:
-        plt.legend()
+        legend = plt.legend()
+        # get the width of your widest label, since every label will need
+        # to shift by this amount after we align to the right
+        # https://stackoverflow.com/questions/7936034/text-alignment-in-a-matplotlib-legend
+        max_shift = max([t.get_window_extent().width for t in legend.get_texts()])
+        for t in legend.get_texts():
+            t.set_ha("right")  # ha is alias for horizontalalignment
+            temp_shift = max_shift - t.get_window_extent().width
+            t.set_position((temp_shift, 0))
