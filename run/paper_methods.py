@@ -44,11 +44,6 @@ optimizer = Optimizer(
 )
 
 
-"""
-Run Runge-Kutta method and plot its result
-"""
-
-
 # Initialize figure with vectorfield
 # We encapsulate this code into a function because we are reusing it later
 def plot_vectorfield():
@@ -58,25 +53,6 @@ def plot_vectorfield():
     ticks = np.arange(-5, 20, 5)
     plt.xticks(ticks)
     plt.yticks(ticks)
-
-
-plot_vectorfield()
-
-# Plot source point
-plt.scatter(x0, y0, c="green", s=20, zorder=10)
-
-# Initial conditions of each segment (only angle varies)
-x = np.repeat(x0, 5)
-y = np.repeat(y0, 5)
-theta = np.linspace(1, 5, 5) * -np.pi / 4
-
-# Run RK method and plot each segment
-list_segments = optimizer.solve_ivp(x, y, theta)
-for segment in list_segments:
-    x, y = segment.x, segment.y
-    plt.plot(x, y, c="black", alpha=0.9, zorder=5)
-    plt.scatter(x[1:-1], y[1:-1], c="orange", s=10, zorder=10)
-    plt.scatter(x[-1], y[-1], c="red", s=20, zorder=10)
 
 
 def write_textbox(
@@ -117,15 +93,38 @@ def write_textbox(
     return eq
 
 
+"""
+Run Runge-Kutta method and plot its result
+"""
+
+plot_vectorfield()
+
+# Plot source point
+plt.scatter(x0, y0, c="green", s=20, zorder=10)
+
+# Initial conditions of each segment (only angle varies)
+x = np.repeat(x0, 5)
+y = np.repeat(y0, 5)
+theta = np.linspace(1, 5, 5) * -np.pi / 4
+
+# Run RK method and plot each segment
+list_segments = optimizer.solve_ivp(x, y, theta, time_iter=4)
+for segment in list_segments:
+    x, y = segment.x, segment.y
+    plt.plot(x, y, c="black", alpha=0.9, zorder=5)
+    plt.scatter(x[1:-1], y[1:-1], c="orange", s=10, zorder=10)
+    plt.scatter(x[-1], y[-1], c="red", s=20, zorder=10)
+
+
 # Add equations
 bbox = {"boxstyle": "round", "facecolor": "white", "alpha": 1}
 thetas = [float(route.theta[0]) for route in list_segments]
 eq_rk = write_textbox((x0, y0), optimizer.vel, thetas=thetas)
-plt.text(-4.5, -4.5, eq_rk, fontsize=10, verticalalignment="bottom", bbox=bbox)
+plt.text(-4.5, -5.5, eq_rk, fontsize=10, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
 plt.xlim(-5, 15)
-plt.ylim(-5, 12)
+plt.ylim(-6, 12)
 plt.tight_layout()
 plt.savefig(path_out / "methods_runge_kutta.png")
 plt.close()
