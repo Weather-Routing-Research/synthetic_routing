@@ -63,7 +63,7 @@ def write_textbox(
     highlight_first: bool = False,
 ) -> str:
     eq = (
-        r"$W(x_1,x_2) = \left\langle 0.05\cdot (x_2+1), -0.05\cdot(x_1+3)\right\rangle$"
+        r"$W(x_1,x_2) = \left\langle \frac{x_2+1}{20}, -\frac{x_1+3}{20}\right\rangle$"
         + "\n"
         + r"$\left\langle x_1^{(0)}, x_2^{(0)} \right\rangle = \left\langle "
         + f"{p0[0]:.0f}, {p0[1]:.0f}"
