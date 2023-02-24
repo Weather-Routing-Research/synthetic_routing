@@ -84,6 +84,7 @@ def write_textbox(
     vel: float,
     pn: Optional[Tuple[float]] = None,
     thetas: Optional[Tuple[float]] = None,
+    highlight_first: bool = False,
 ) -> str:
     eq = (
         r"$W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$"
@@ -104,7 +105,7 @@ def write_textbox(
     if thetas:
         eq += r"$\theta_0 = "
         thetas = [(180 * t / np.pi) for t in thetas]
-        t_first = thetas[0]
+        t_first = thetas[0] if highlight_first else -999
         list_thetas = []
         for t in sorted(thetas):
             if t == t_first:
@@ -183,7 +184,9 @@ for theta in arr_theta:
 
 # Add equations
 thetas = [route.theta[0] for route in list_routes_plot]
-eq_explo = write_textbox((x0, y0), optimizer.vel, pn=(xn, yn), thetas=thetas)
+eq_explo = write_textbox(
+    (x0, y0), optimizer.vel, pn=(xn, yn), thetas=thetas, highlight_first=True
+)
 plt.text(-6.5, 15.5, eq_explo, fontsize=10, verticalalignment="top", bbox=bbox)
 
 # Store plot
@@ -222,7 +225,9 @@ for theta in arr_theta:
 
 # Add equations
 thetas = [route.theta[0] for route in list_routes_plot]
-eq_explo = write_textbox((x0, y0), optimizer.vel, pn=(xn, yn), thetas=thetas)
+eq_explo = write_textbox(
+    (x0, y0), optimizer.vel, pn=(xn, yn), thetas=thetas, highlight_first=True
+)
 plt.text(-6.5, -6.5, eq_explo, fontsize=10, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
