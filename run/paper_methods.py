@@ -4,7 +4,7 @@ Generate all the figures used in the paper. Methods section
 
 from copy import deepcopy
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -78,15 +78,47 @@ for segment in list_segments:
     plt.scatter(x[1:-1], y[1:-1], c="orange", s=10, zorder=10)
     plt.scatter(x[-1], y[-1], c="red", s=20, zorder=10)
 
+
+def write_textbox(
+    p0: Tuple[float],
+    vel: float,
+    pn: Optional[Tuple[float]] = None,
+    thetas: Optional[Tuple[float]] = None,
+) -> str:
+    eq = (
+        r"$W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$"
+        + "\n"
+        + r"$\left\langle x_0, y_0 \right\rangle = \left\langle "
+        + f"{p0[0]:.1f}, {p0[1]:.1f}"
+        + r"\right\rangle$"
+        + "\n"
+    )
+    if pn:
+        eq += (
+            r"$\left\langle x_T, y_T \right\rangle = \left\langle "
+            + f"{pn[0]:.1f}, {pn[1]:.1f}"
+            + r"\right\rangle$"
+            + "\n"
+        )
+    eq += r"$V_{vessel}$ = " + f"{vel:.1f}\n"
+    if thetas:
+        eq += r"$\theta_0 = "
+        thetas = [(180 * t / np.pi) for t in thetas]
+        t_first = thetas[0]
+        list_thetas = []
+        for t in sorted(thetas):
+            if t == t_first:
+                list_thetas.append(r"\mathbf{" + f"{t:.0f}" + r"}\degree")
+            else:
+                list_thetas.append(f"{t:.0f}" + r"\degree")
+        eq += ", ".join(list_thetas) + r"$"
+    return eq
+
+
 # Add equations
 bbox = {"boxstyle": "round", "facecolor": "white", "alpha": 1}
-eq_rk = r"""
-$W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$
-$\left\langle x_0, y_0 \right\rangle = \left\langle 8, 8 \right\rangle$
-$V_{vessel} = {VelVessel}$
-$\theta_0 = \frac{-\pi}{4}, \frac{-\pi}{2}, \frac{-3\pi}{4}, -\pi, \frac{-5\pi}{4}$
-"""
-eq_rk = eq_rk.replace("{VelVessel}", f"{optimizer.vel:.1f}")
+thetas = [float(route.theta[0]) for route in list_segments]
+eq_rk = write_textbox((x0, y0), optimizer.vel, thetas=thetas)
 plt.text(-4.5, -4.5, eq_rk, fontsize=10, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
@@ -150,14 +182,8 @@ for theta in arr_theta:
     plt.plot(x, y, linestyle="--", color="orange", alpha=1, zorder=3)
 
 # Add equations
-eq_explo = r"""
-$W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$
-$\left\langle x_0, y_0 \right\rangle = \left\langle 12, -4 \right\rangle$
-$\left\langle x_T, y_T \right\rangle = \left\langle 4, 14 \right\rangle$
-$V_{vessel} = {VelVessel}$
-$\theta_0 = \frac{3 \pi}{8}, \frac{\pi}{2}, \frac{5\pi}{8}, \mathbf{\frac{3\pi}{4}}, \frac{7\pi}{8}$
-"""
-eq_explo = eq_explo.replace("{VelVessel}", f"{optimizer.vel:.1f}")
+thetas = [route.theta[0] for route in list_routes_plot]
+eq_explo = write_textbox((x0, y0), optimizer.vel, pn=(xn, yn), thetas=thetas)
 plt.text(-6.5, 15.5, eq_explo, fontsize=10, verticalalignment="top", bbox=bbox)
 
 # Store plot
@@ -195,14 +221,8 @@ for theta in arr_theta:
     plt.plot(x, y, linestyle="--", color="orange", alpha=1, zorder=3)
 
 # Add equations
-eq_explo = r"""
-$W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$
-$\left\langle x_0, y_0 \right\rangle = \left\langle 12, -4 \right\rangle$
-$\left\langle x_T, y_T \right\rangle = \left\langle 4, 14 \right\rangle$
-$V_{vessel} = {VelVessel}$
-$\theta_0 = \frac{13 \pi}{20}, \frac{7\pi}{10}, \frac{3\pi}{4}, \mathbf{\frac{4\pi}{5}}, \frac{17\pi}{20}$
-"""
-eq_explo = eq_explo.replace("{VelVessel}", f"{optimizer.vel:.1f}")
+thetas = [route.theta[0] for route in list_routes_plot]
+eq_explo = write_textbox((x0, y0), optimizer.vel, pn=(xn, yn), thetas=thetas)
 plt.text(-6.5, -6.5, eq_explo, fontsize=10, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
@@ -228,13 +248,8 @@ plot_vectorfield()
 plot_routes([route])
 
 # Add equations
-eq_opt = r"""
-$W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$
-$\left\langle x_0, y_0 \right\rangle = \left\langle 12, -4 \right\rangle$
-$\left\langle x_T, y_T \right\rangle = \left\langle 4, 14 \right\rangle$
-$V_{vessel} = {VelVessel}$
-"""
-eq_opt = eq_opt.replace("{VelVessel}", f"{optimizer.vel:.1f}")
+thetas = [route.theta[0] for route in list_routes_plot]
+eq_opt = write_textbox((x0, y0), optimizer.vel, pn=(xn, yn))
 plt.text(-6.5, -6.5, eq_opt, fontsize=10, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
