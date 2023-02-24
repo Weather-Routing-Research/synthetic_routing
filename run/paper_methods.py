@@ -101,8 +101,9 @@ def write_textbox(
             + r"\right\rangle$"
             + "\n"
         )
-    eq += r"$V_{vessel}$ = " + f"{vel:.1f}\n"
+    eq += r"$V_{vessel}$ = " + f"{vel:.1f}"
     if thetas:
+        eq += "\n"
         eq += r"$\theta_0 = "
         thetas = [(180 * t / np.pi) for t in thetas]
         t_first = thetas[0] if highlight_first else -999
@@ -187,10 +188,10 @@ thetas = [route.theta[0] for route in list_routes_plot]
 eq_explo = write_textbox(
     (x0, y0), optimizer.vel, pn=(xn, yn), thetas=thetas, highlight_first=True
 )
-plt.text(-6.5, 15.5, eq_explo, fontsize=10, verticalalignment="top", bbox=bbox)
+plt.text(-7.5, 15.5, eq_explo, fontsize=9, verticalalignment="top", bbox=bbox)
 
 # Store plot
-plt.xlim(-7, 16)
+plt.xlim(-8, 16)
 plt.ylim(-7, 16)
 plt.tight_layout()
 plt.savefig(path_out / "methods_hybrid_exploration.png")
@@ -228,10 +229,10 @@ thetas = [route.theta[0] for route in list_routes_plot]
 eq_explo = write_textbox(
     (x0, y0), optimizer.vel, pn=(xn, yn), thetas=thetas, highlight_first=True
 )
-plt.text(-6.5, -6.5, eq_explo, fontsize=10, verticalalignment="bottom", bbox=bbox)
+plt.text(-7.5, -6.5, eq_explo, fontsize=9, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
-plt.xlim(-7, 16)
+plt.xlim(-8, 16)
 plt.ylim(-7, 16)
 plt.tight_layout()
 plt.savefig(path_out / "methods_hybrid_exploitation.png")
