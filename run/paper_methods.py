@@ -83,16 +83,17 @@ bbox = {"boxstyle": "round", "facecolor": "white", "alpha": 1}
 eq_rk = r"""
 $W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$
 $\left\langle x_0, y_0 \right\rangle = \left\langle 8, 8 \right\rangle$
-$V_{vessel} = 1.5$
+$V_{vessel} = {VelVessel}$
 $\theta_0 = \frac{-\pi}{4}, \frac{-\pi}{2}, \frac{-3\pi}{4}, -\pi, \frac{-5\pi}{4}$
 """
+eq_rk = eq_rk.replace("{VelVessel}", f"{optimizer.vel:.1f}")
 plt.text(-4.5, -4.5, eq_rk, fontsize=10, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
 plt.xlim(-5, 15)
 plt.ylim(-5, 12)
 plt.tight_layout()
-plt.savefig(path_out / "runge-kutta.png")
+plt.savefig(path_out / "methods_runge_kutta.png")
 plt.close()
 
 print("Runge-Kutta - Finished")
@@ -153,16 +154,17 @@ eq_explo = r"""
 $W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$
 $\left\langle x_0, y_0 \right\rangle = \left\langle 12, -4 \right\rangle$
 $\left\langle x_T, y_T \right\rangle = \left\langle 4, 14 \right\rangle$
-$V_{vessel} = 1.5$
+$V_{vessel} = {VelVessel}$
 $\theta_0 = \frac{3 \pi}{8}, \frac{\pi}{2}, \frac{5\pi}{8}, \mathbf{\frac{3\pi}{4}}, \frac{7\pi}{8}$
 """
+eq_explo = eq_explo.replace("{VelVessel}", f"{optimizer.vel:.1f}")
 plt.text(-6.5, 15.5, eq_explo, fontsize=10, verticalalignment="top", bbox=bbox)
 
 # Store plot
 plt.xlim(-7, 16)
 plt.ylim(-7, 16)
 plt.tight_layout()
-plt.savefig(path_out / "hybrid-exploration.png")
+plt.savefig(path_out / "methods_hybrid_exploration.png")
 plt.close()
 
 print("Exploration step - Finished")
@@ -181,8 +183,9 @@ plot_vectorfield()
 plot_routes(list_routes_plot)
 
 # Compute angles
+angle_best = list_routes_plot[0].theta[0]
 arr_theta = compute_thetas_in_cone(
-    3 * np.pi / 4, optimizer.angle_amplitude / 5, optimizer.num_angles
+    angle_best, optimizer.angle_amplitude / 5, optimizer.num_angles
 )
 
 # Plot original angles
@@ -196,16 +199,17 @@ eq_explo = r"""
 $W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$
 $\left\langle x_0, y_0 \right\rangle = \left\langle 12, -4 \right\rangle$
 $\left\langle x_T, y_T \right\rangle = \left\langle 4, 14 \right\rangle$
-$V_{vessel} = 1.5$
+$V_{vessel} = {VelVessel}$
 $\theta_0 = \frac{13 \pi}{20}, \frac{7\pi}{10}, \frac{3\pi}{4}, \mathbf{\frac{4\pi}{5}}, \frac{17\pi}{20}$
 """
+eq_explo = eq_explo.replace("{VelVessel}", f"{optimizer.vel:.1f}")
 plt.text(-6.5, -6.5, eq_explo, fontsize=10, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
 plt.xlim(-7, 16)
 plt.ylim(-7, 16)
 plt.tight_layout()
-plt.savefig(path_out / "hybrid-exploitation.png")
+plt.savefig(path_out / "methods_hybrid_exploitation.png")
 plt.close()
 
 print("Exploitation step - Finished")
@@ -228,15 +232,16 @@ eq_opt = r"""
 $W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$
 $\left\langle x_0, y_0 \right\rangle = \left\langle 12, -4 \right\rangle$
 $\left\langle x_T, y_T \right\rangle = \left\langle 4, 14 \right\rangle$
-$V_{vessel} = 1.5$
+$V_{vessel} = {VelVessel}$
 """
+eq_opt = eq_opt.replace("{VelVessel}", f"{optimizer.vel:.1f}")
 plt.text(-6.5, -6.5, eq_opt, fontsize=10, verticalalignment="bottom", bbox=bbox)
 
 # Store plot
 plt.xlim(-7, 16)
 plt.ylim(-7, 16)
 plt.tight_layout()
-plt.savefig(path_out / "hybrid-optimized.png")
+plt.savefig(path_out / "methods_hybrid_optimized.png")
 plt.close()
 
 print("Optimization - Finished")
@@ -297,7 +302,7 @@ ax.set_ylim(-7, 16)
 # Store plot
 plt.draw()
 fig.tight_layout()
-plt.savefig(path_out / "hybrid-dnj.png")
+plt.savefig(path_out / "methods_hybrid_dnj.png")
 plt.close()
 
 print("DNJ - Finished")
