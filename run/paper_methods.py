@@ -63,24 +63,23 @@ def write_textbox(
     highlight_first: bool = False,
 ) -> str:
     eq = (
-        r"$W(x,y) = \left\langle \frac{y+1}{20}, -\frac{x+3}{20}\right\rangle$"
+        r"$W(x_1,x_2) = \left\langle 0.05\cdot (x_2+1), -0.05\cdot(x_1+3)\right\rangle$"
         + "\n"
-        + r"$\left\langle x_0, y_0 \right\rangle = \left\langle "
-        + f"{p0[0]:.1f}, {p0[1]:.1f}"
+        + r"$\left\langle x_1^{(0)}, x_2^{(0)} \right\rangle = \left\langle "
+        + f"{p0[0]:.0f}, {p0[1]:.0f}"
         + r"\right\rangle$"
         + "\n"
     )
     if pn:
         eq += (
-            r"$\left\langle x_T, y_T \right\rangle = \left\langle "
-            + f"{pn[0]:.1f}, {pn[1]:.1f}"
+            r"$\left\langle x_1^{(T)}, x_2^{(T)} \right\rangle = \left\langle "
+            + f"{pn[0]:.0f}, {pn[1]:.0f}"
             + r"\right\rangle$"
             + "\n"
         )
     eq += r"$V_{vessel}$ = " + f"{vel:.1f}"
     if thetas:
-        eq += "\n"
-        eq += r"$\theta_0 = "
+        eq += "\n" + r"$\alpha^{(0)} = "
         thetas = [(180 * t / np.pi) for t in thetas]
         t_first = thetas[0] if highlight_first else -999
         list_thetas = []
