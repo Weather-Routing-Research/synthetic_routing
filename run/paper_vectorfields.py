@@ -33,7 +33,7 @@ for dict_vf in list_vf:
     key = dict_vf["key"]
     vf = VectorfieldReal.from_folder(dict_vf["path"], key, radians=dict_vf["si_units"])
     vf.plot(step=DEG2RAD, do_color=True)
-    plot_ticks_radians_to_degrees(step=5)
+    plot_ticks_radians_to_degrees(step=6)
     plt.scatter(p0[0], p0[1], s=20, c="y")
     plt.scatter(pn[0], pn[1], s=20, c="r")
     plt.tight_layout()
