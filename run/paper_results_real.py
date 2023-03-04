@@ -7,6 +7,6 @@ from hybrid_routing.pipeline import run_pipelines
 run_pipelines(
     "real",
     path_config="data/config.toml",
-    path_out="output_real",
+    path_out="output",
     max_thread=6,
 )

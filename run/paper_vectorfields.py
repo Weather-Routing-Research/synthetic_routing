@@ -8,8 +8,7 @@ from hybrid_routing.utils.config import load_config
 from hybrid_routing.utils.plot import plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
 
-config = load_config("data/config.toml", "real")
-list_benchmark = config.tolist()
+list_benchmark = load_config("data/config.toml", "real").tolist()
 
 path_data = "./data"
 path_out = Path("output/")
