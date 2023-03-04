@@ -1,14 +1,18 @@
+import json
 import time
 from copy import deepcopy
 from importlib import import_module
 from pathlib import Path
+from threading import Thread
 from typing import Dict, List, Optional, Tuple, Union
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
 from hybrid_routing.geometry import DEG2RAD, Geometry
 from hybrid_routing.optimization import DNJ, Optimizer, Route
+from hybrid_routing.utils.config import load_config
 from hybrid_routing.utils.plot import plot_textbox, plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
 from hybrid_routing.vectorfields.base import Vectorfield
@@ -401,3 +405,92 @@ class Pipeline:
         plt.ylim(extent[2], extent[3])
 
         plt.tight_layout()
+
+
+def run_pipelines(
+    key: str,
+    path_config: str = "data/config.toml",
+    path_out: Union[str, Path] = "output",
+    max_thread: int = 6,
+):
+    """Run the benchmarks defined by a configuration `toml` file
+
+    Parameters
+    ----------
+    key : str
+        Group of benchmarks, for instance "synthetic" or "real"
+    path_config : str, optional
+        Path to the configuration file, by default "data/config.toml"
+    path_out : str, optional
+        Output path, by default "output"
+    max_thread : int, optional
+        Maximum number of threads allowed, by default 6
+    """
+    # https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
+    matplotlib.use("Agg")
+
+    list_benchmark = load_config(path_config, key).tolist()
+    dict_zivp = load_config(path_config, "zivp")[key]
+    dict_dnj = load_config(path_config, "dnj")[key]
+
+    list_vel = dict_zivp["vel"]
+    list_vel = list_vel if isinstance(list_vel, List) else [list_vel]
+
+    # Custom folder for this date
+    path_out = Path(path_out) if isinstance(path_out, str) else path_out
+    if not path_out.exists():
+        path_out.mkdir()
+
+    # Maximum number of threads cannot be higher than number of processes
+    max_thread = min(max_thread, len(list_benchmark) * len(list_vel))
+
+    # Initialize list of pipelines
+    list_pipes: List[Pipeline] = [None for n in range(max_thread)]
+
+    def run_pipeline(n_thread: int, dict_pipe: dict, vel: float):
+        print(f"Initializing: {dict_pipe['key']}, vel = {vel}")
+        pipe = Pipeline(**dict_pipe)
+
+        pipe.solve_zivp(**dict_zivp)
+        pipe.compute_geodesic()
+        pipe.solve_dnj(**dict_dnj)
+
+        # Append pipeline to list
+        list_pipes[n_thread] = pipe
+
+        # Decide filename
+        file = path_out / pipe.filename
+
+        # Store in dictionary (json)
+        with open(file.with_suffix(".json"), "w") as outfile:
+            dict_results = pipe.to_dict()
+            json.dump(dict_results, outfile)
+
+        print(f"Done {pipe.filename} vectorfield, {vel} m/s\n---")
+
+    # Initialize list of threads and index
+    threads: List[Thread] = [None for i in range(max_thread)]
+    n_thread = 0
+
+    for dict_pipe in list_benchmark:
+        for vel in list_vel:
+            threads[n_thread] = Thread(
+                target=run_pipeline, args=(n_thread, dict_pipe, vel)
+            )
+            threads[n_thread].start()
+            n_thread += 1
+            # If maximum index is reached, wait for all threads to finish
+            if n_thread == max_thread:
+                # Plot each thread independently, to avoid overlaps
+                for n_thread, t in enumerate(threads):
+                    t.join()  # Waits for thread to finish before plotting
+                    pipe = list_pipes[n_thread]  # Get the associated pipeline
+                    # Decide filename
+                    file = path_out / pipe.filename
+                    # Plot results and store
+                    plt.figure(dpi=120)
+                    pipe.plot()
+                    plt.savefig(file.with_suffix(".png"))
+                    plt.close()
+                # Reset thread number
+                n_thread = 0

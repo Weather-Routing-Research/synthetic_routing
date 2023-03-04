@@ -40,3 +40,27 @@ p0 = [43.49, -1.66] # [lon, lat]
 pn = [98.14, 10.21]
 path = "./data"
 si_units = true
+
+[zivp.synthetic]
+vel = 1
+time_iter = 0.1
+time_step = 0.01
+num_points = 200
+
+[zivp.real]
+vel = [3, 6, 10]
+time_iter = 14400        # 4 hour (4 * 3600 s)
+time_step = 600          # Do not go below 10 min (600 s)
+dist_min = 10000
+num_angles = 21
+angle_amplitude = 1.5708 # 90 degrees
+angle_heading = 0.785398 # 45 degrees
+num_points = 200
+
+[dnj.synthetic]
+num_iter = 10000
+optimize_for = "time"
+
+[dnj.real]
+num_iter = 2000
+optimize_for = "time"
