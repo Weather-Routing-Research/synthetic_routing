@@ -71,8 +71,8 @@ class VectorfieldReal(VectorfieldDiscrete):
         VectorfieldReal
         """
         path = Path(path) if isinstance(path, str) else path
-        df_x = pd.read_csv(path / (name + "-lon.csv"), index_col=0)
-        df_y = pd.read_csv(path / (name + "-lat.csv"), index_col=0)
+        df_x = pd.read_csv(path / (name + "_lon.csv"), index_col=0)
+        df_y = pd.read_csv(path / (name + "_lat.csv"), index_col=0)
         return cls(df_x, df_y, radians=radians)
 
     @partial(jit, static_argnums=(0,))

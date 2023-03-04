@@ -134,8 +134,7 @@ dmypy.json
 # Resources used in this study, but not part of the library
 resources/
 
-# Outputs and data
-data/
+# Outputs
 output/
 
 # VSCode stuff

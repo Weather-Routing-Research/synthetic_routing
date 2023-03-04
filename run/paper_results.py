@@ -11,28 +11,15 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from hybrid_routing.pipeline import Pipeline
+from hybrid_routing.utils.config import load_config
 
 # https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
 matplotlib.use("Agg")
 
 max_thread = 6  # Maximum number of threads allowed
 
-list_benchmark = [
-    dict(p0=(3, 2), pn=(-7, 2), key="Circular", si_units=False),
-    dict(p0=(0, 0), pn=(6, 2), key="FourVortices", si_units=False),  # Ferraro et al.
-]
-dict_plot = {
-    "Circular": {
-        "extent": (-8, 4, -4, 3),
-        "textbox_pos": (0, -3.5),
-        "textbox_align": "bottom",
-    },
-    "FourVortices": {
-        "extent": (-1, 7, -1, 6),
-        "textbox_pos": (1.5, -0.5),
-        "textbox_align": "bottom",
-    },
-}
+config = load_config("data/config.toml", "synthetic")
+list_benchmark = config.tolist()
 
 """
 Create output folder
@@ -81,6 +68,7 @@ threads: List[Thread] = [None for i in range(max_thread)]
 n_thread = 0
 
 for dict_pipe in list_benchmark:
+    dict_plot = dict_pipe.pop("plot")
     threads[n_thread] = Thread(target=run_pipeline, args=(n_thread, dict_pipe))
     threads[n_thread].start()
     n_thread += 1
@@ -94,8 +82,9 @@ for dict_pipe in list_benchmark:
             file = path_out / pipe.filename
             # Plot results and store
             plt.figure(dpi=120)
-            pipe.plot(**dict_plot[pipe.key])
+            pipe.plot(**dict_plot)
             plt.savefig(file.with_suffix(".png"))
             plt.close()
         # Reset thread number
+        n_thread = 0
         n_thread = 0

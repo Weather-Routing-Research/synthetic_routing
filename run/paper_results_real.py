@@ -2,7 +2,6 @@
 Generate all the figures used in the paper. Results section
 """
 
-import datetime as dt
 import json
 from pathlib import Path
 from threading import Thread
@@ -13,29 +12,17 @@ import matplotlib.pyplot as plt
 
 from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.pipeline import Pipeline
+from hybrid_routing.utils.config import load_config
 
 # https://stackoverflow.com/questions/27147300/matplotlib-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread
 matplotlib.use("Agg")
 
 max_thread = 6  # Maximum number of threads allowed
 
-list_benchmark = [
-    dict(
-        p0=(-79.7, 32.7),
-        pn=(-29.5, 38.5),
-        key="real",
-        path="./data",
-        si_units=True,
-    ),
-    dict(
-        p0=(43.49, -1.66),
-        pn=(98.14, 10.21),
-        key="real-land",
-        path="./data",
-        si_units=True,
-    ),
-]
 list_vel = [10, 6, 3]
+
+config = load_config("data/config.toml", "real")
+list_benchmark = config.tolist()
 
 """
 Create output folder
@@ -111,5 +98,6 @@ for dict_pipe in list_benchmark:
                 plt.savefig(file.with_suffix(".png"))
                 plt.close()
             # Reset thread number
+            n_thread = 0
             n_thread = 0
             n_thread = 0

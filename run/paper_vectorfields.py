@@ -4,30 +4,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from hybrid_routing.geometry import DEG2RAD
+from hybrid_routing.utils.config import load_config
 from hybrid_routing.utils.plot import plot_ticks_radians_to_degrees
 from hybrid_routing.vectorfields import VectorfieldReal
 
-list_vf = [
-    dict(
-        p0=(-79.7, 32.7),
-        pn=(-29.5, 38.5),
-        key="real",
-        path="./data",
-        si_units=True,
-    ),
-    dict(
-        p0=(43.49, -1.66),
-        pn=(98.14, 10.21),
-        key="real-land",
-        path="./data",
-        si_units=True,
-    ),
-]
+config = load_config("data/config.toml", "real")
+list_benchmark = config.tolist()
 
 path_data = "./data"
 path_out = Path("output/")
 
-for dict_vf in list_vf:
+for dict_vf in list_benchmark:
     p0 = np.array(dict_vf["p0"]) * DEG2RAD
     pn = np.array(dict_vf["pn"]) * DEG2RAD
     key = dict_vf["key"]

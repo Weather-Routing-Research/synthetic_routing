@@ -1,0 +1,42 @@
+[synthetic.Circular]
+p0 = [3, 2]
+pn = [-7, 2]
+si_units = false
+[synthetic.Circular.plot]
+extent = [-8, 4, -4, 3]
+textbox_pos = [0.0, -3.5]
+textbox_align = "bottom"
+
+[synthetic.FourVortices]
+# Ferraro et al.
+p0 = [0, 0]
+pn = [6, 2]
+si_units = false
+[synthetic.FourVortices.plot]
+extent = [-1, 7, -1, 6]
+textbox_pos = [1.5, -0.5]
+textbox_align = "bottom"
+
+[real.charleston_azores]
+p0 = [-79.7, 32.7] # [lon, lat]
+pn = [-29.5, 38.5]
+path = "./data"
+si_units = true
+
+[real.charleston_cancun]
+p0 = [-79.7, 32.7] # [lon, lat]
+pn = [-86.0, 21.5]
+path = "./data"
+si_units = true
+
+[real.houston_panama]
+p0 = [-94.7, 29.0] # [lon, lat]
+pn = [-80.0, 9.7]
+path = "./data"
+si_units = true
+
+[real.somalia_myanmar_verano]
+p0 = [43.49, -1.66] # [lon, lat]
+pn = [98.14, 10.21]
+path = "./data"
+si_units = true

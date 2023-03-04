@@ -46,16 +46,9 @@ def main(
     #  VECTORFIELD
     ####################################################################################
 
-    # Import vectorfield
-    if vf.lower() == "real":
-        vectorfield = VectorfieldReal.from_folder("./data", "real-land", radians=True)
-        q0 = (43.49 * DEG2RAD, -1.66 * DEG2RAD)
-        q1 = (98.14 * DEG2RAD, 10.21 * DEG2RAD)
-        xlim = (40 * DEG2RAD, 100 * DEG2RAD)
-        ylim = (-25 * DEG2RAD, 30 * DEG2RAD)
-        step = DEG2RAD
-    else:
-        module = import_module("hybrid_routing.vectorfields")
+    module = import_module("hybrid_routing.vectorfields")
+    try:
+        # Check if vector field exists in library
         vectorfield: Vectorfield = getattr(module, vf)()
         if discrete:
             vectorfield = vectorfield.discretize(-10, 10, -10, 10, step=1 / 12)
@@ -64,6 +57,14 @@ def main(
         xlim = (-1, 7)
         ylim = (-1, 7)
         step = 0.4
+    except AttributeError:
+        # If vector field not in library, assume is a real vector field
+        vectorfield = VectorfieldReal.from_folder("./data", vf, radians=True)
+        q0 = (43.49 * DEG2RAD, -1.66 * DEG2RAD)
+        q1 = (98.14 * DEG2RAD, 10.21 * DEG2RAD)
+        xlim = (40 * DEG2RAD, 100 * DEG2RAD)
+        ylim = (-25 * DEG2RAD, 30 * DEG2RAD)
+        step = DEG2RAD
 
     ####################################################################################
     #  Helper function to plot the routes
