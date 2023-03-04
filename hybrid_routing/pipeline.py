@@ -451,7 +451,7 @@ def run_pipelines(
         print(f"Initializing: {dict_pipe['key']}, vel = {vel}")
         pipe = Pipeline(**dict_pipe)
 
-        pipe.solve_zivp(**dict_zivp)
+        pipe.solve_zivp(vel=vel, **dict_zivp)
         pipe.compute_geodesic()
         pipe.solve_dnj(**dict_dnj)
 
