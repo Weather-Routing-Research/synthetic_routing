@@ -430,10 +430,10 @@ def run_pipelines(
     matplotlib.use("Agg")
 
     list_benchmark = load_config(path_config, key).tolist()
-    dict_zivp = load_config(path_config, "zivp")[key]
-    dict_dnj = load_config(path_config, "dnj")[key]
+    dict_zivp: Dict = load_config(path_config, "zivp")[key]
+    dict_dnj: Dict = load_config(path_config, "dnj")[key]
 
-    list_vel = dict_zivp["vel"]
+    list_vel = dict_zivp.pop("vel")
     list_vel = list_vel if isinstance(list_vel, List) else [list_vel]
 
     # Custom folder for this date
