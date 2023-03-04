@@ -68,7 +68,6 @@ threads: List[Thread] = [None for i in range(max_thread)]
 n_thread = 0
 
 for dict_pipe in list_benchmark:
-    dict_plot = dict_pipe.pop("plot")
     threads[n_thread] = Thread(target=run_pipeline, args=(n_thread, dict_pipe))
     threads[n_thread].start()
     n_thread += 1
@@ -82,7 +81,7 @@ for dict_pipe in list_benchmark:
             file = path_out / pipe.filename
             # Plot results and store
             plt.figure(dpi=120)
-            pipe.plot(**dict_plot)
+            pipe.plot()
             plt.savefig(file.with_suffix(".png"))
             plt.close()
         # Reset thread number

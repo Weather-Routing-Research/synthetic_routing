@@ -24,6 +24,7 @@ class Pipeline:
         key: str,
         path: Optional[Union[str, Path]] = None,
         si_units: bool = False,
+        plot: Optional[Dict] = None,
     ):
         """Initialize the pipeline with the start and end point, and the vectorfield
 
@@ -40,6 +41,8 @@ class Pipeline:
             If None, assume vectorfield is synthetic. By default None
         si_units : bool, optional
             Assume units arrive in SI (degrees, meters), by default False
+        plot : Dict, optional
+            Plot configuration, will be used by default when calling plot function
         """
         self.x0, self.y0 = p0
         self.xn, self.yn = pn
@@ -67,6 +70,7 @@ class Pipeline:
         self._routes_dnj: List[Route] = [None] * self._num_dnj
         self.geodesic: Route = None
         self._timeit: Dict[str, int] = {}
+        self._dict_plot = plot if plot is not None else {}
 
     @property
     def filename(self):
@@ -300,6 +304,20 @@ class Pipeline:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
         if self.route_dnj is None:
             raise AttributeError("DNJ step is missing. Run `solve_dnj` first.")
+
+        # The plot parameters may have been predefined in the initial call
+        # If that is the case, use those parameters in case no other were provided
+        extent = extent if extent is not None else self._dict_plot.get("extent", None)
+        textbox_pos = (
+            textbox_pos
+            if textbox_pos is not None
+            else self._dict_plot.get("textbox_pos", None)
+        )
+        textbox_align = (
+            textbox_align
+            if textbox_align is not None
+            else self._dict_plot.get("textbox_align", None)
+        )
 
         # Vectorfield
         if self.real:
