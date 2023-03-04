@@ -87,4 +87,3 @@ for dict_pipe in list_benchmark:
             plt.close()
         # Reset thread number
         n_thread = 0
-        n_thread = 0
