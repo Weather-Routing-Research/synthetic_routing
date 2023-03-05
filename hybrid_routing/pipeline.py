@@ -111,65 +111,18 @@ class Pipeline:
         self.route_zivp = route
         self.optimizer = Optimizer(self.vectorfield, vel=self.vel)
 
-    def solve_zivp(
-        self,
-        time_iter: float = 0.5,
-        time_step: float = 0.025,
-        angle_amplitude: float = np.pi,
-        angle_heading: float = np.pi / 2,
-        num_angles: int = 20,
-        vel: float = 1,
-        dist_min: float = 0.1,
-        max_iter: int = 2000,
-        use_rk: bool = True,
-        method: str = "direction",
-        num_points: Optional[int] = None,
-    ):
+    def solve_zivp(self, vel: float = 1, num_points: Optional[int] = None, **kwargs):
         """Solve the Zermelo Initial Value Problem
 
         Parameters
         ----------
-        time_iter : float, optional
-            The total amount of time the ship is allowed to travel by at each iteration,
-            by default 0.5
-        time_step : float, optional
-            Number of steps to reach from 0 to time_iter (equivalently, how "smooth"
-            each path is), by default 0.025
-        angle_amplitude : float, optional
-            The search cone range in radians, by default pi
-        angle_heading : float, optional
-            Maximum deviation allowed when optimizing direction,
-            by default pi/2
-        num_angles : int, optional
-            Number of initial search angles, by default 20
         vel : float, optional
             Speed of the ship (unit unknown), by default 1
-        dist_min : float, optional
-            Minimum terminating distance around the destination (x_end, y_end),
-            by default 0.1
-        max_iter : int, optional
-            Maximum number of iterations allowed for the optimizer, by default 2000
-        use_rk : bool, optional
-            Use Runge-Kutta solver instead of odeint solver, by default True
-        method: str, optional
-            Method to compute the optimal route. Options are:
-            - "direction": Keeps the routes which direction points to the goal
-            - "closest": Keeps the closest route to the goal
+        kwargs : Dict, optional
+            Other arguments relevant to the Optimizer
         """
         # Initialize the optimizer
-        self.optimizer = Optimizer(
-            self.vectorfield,
-            time_iter=time_iter,
-            time_step=time_step,
-            angle_amplitude=angle_amplitude,
-            angle_heading=angle_heading,
-            num_angles=num_angles,
-            vel=vel,
-            dist_min=dist_min,
-            max_iter=max_iter,
-            use_rk=use_rk,
-            method=method,
-        )
+        self.optimizer = Optimizer(self.vectorfield, vel=vel, **kwargs)
         # Run the optimizer until it converges
         tic = time.process_time()  # We want to time this process
         for list_routes in self.optimizer.optimize_route(
