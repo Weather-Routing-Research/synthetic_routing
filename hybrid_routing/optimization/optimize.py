@@ -42,6 +42,7 @@ class Optimizer:
         num_angles: int = 5,
         vel: float = 5,
         dist_min: Optional[float] = None,
+        prop_keep_before_land: float = 0.9,
         max_iter: int = 2000,
         use_rk: bool = False,
         method: str = "direction",
@@ -72,6 +73,8 @@ class Optimizer:
             by default None
         max_iter : int, optional
             Maximum number of iterations allowed, by default 2000
+        prop_keep_before_land : float, optional
+            Proportion of the trajectory to keep before touching land, by default 0.9
         use_rk : bool, optional
             Use Runge-Kutta solver instead of odeint solver
         method: str, optional
@@ -115,6 +118,7 @@ class Optimizer:
             print("Non recognized method, using 'direction'.")
             self.method = "direction"
         self.max_iter = max_iter
+        self.prop_land = prop_keep_before_land
         self.exploration = None
 
     def asdict(self) -> Dict:
@@ -321,7 +325,7 @@ class Optimizer:
         cone_center = self.geometry.angle_p0_to_p1(p0, pn)
 
         pt = p0  # Position now
-        t = 0  # Time now
+        t = jnp.float64(0.0)  # Time now
 
         # Initialize the routes
         # Each one starts with a different angle
@@ -390,8 +394,8 @@ class Optimizer:
                     )
                 elif not cond_land:
                     # If the route has been stopped for reaching land,
-                    # cut the last 10% of it
-                    icut = max(1, int(9 * len(route) / 10))
+                    # cut the last `prop_land` of it
+                    icut = max(1, int(self.prop_land * len(route)))
                     route.x = route.x[:icut]
                     route.y = route.y[:icut]
                     route.t = route.t[:icut]
