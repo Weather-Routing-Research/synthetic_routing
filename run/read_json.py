@@ -84,7 +84,7 @@ def open_json_and_plot(
     )
     name = path_json.stem
     plt.tight_layout()
-    plt.savefig(path_out / (name.lower().replace(" ", "_") + "_compare.png"))
+    plt.savefig(path_out / (name.lower().replace(" ", "_") + ".png"))
     plt.close()
 
     if num_iter:
