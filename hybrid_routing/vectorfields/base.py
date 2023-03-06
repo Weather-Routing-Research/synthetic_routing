@@ -224,6 +224,11 @@ class Vectorfield(ABC):
         """Just a placeholder function. Indicates that no point has land."""
         return jnp.tile(False, x.shape)
 
+    @partial(jit, static_argnums=(0,))
+    def out_of_bounds(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Just a placeholder function. Indicates that no point is out of bounds."""
+        return jnp.tile(False, x.shape)
+
     def plot(
         self,
         extent: Optional[Tuple[float]] = None,
@@ -367,6 +372,17 @@ class VectorfieldDiscrete(Vectorfield):
         v = (self.v.T * w).sum(axis=(-2, -1))  # (P, )
 
         return u, v
+
+    @partial(jit, static_argnums=(0,))
+    def out_of_bounds(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
+        """Returns True for any point that is out of bounds."""
+        out_bound = (
+            jnp.where(x < self.arr_x[0], True, False)
+            + jnp.where(x > self.arr_x[-1], True, False)
+            + jnp.where(y < self.arr_y[0], True, False)
+            + jnp.where(y > self.arr_y[-1], True, False)
+        )
+        return jnp.where(out_bound >= 1, True, False)
 
     def plot(
         self,

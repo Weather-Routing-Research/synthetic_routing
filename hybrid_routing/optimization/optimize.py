@@ -384,17 +384,20 @@ class Optimizer:
                 # Check if the route crosses land. If not, we keep it
                 is_land = self.vectorfield.is_land(route_new.x, route_new.y)
                 cond_land = not is_land.any()
+                # Check the trajectory has not gone out of bounds
+                is_out = self.vectorfield.out_of_bounds(route_new.x, route_new.y)
+                cond_out = not is_out.any()
                 # Check both conditions
-                if cond_theta and cond_land:
+                if cond_theta and cond_land and cond_out:
                     route.append_points(
                         route_new.x[1:],
                         route_new.y[1:],
                         t=route_new.t[1:],
                         theta=route_new.theta[1:],
                     )
-                elif not cond_land:
-                    # If the route has been stopped for reaching land,
-                    # cut the last `prop_land` of it
+                elif (not cond_land) or (not cond_out):
+                    # If the route has been stopped for reaching land
+                    # or getting out of bounds, cut the last `prop_land` of it
                     icut = max(1, int(self.prop_land * len(route)))
                     route.x = route.x[:icut]
                     route.y = route.y[:icut]
