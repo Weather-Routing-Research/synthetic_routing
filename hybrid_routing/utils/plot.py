@@ -102,6 +102,7 @@ def plot_routes(
     vel: Optional[int] = None,
     step: int = 1,
     legend: bool = True,
+    fit_routes: bool=True,
     **kwargs,
 ):
     """Plot a list of routes, adding its time and distance to the legend. If the
@@ -118,6 +119,8 @@ def plot_routes(
         Velocity to recompute times, by default None
     legend : bool, optional
         Add the legend with times and distances, by default True
+    fit_routes : bool, optional
+        Fit the plot to the routes, by default True
     """
     # If the vector field is real, we will use SI units
     si_units = str(vectorfield.geometry).lower() == "spherical"
@@ -131,13 +134,17 @@ def plot_routes(
         prop_dist = 1
 
     # Limits of the vector field
-    xmin = min([min(r.x) for r in list_route])
-    xmax = max([max(r.x) for r in list_route])
-    ymin = min([min(r.y) for r in list_route])
-    ymax = max([max(r.y) for r in list_route])
+    if fit_routes:
+        xmin = min([min(r.x) for r in list_route])
+        xmax = max([max(r.x) for r in list_route])
+        ymin = min([min(r.y) for r in list_route])
+        ymax = max([max(r.y) for r in list_route])
+        extent = (xmin - 2 * step, xmax + 2 * step, ymin - 2 * step, ymax + 2 * step)
+    else:
+        extent =None
 
     vectorfield.plot(
-        extent=(xmin - 2 * step, xmax + 2 * step, ymin - 2 * step, ymax + 2 * step),
+        extent=extent,
         step=step,
         do_color=True,
         **kwargs,

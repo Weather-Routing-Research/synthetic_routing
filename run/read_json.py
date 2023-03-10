@@ -70,17 +70,19 @@ def open_json_and_plot(
         geometry=dict_route["geometry"],
     )
     route_geod.recompute_times(pipe.vel, pipe.vectorfield)
-    print("\nGeodesic")
+    print("\nMinimum distance")
     print(f"  Time (h): {route_geod.t[-1] / 3600:.1f}")
     print(f"  Distance (km): {route_geod.d.sum() / 1000:.1f}")
 
-    plt.rcParams.update({"font.size": 18})
+    plt.figure(dpi=120)
+    plt.rcParams.update({"font.size": 10})
     plot_routes(
         [route, route_dnj, route_geod],
         pipe.vectorfield,
-        labels=["ZIVP", "DNJ", "Circum."],
+        labels=["HS (no smooth)", "HS (smooth)", "Min. dist."],
         vel=pipe.vel,
         alpha=0.6,
+        fit_routes=False,
     )
     name = path_json.stem
     plt.tight_layout()
