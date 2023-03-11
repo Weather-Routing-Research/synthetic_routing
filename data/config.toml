@@ -1,6 +1,6 @@
 [synthetic.Circular]
-p0 = [3, 2]
-pn = [-7, 2]
+p0 = [3.0, 2.0]
+pn = [-7.0, 2.0]
 si_units = false
 [synthetic.Circular.plot]
 extent = [-8, 4, -4, 3]
@@ -9,8 +9,8 @@ textbox_align = "bottom"
 
 [synthetic.FourVortices]
 # Ferraro et al.
-p0 = [0, 0]
-pn = [6, 2]
+p0 = [0.0, 0.0]
+pn = [6.0, 2.0]
 si_units = false
 [synthetic.FourVortices.plot]
 extent = [-1, 7, -1, 6]
@@ -53,16 +53,13 @@ num_points = 200
 
 [zivp.real]
 vel = [3, 6, 10]
-time_iter = 14400        # 4 hour (4 * 3600 s)
-time_step = 600          # Do not go below 10 min (600 s)
+time_iter = 18000         # 5 hour (5 * 3600 s)
+time_step = 1800          # 30 min
 dist_min = 10000
 num_angles = 21
-angle_amplitude = 1.5708 # 90 degrees
-angle_heading = 1.5708   # 90 degrees
-#angle_heading = 1.0472   # 60 degrees
-#angle_heading = 0.785398 # 45 degrees
+angle_amplitude = 3.1316  # 180 degrees
+angle_heading = 1.5708    # 90 degrees
 num_points = 200
-prop_keep_before_land = 0.25
 max_iter = 500
 
 [dnj.synthetic]
