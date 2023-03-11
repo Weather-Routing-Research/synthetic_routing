@@ -42,7 +42,6 @@ class Optimizer:
         num_angles: int = 5,
         vel: float = 5,
         dist_min: Optional[float] = None,
-        prop_keep_before_land: float = 1.0,
         max_iter: int = 2000,
         use_rk: bool = False,
         method: str = "direction",
@@ -73,9 +72,6 @@ class Optimizer:
             by default None
         max_iter : int, optional
             Maximum number of iterations allowed, by default 2000
-        prop_keep_before_land : float, optional
-            Proportion of the trajectory to keep before touching land or
-            getting out of bounds, by default 1.0
         use_rk : bool, optional
             Use Runge-Kutta solver instead of odeint solver
         method: str, optional
@@ -119,7 +115,6 @@ class Optimizer:
             print("Non recognized method, using 'direction'.")
             self.method = "direction"
         self.max_iter = max_iter
-        self.prop_land = prop_keep_before_land
         self.exploration = None
 
     def asdict(self) -> Dict:
@@ -388,27 +383,27 @@ class Optimizer:
                 # Check the trajectory has not gone out of bounds
                 is_out = self.vectorfield.out_of_bounds(route_new.x, route_new.y)
                 cond_out = not is_out.any()
-                # Check both conditions
-                if cond_theta and cond_land and cond_out:
-                    route.append_points(
-                        route_new.x[1:],
-                        route_new.y[1:],
-                        t=route_new.t[1:],
-                        theta=route_new.theta[1:],
-                    )
-                elif (not cond_land) or (not cond_out):
-                    # If the route has been stopped for reaching land
-                    # or getting out of bounds, cut the last `prop_land` of it
-                    icut = max(1, int(self.prop_land * len(route)))
-                    route.x = route.x[:icut]
-                    route.y = route.y[:icut]
-                    route.t = route.t[:icut]
-                    route.theta = route.theta[:icut]
-                    # Add the route to the stopped list
+                # If one of the conditions is not met,
+                # add the route to the stopped list
+                if not (cond_theta and cond_land and cond_out):
                     list_stop.append(idx)
+                # If the segment has hit land nor gone out of bounds, cut it first
+                if not (cond_land and cond_out):
+                    # Find the index where to cut
+                    is_cut = jnp.where(jnp.cumsum(is_land + is_out) > 0, 1, 0)
+                    icut = int(jnp.sum(is_cut))
+                    # Cut the segment
+                    x = route_new.x[1:icut]
+                    y = route_new.y[1:icut]
+                    t = route_new.t[1:icut]
+                    theta = route_new.theta[1:icut]
                 else:
-                    # Add the route to the stopped list
-                    list_stop.append(idx)
+                    x = route_new.x[1:]
+                    y = route_new.y[1:]
+                    t = route_new.t[1:]
+                    theta = route_new.theta[1:]
+                # Append new segment to the trajectory
+                route.append_points(x, y, t, theta=theta)
 
             # If all routes have been stopped, generate new ones
             if len(list_stop) == len(list_routes):
