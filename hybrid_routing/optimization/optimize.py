@@ -42,7 +42,7 @@ class Optimizer:
         num_angles: int = 5,
         vel: float = 5,
         dist_min: Optional[float] = None,
-        prop_keep_before_land: float = 0.9,
+        prop_keep_before_land: float = 1.0,
         max_iter: int = 2000,
         use_rk: bool = False,
         method: str = "direction",
@@ -74,7 +74,8 @@ class Optimizer:
         max_iter : int, optional
             Maximum number of iterations allowed, by default 2000
         prop_keep_before_land : float, optional
-            Proportion of the trajectory to keep before touching land, by default 0.9
+            Proportion of the trajectory to keep before touching land or
+            getting out of bounds, by default 1.0
         use_rk : bool, optional
             Use Runge-Kutta solver instead of odeint solver
         method: str, optional
