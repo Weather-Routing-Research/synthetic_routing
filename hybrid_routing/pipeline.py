@@ -152,20 +152,11 @@ class Pipeline:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
         # First compute the total distance to travel
         dist = self.geometry.dist_p0_to_p1((self.x0, self.y0), (self.xn, self.yn))
-        # Initialize the optimizer
-        optimizer = Optimizer(
-            self.vectorfield,
-            time_iter=1 / 20,
-            time_step=1 / 100,  # Whole travel takes 1 unit of time
-            angle_amplitude=180 * DEG2RAD,
-            angle_heading=180 * DEG2RAD,
-            num_angles=41,  # Allow some variation to avoid land
-            vel=dist,  # Very high to ignore currents
-            dist_min=dist / 20,
-            max_iter=self.optimizer.max_iter,
-            use_rk=self.optimizer.use_rk,
-            method=self.optimizer.method,
-        )
+        # Initialize the optimizer, based on the ZIVP step
+        optimizer = deepcopy(self.optimizer)
+        optimizer.time_iter = optimizer.time_iter * optimizer.vel / dist
+        optimizer.time_step = optimizer.time_step * optimizer.vel / dist
+        optimizer.vel = dist  # Whole travel takes one unit of time
         # Run the optimizer until it converges
         tic = time.process_time()  # We want to time this process
         for list_routes in optimizer.optimize_route(
