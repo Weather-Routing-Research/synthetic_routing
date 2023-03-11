@@ -157,9 +157,9 @@ class Pipeline:
             self.vectorfield,
             time_iter=1 / 20,
             time_step=1 / 100,  # Whole travel takes 1 unit of time
-            angle_amplitude=20 * DEG2RAD,  # Small angle
-            angle_heading=20 * DEG2RAD,
-            num_angles=11,  # Allow some variation to avoid land
+            angle_amplitude=180 * DEG2RAD,
+            angle_heading=180 * DEG2RAD,
+            num_angles=41,  # Allow some variation to avoid land
             vel=dist,  # Very high to ignore currents
             dist_min=dist / 20,
             max_iter=self.optimizer.max_iter,
@@ -214,7 +214,11 @@ class Pipeline:
         for n in range(self._num_dnj):
             self.dnj.optimize_route(route, num_iter=num_iter)
             route.recompute_times(self.vel, self.vectorfield)
-            self._routes_dnj[n] = deepcopy(route)
+            # If there is land, do not store this route
+            if self.vectorfield.is_land(route.x, route.y).any():
+                self._routes_dnj[n] = deepcopy(self.route_zivp)
+            else:
+                self._routes_dnj[n] = deepcopy(route)
             print(f"  DNJ step {n+1} out of 10")
         # Store the computation time
         self._timeit.update({"dnj": int(time.process_time() - tic)})
