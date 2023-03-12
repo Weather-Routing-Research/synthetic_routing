@@ -53,8 +53,8 @@ num_points = 200
 
 [zivp.real]
 vel = [3, 6, 10]
-time_iter = 18000         # 5 hour (5 * 3600 s)
-time_step = 1800          # 30 min
+time_iter = 7200         # 2 hour (2 * 3600 s)
+time_step = 600          # 10 min
 dist_min = 10000
 num_angles = 21
 angle_amplitude = 3.1316  # 180 degrees
