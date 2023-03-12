@@ -24,8 +24,9 @@ path = "./data"
 si_units = true
 
 [real.houston_panama]
-p0 = [-94.7, 29.0] # [lon, lat]
-pn = [-80.0, 9.7]
+# We do Panama - Houston instead
+pn = [-94.7, 29.0] # [lon, lat]
+p0 = [-80.0, 9.7]
 path = "./data"
 si_units = true
 
