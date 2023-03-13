@@ -14,7 +14,7 @@ pn = [6.0, 2.0]
 si_units = false
 [synthetic.FourVortices.plot]
 extent = [-1, 7, -1, 6]
-textbox_pos = [1.5, -0.5]
+textbox_pos = [1.0, -0.5]
 textbox_align = "bottom"
 
 [real.charleston_azores]
@@ -49,7 +49,7 @@ time_step = 0.01
 dist_min = 0.1
 num_angles = 21
 angle_amplitude = 3.1416 # 180 degrees
-angle_heading = 1.5708   # 90 degrees
+angle_heading = 1.5708    # 90 degrees
 num_points = 200
 
 [zivp.real]
