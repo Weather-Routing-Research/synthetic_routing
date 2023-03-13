@@ -1,6 +1,6 @@
 import warnings
 from functools import partial
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import jax.numpy as jnp
 from jax import grad, jacfwd, jacrev, jit, random, vmap
@@ -22,6 +22,7 @@ class DNJ:
         vectorfield: Vectorfield,
         time_step: float = 0.1,
         optimize_for: str = "fuel",
+        num_iter: int = 10,
     ):
         """Initialize the DNJ algorithm
 
@@ -34,6 +35,8 @@ class DNJ:
             must be the same as the route, by default 0.1
         optimize_for : str, optional
             Optimization target, either "fuel" or "time", by default "fuel"
+        num_iter : int, optional
+            Number of DNJ iterations, by default 10
 
         Raises
         ------
@@ -43,6 +46,7 @@ class DNJ:
         self.vectorfield = vectorfield
         self.time_step = time_step
         self.optimize_for = optimize_for
+        self.num_iter = num_iter
         h = time_step
         if vectorfield.spherical:
             get_current = vectorfield.get_current_rad
@@ -144,7 +148,7 @@ class DNJ:
         q = self.optim_vect(pts[:-2], pts[1:-1], pts[2:])
         return pts_new.at[1:-1].set(damping * q + pts[1:-1])
 
-    def optimize_route(self, route: Route, num_iter: int = 10):
+    def optimize_route(self, route: Route, num_iter: Optional[int] = None):
         """Optimizes a route for any number of iterations
 
         Parameters
@@ -154,6 +158,7 @@ class DNJ:
         num_iter : int, optional
             Number of DNJ iterations, by default 10
         """
+        num_iter = self.num_iter if num_iter is None else num_iter
         pts = route.pts
         mask_nan = jnp.isnan(pts)
         # Loop iterations
