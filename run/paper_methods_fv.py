@@ -4,7 +4,7 @@ Generate all the figures used in the paper. Methods section
 
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,6 +12,7 @@ import numpy as np
 from hybrid_routing.optimization.dnj import DNJ
 from hybrid_routing.optimization.optimize import Optimizer, compute_thetas_in_cone
 from hybrid_routing.optimization.route import Route
+from hybrid_routing.utils.config import load_config
 from hybrid_routing.vectorfields import FourVortices
 
 """
@@ -28,23 +29,20 @@ Vectorfield and initial conditions
 
 vectorfield = FourVortices()
 
-x0, y0 = 0, 0
-xn, yn = 6, 2
-xmin, xmax = -1, 7
-ymin, ymax = -1, 7
+cfg = load_config("./data/config.toml")
+cfg_vf: Dict = cfg["synthetic"]["FourVortices"]
+cfg_zivp: Dict = cfg["zivp"]["synthetic"]
+cfg_zivp.pop("num_points")
+cfg_zivp["num_angles"] = cfg_zivp["num_angles"] // 3
+cfg_zivp["angle_amplitude"] = cfg_zivp["angle_amplitude"] / 3
+cfg_dnj: Dict = cfg["dnj"]["synthetic"]
 
-optimizer = Optimizer(
-    vectorfield,
-    time_iter=0.1,
-    time_step=0.01,
-    angle_amplitude=np.pi,
-    angle_heading=np.pi / 2,
-    num_angles=5,
-    vel=1,
-    dist_min=0.1,
-    use_rk=True,
-    method="direction",
-)
+x0, y0 = cfg_vf["p0"]
+xn, yn = cfg_vf["pn"]
+xmin, xmax = -2, 8
+ymin, ymax = -4, 6
+
+optimizer = Optimizer(vectorfield, **cfg_zivp)
 
 
 # Initialize figure with vectorfield
@@ -214,7 +212,7 @@ print("Optimization - Finished")
 Discrete Newton-Jacobi
 """
 
-dnj = DNJ(vectorfield, time_step=optimizer.time_step, optimize_for="fuel")
+dnj = DNJ(vectorfield, **cfg_dnj)
 
 plot_vectorfield()
 plt.scatter(route.x[0], route.y[0], c="green", s=20, zorder=10)
@@ -223,7 +221,7 @@ plt.plot(route.x, route.y, c="grey", linewidth=2, alpha=0.9, zorder=5)
 
 # Apply DNJ in loop
 for n in range(5):
-    dnj.optimize_route(route, num_iter=2000)
+    dnj.optimize_route(route, num_iter=dnj.num_iter // 5)
     s = 2 if n == 4 else 1
     c = "black" if n == 4 else "grey"
     alpha = 0.9 if n == 4 else 0.6
