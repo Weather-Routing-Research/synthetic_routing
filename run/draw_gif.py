@@ -1,38 +1,31 @@
 import os
 import shutil
-from importlib import import_module
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import imageio.v2 as imageio
 import matplotlib.pyplot as plt
-import numpy as np
 import typer
 
-from hybrid_routing.geometry import DEG2RAD
 from hybrid_routing.optimization import DNJ, Optimizer, Route
-from hybrid_routing.vectorfields import VectorfieldReal
-from hybrid_routing.vectorfields.base import Vectorfield
+from hybrid_routing.pipeline import Pipeline
+from hybrid_routing.utils.config import load_config
 
 
 def main(
     vf: str = "FourVortices",
-    discrete: bool = False,
-    use_rk: bool = True,
-    method: str = "direction",
-    time_iter: float = 0.1,
-    time_step: float = 0.01,
-    angle_amplitude: float = np.pi,
-    num_angles: int = 20,
     vel: float = 1,
-    dist_min: float = 0.1,
+    path_config: str = "./data/config.toml",
     do_color: bool = False,
     path_out: str = "output/",
 ):
-    suptitle = vf
-    suptitle += " Discretized" if discrete else ""
-    suptitle += " Runge-Kutta" if use_rk else " ODEINT"
-    suptitle += " " + method
+    cfg = load_config(path_config)
+
+    for key in ["synthetic", "real"]:
+        if vf in cfg[key].keys():
+            break
+    else:
+        raise ValueError(f"Key not found in config: {vf}")
 
     color = "orange" if do_color else "green"
 
@@ -46,25 +39,10 @@ def main(
     #  VECTORFIELD
     ####################################################################################
 
-    module = import_module("hybrid_routing.vectorfields")
-    try:
-        # Check if vector field exists in library
-        vectorfield: Vectorfield = getattr(module, vf)()
-        if discrete:
-            vectorfield = vectorfield.discretize(-10, 10, -10, 10, step=1 / 12)
-        q0 = (0, 0)
-        q1 = (6, 2)
-        xlim = (-1, 7)
-        ylim = (-1, 7)
-        step = 0.4
-    except AttributeError:
-        # If vector field not in library, assume is a real vector field
-        vectorfield = VectorfieldReal.from_folder("./data", vf, radians=True)
-        q0 = (43.49 * DEG2RAD, -1.66 * DEG2RAD)
-        q1 = (98.14 * DEG2RAD, 10.21 * DEG2RAD)
-        xlim = (40 * DEG2RAD, 100 * DEG2RAD)
-        ylim = (-25 * DEG2RAD, 30 * DEG2RAD)
-        step = DEG2RAD
+    cfg_vf: Dict = cfg[key][vf]
+    cfg_vf["key"] = vf
+    pipeline = Pipeline(**cfg_vf)
+    vectorfield = pipeline.vectorfield
 
     ####################################################################################
     #  Helper function to plot the routes
@@ -77,17 +55,14 @@ def main(
         color: str = "black",
     ):
         vectorfield.plot(
-            extent=(xlim[0], xlim[1], ylim[0], ylim[1]),
-            step=step,
+            extent=pipeline._dict_plot.get("extent", None),
             do_color=do_color,
         )
         for route in list_routes:
             plt.plot(route.x, route.y, color=color, alpha=0.6)
-        plt.scatter([q0[0], q1[0]], [q0[1], q1[1]], c="red")
-        plt.suptitle(suptitle)
+        plt.scatter([pipeline.x0, pipeline.xn], [pipeline.y0, pipeline.yn], c="red")
+        plt.suptitle(vf)
         plt.title(title)
-        plt.xlim(xlim[0], xlim[1])
-        plt.ylim(ylim[0], ylim[1])
         # Set ticks on bottom
         plt.gca().tick_params(
             axis="x", bottom=True, top=False, labelbottom=True, labeltop=False
@@ -100,28 +75,23 @@ def main(
     # OPTIMIZATION ZIVP
     ####################################################################################
 
-    optimizer = Optimizer(
-        vectorfield,
-        time_iter=time_iter,
-        time_step=time_step,
-        angle_amplitude=angle_amplitude,
-        angle_heading=angle_amplitude / 2,
-        num_angles=num_angles,
-        vel=vel,
-        dist_min=dist_min,
-        use_rk=use_rk,
-        method=method,
-    )
+    cfg_zivp: Dict = cfg["zivp"][key]
+    cfg_zivp["vel"] = vel
+    cfg_zivp.pop("num_points")
+
+    optimizer = Optimizer(vectorfield, **cfg_zivp)
 
     idx = 0
     # Generate one plot every 10 iterations
-    for list_routes in optimizer.optimize_route(q0, q1):
+    for list_routes in optimizer.optimize_route(
+        [pipeline.x0, pipeline.y0], [pipeline.xn, pipeline.yn]
+    ):
         if idx % 5 == 0:
-            n = "exploration" if optimizer.exploration else "exploitation"
+            n = "exploration" if optimizer.exploration else "refinement"
             plot_routes_and_save(
                 list_routes=list_routes,
                 fout=path_img / f"{idx:03d}.png",
-                title=f"ZIVP ({n})",
+                title=f"HS ({n})",
                 color=color,
             )
         idx += 1
@@ -131,7 +101,7 @@ def main(
         plot_routes_and_save(
             list_routes=[list_routes[0]],
             fout=path_img / f"{idx:03d}.png",
-            title="ZIVP (result)",
+            title="HS (result)",
             color=color,
         )
         idx += 1
@@ -140,11 +110,11 @@ def main(
     # SMOOTHING DNJ
     ####################################################################################
 
-    dnj = DNJ(vectorfield, time_step=time_step, optimize_for="time")
+    dnj = DNJ(vectorfield, time_step=cfg_zivp["time_step"], **cfg["dnj"][key])
 
     for n in range(40):
         route = list_routes[0]
-        dnj.optimize_route(route, num_iter=200)
+        dnj.optimize_route(route, num_iter=dnj.num_iter // 40)
         plot_routes_and_save(
             list_routes=[route],
             fout=path_img / f"{idx:03d}.png",
