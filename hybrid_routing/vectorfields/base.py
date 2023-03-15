@@ -387,7 +387,7 @@ class VectorfieldDiscrete(Vectorfield):
     def plot(
         self,
         extent: Optional[Tuple[float]] = None,
-        step: float = 1,
+        step: Optional[float] = None,
         do_color: bool = False,
         **kwargs
     ):
@@ -408,6 +408,9 @@ class VectorfieldDiscrete(Vectorfield):
             y_max = self.arr_y.max()
         else:
             x_min, x_max, y_min, y_max = extent
+
+        if step is None:
+            step = DEG2RAD if self.spherical else 1
         # Compute the step for the discrete arrays
         s = int(max(1, step // np.mean(np.abs(np.diff(self.arr_x)))))
         idx = jnp.argwhere((self.arr_x >= x_min) & (self.arr_x <= x_max)).flatten()
