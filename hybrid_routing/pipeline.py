@@ -154,9 +154,9 @@ class Pipeline:
         dist = self.geometry.dist_p0_to_p1((self.x0, self.y0), (self.xn, self.yn))
         # Initialize the optimizer, based on the ZIVP step
         optimizer = deepcopy(self.optimizer)
-        optimizer.time_iter = optimizer.time_iter * optimizer.vel / dist
-        optimizer.time_step = optimizer.time_step * optimizer.vel / dist
-        optimizer.vel = dist  # Whole travel takes one unit of time
+        optimizer.time_iter = optimizer.time_iter * optimizer.vel / dist / 1e4
+        optimizer.time_step = optimizer.time_step * optimizer.vel / dist / 1e4
+        optimizer.vel = dist * 1e4  # Whole travel takes 1e-4 units of time
         # Run the optimizer until it converges
         tic = time.process_time()  # We want to time this process
         for list_routes in optimizer.optimize_route(
