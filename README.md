@@ -239,8 +239,6 @@ The demo will start at port 8501 (you can change the port to anyone you prefer).
 
 ## Contact
 
-Official website: [https://smartshipping.es/]
-
 Robert Milson - rmilson@dal.ca
 
 Project link: [https://github.com/daniprec/hybrid_ivp](https://github.com/daniprec/hybrid_ivp)
