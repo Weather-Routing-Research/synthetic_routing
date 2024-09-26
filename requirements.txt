@@ -100,9 +100,9 @@ ipython-genutils==0.2.0
     #   notebook
 ipywidgets==7.7.1
     # via pydeck
-jax==0.3.14
+jax
     # via synthrouting (setup.py)
-jaxlib==0.3.14
+jaxlib
     # via synthrouting (setup.py)
 jedi==0.18.1
     # via ipython
