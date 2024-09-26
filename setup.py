@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="synthrouting",
     use_scm_version=False,
-    author="Daniel Precioso",
+    author="Weather Navigation",
     description="Zermelo navigation problem via hybrid search",
     long_description=long_description,
     packages=setuptools.find_packages(),
@@ -27,9 +27,7 @@ setuptools.setup(
         "pip-tools",
         "pytest",
         "scipy",
-        "streamlit==1.11.0",
-        # "tensorflow>=2.9.0",
-        # "tensorflow-probability>=0.17.0",
+        "streamlit",
         "typer",
     ],
 )
