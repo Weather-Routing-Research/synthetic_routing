@@ -11,4 +11,5 @@ dependencies:
   - cudnn
   - cuda-nvcc
   - pip:
+      - jax[cuda12]  # Replace cuda12 with your CUDA version
       - -e .[dev]
