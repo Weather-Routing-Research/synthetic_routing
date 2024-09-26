@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 import pytest
 
-from hybrid_routing.geometry import DEG2RAD, Euclidean
+from synthrouting.geometry import DEG2RAD, Euclidean
 
 
 @pytest.mark.parametrize(

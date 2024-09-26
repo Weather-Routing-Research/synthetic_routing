@@ -24,11 +24,11 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from PIL import Image
 
-from hybrid_routing.optimization.dnj import DNJ, DNJRandomGuess
-from hybrid_routing.optimization.optimize import Optimizer
-from hybrid_routing.optimization.route import Route
-from hybrid_routing.vectorfields import *
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.optimization.dnj import DNJ, DNJRandomGuess
+from synthrouting.optimization.optimize import Optimizer
+from synthrouting.optimization.route import Route
+from synthrouting.vectorfields import *
+from synthrouting.vectorfields.base import Vectorfield
 
 X_MIN, X_MAX = 0.0, 6.0
 Y_MIN, Y_MAX = -1.0, 6.0

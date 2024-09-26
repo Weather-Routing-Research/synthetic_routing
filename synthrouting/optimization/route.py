@@ -3,8 +3,8 @@ from typing import Optional, Tuple, Union
 
 import jax.numpy as jnp
 
-from hybrid_routing.geometry import Euclidean, Geometry
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.geometry import Euclidean, Geometry
+from synthrouting.vectorfields.base import Vectorfield
 
 
 class Route:

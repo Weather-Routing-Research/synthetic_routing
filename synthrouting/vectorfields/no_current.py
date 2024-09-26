@@ -4,16 +4,16 @@ from typing import Tuple
 import jax.numpy as jnp
 from jax import jit
 
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.vectorfields.base import Vectorfield
 
 
-class ConstantCurrent(Vectorfield):
-    """Constant vector field, implements Vectorfield class.
+class NoCurrent(Vectorfield):
+    """Circular vector field, implements Vectorfield class.
     Vectorfield defined by:
-    W: (x, y) -> (u, v), u(x, y) = 0.2, v(x, y) = -0.2
+    W: (x, y) -> (u, v), u(x, y) = 0, v(x, y) = 0.
     with:
-        du/dx = 0,      du/dy = 0
-        dv/dx = 0,      dv/dy = 0
+        du/dx = 0,  du/dy = 0
+        dv/dx = 0,  dv/dy = 0
     """
 
     @partial(jit, static_argnums=(0,))
@@ -26,6 +26,6 @@ class ConstantCurrent(Vectorfield):
 
     @partial(jit, static_argnums=(0,))
     def get_current(self, x: jnp.array, y: jnp.array) -> jnp.array:
-        u = jnp.tile(0.2, x.shape)
-        v = jnp.tile(-0.2, x.shape)
+        u = jnp.zeros(x.shape)
+        v = jnp.zeros(x.shape)
         return jnp.stack([u, v])

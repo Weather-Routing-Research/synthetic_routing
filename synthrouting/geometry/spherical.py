@@ -3,7 +3,7 @@ from functools import partial
 import jax.numpy as jnp
 from jax import jit
 
-from hybrid_routing.geometry.base import Geometry
+from synthrouting.geometry.base import Geometry
 
 RADIUS = 6367449  # meters
 RAD2M = RADIUS  # Radians to meters conversion

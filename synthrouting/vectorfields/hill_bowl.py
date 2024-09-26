@@ -4,7 +4,7 @@ from typing import Iterable
 import jax.numpy as jnp
 from jax import jit
 
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.vectorfields.base import Vectorfield
 
 
 class HillBowl(Vectorfield):

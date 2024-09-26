@@ -2,7 +2,7 @@
 Generate all the figures used in the paper. Results section
 """
 
-from hybrid_routing.pipeline import run_pipelines
+from synthrouting.pipeline import run_pipelines
 
 run_pipelines(
     "synthetic",

@@ -5,8 +5,8 @@ from typing import Callable, Dict, List, Optional, Tuple
 import jax.numpy as jnp
 from jax import grad, jacfwd, jacrev, jit, random, vmap
 
-from hybrid_routing.optimization.route import Route
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.optimization.route import Route
+from synthrouting.vectorfields.base import Vectorfield
 
 KEY = random.PRNGKey(42)
 

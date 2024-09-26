@@ -4,8 +4,8 @@ import jax.numpy as jnp
 from jax.experimental.ode import odeint
 
 # from scipy.integrate import odeint
-from hybrid_routing.optimization.route import Route
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.optimization.route import Route
+from synthrouting.vectorfields.base import Vectorfield
 
 
 def solve_ode_zermelo(

@@ -5,9 +5,9 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.pylab import cm
 
-from hybrid_routing.geometry import DEG2RAD
-from hybrid_routing.optimization import Route
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.geometry import DEG2RAD
+from synthrouting.optimization import Route
+from synthrouting.vectorfields.base import Vectorfield
 
 
 def plot_ticks_radians_to_degrees(

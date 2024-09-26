@@ -5,9 +5,9 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import typer
 
-from hybrid_routing.optimization import Route
-from hybrid_routing.pipeline import Pipeline
-from hybrid_routing.utils.plot import plot_routes
+from synthrouting.optimization import Route
+from synthrouting.pipeline import Pipeline
+from synthrouting.utils.plot import plot_routes
 
 
 def open_json_and_plot(

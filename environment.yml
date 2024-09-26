@@ -1,4 +1,4 @@
-name: hybrid-routing
+name: synthrouting
 channels:
   - conda-forge
   - defaults

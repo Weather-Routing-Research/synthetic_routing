@@ -224,7 +224,7 @@ The module [hybrid_routing.web](./hybrid_routing/web/) contains the utils used t
 
 ## Demo
 
-With the `hybrid-routing` environment active, you can initialize the web application by running the following command:
+With the `synthrouting` environment active, you can initialize the web application by running the following command:
 
 ```cmd
 streamlit run hybrid_routing/demo.py --server.port 8501

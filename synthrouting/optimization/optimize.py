@@ -3,14 +3,14 @@ from typing import Dict, List, Optional, Tuple
 
 import jax.numpy as jnp
 
-from hybrid_routing.geometry import Euclidean, Geometry, Spherical
-from hybrid_routing.optimization.route import Route
-from hybrid_routing.optimization.zivp import (
+from synthrouting.geometry import Euclidean, Geometry, Spherical
+from synthrouting.optimization.route import Route
+from synthrouting.optimization.zivp import (
     solve_discretized_zermelo,
     solve_ode_zermelo,
     solve_rk_zermelo,
 )
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.vectorfields.base import Vectorfield
 
 
 def compute_thetas_in_cone(

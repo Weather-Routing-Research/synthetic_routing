@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from hybrid_routing.optimization.dnj import DNJ
-from hybrid_routing.optimization.optimize import Optimizer
-from hybrid_routing.optimization.route import Route
-from hybrid_routing.vectorfields.constant_current import ConstantCurrent
+from synthrouting.optimization.dnj import DNJ
+from synthrouting.optimization.optimize import Optimizer
+from synthrouting.optimization.route import Route
+from synthrouting.vectorfields.constant_current import ConstantCurrent
 
 
 @pytest.mark.parametrize("use_rk", [False, True])

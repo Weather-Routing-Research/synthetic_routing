@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from jax import jacfwd, jacrev, jit
 
-from hybrid_routing.geometry import Euclidean, Geometry, Spherical
-from hybrid_routing.geometry.spherical import DEG2RAD, RAD2M
+from synthrouting.geometry import Euclidean, Geometry, Spherical
+from synthrouting.geometry.spherical import DEG2RAD, RAD2M
 
 
 class Vectorfield(ABC):

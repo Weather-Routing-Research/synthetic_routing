@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="hybrid-routing",
+    name="synthrouting",
     use_scm_version=False,
     author="Daniel Precioso",
     description="Zermelo navigation problem via hybrid search",
@@ -20,8 +20,8 @@ setuptools.setup(
     install_requires=[
         "black",
         "imageio",
-        "jax==0.3.14",
-        "jaxlib==0.3.14",
+        "jax",
+        "jaxlib",
         "matplotlib",
         "numpy",
         "pip-tools",

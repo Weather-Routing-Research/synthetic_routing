@@ -7,9 +7,9 @@ import imageio.v2 as imageio
 import matplotlib.pyplot as plt
 import typer
 
-from hybrid_routing.optimization import DNJ, Optimizer, Route
-from hybrid_routing.pipeline import Pipeline
-from hybrid_routing.utils.config import load_config
+from synthrouting.optimization import DNJ, Optimizer, Route
+from synthrouting.pipeline import Pipeline
+from synthrouting.utils.config import load_config
 
 
 def main(

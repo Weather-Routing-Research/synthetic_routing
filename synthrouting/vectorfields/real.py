@@ -6,8 +6,8 @@ import jax.numpy as jnp
 import pandas as pd
 from jax import jit
 
-from hybrid_routing.geometry.spherical import DEG2RAD
-from hybrid_routing.vectorfields.base import VectorfieldDiscrete
+from synthrouting.geometry.spherical import DEG2RAD
+from synthrouting.vectorfields.base import VectorfieldDiscrete
 
 
 class VectorfieldReal(VectorfieldDiscrete):

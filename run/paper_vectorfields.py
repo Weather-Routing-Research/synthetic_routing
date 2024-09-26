@@ -4,11 +4,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from hybrid_routing.geometry import DEG2RAD
-from hybrid_routing.utils.config import load_config
-from hybrid_routing.utils.plot import plot_ticks_radians_to_degrees
-from hybrid_routing.vectorfields import VectorfieldReal
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.geometry import DEG2RAD
+from synthrouting.utils.config import load_config
+from synthrouting.utils.plot import plot_ticks_radians_to_degrees
+from synthrouting.vectorfields import VectorfieldReal
+from synthrouting.vectorfields.base import Vectorfield
 
 path_cfg = "data/config.toml"
 

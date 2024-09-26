@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import typer
 
-from hybrid_routing.optimization.dnj import DNJRandomGuess
-from hybrid_routing.vectorfields import FourVortices
+from synthrouting.optimization.dnj import DNJRandomGuess
+from synthrouting.vectorfields import FourVortices
 
 
 def main(

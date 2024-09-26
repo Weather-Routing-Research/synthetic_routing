@@ -9,11 +9,11 @@ from typing import Dict, List, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 
-from hybrid_routing.optimization.dnj import DNJ
-from hybrid_routing.optimization.optimize import Optimizer, compute_thetas_in_cone
-from hybrid_routing.optimization.route import Route
-from hybrid_routing.utils.config import load_config
-from hybrid_routing.vectorfields import FourVortices
+from synthrouting.optimization.dnj import DNJ
+from synthrouting.optimization.optimize import Optimizer, compute_thetas_in_cone
+from synthrouting.optimization.route import Route
+from synthrouting.utils.config import load_config
+from synthrouting.vectorfields import FourVortices
 
 """
 Create output folder

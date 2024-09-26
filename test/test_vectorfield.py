@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from hybrid_routing.vectorfields import (
+from synthrouting.vectorfields import (
     Circular,
     ConstantCurrent,
     NoCurrent,
@@ -11,7 +11,7 @@ from hybrid_routing.vectorfields import (
     Source,
     VectorfieldReal,
 )
-from hybrid_routing.vectorfields.base import Vectorfield
+from synthrouting.vectorfields.base import Vectorfield
 
 
 def test_no_current_vectorfield():
