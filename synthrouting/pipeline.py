@@ -57,7 +57,7 @@ class Pipeline:
         self.si_units = si_units
 
         if path is None:
-            module = import_module("synchrouting.vectorfields")
+            module = import_module("synthrouting.vectorfields")
             self.vectorfield: Vectorfield = getattr(module, key)()
             self.real = False
         else:

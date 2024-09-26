@@ -30,7 +30,7 @@ for dict_vf in list_benchmark:
         vf.plot(step=DEG2RAD, do_color=True)
         plot_ticks_radians_to_degrees(step=6)
     except KeyError:
-        module = import_module("synchrouting.vectorfields")
+        module = import_module("synthrouting.vectorfields")
         vf: Vectorfield = getattr(module, key)()
         p0 = np.array(dict_vf["p0"])
         pn = np.array(dict_vf["pn"])

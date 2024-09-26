@@ -2,7 +2,7 @@
 This is a simple web application to try out the code.
 To start the web, run:
 
-streamlit run synchrouting/demo.py --server.port 8501
+streamlit run synthrouting/demo.py --server.port 8501
 
 To access it you must first do a bridge in your PC by running:
 
@@ -62,7 +62,7 @@ st.markdown("---")
 ################
 
 dict_vectorfields = dict(
-    inspect.getmembers(sys.modules["synchrouting.vectorfields"], inspect.isclass)
+    inspect.getmembers(sys.modules["synthrouting.vectorfields"], inspect.isclass)
 )
 
 vectorfield_name = st.selectbox("Vector field:", sorted(dict_vectorfields.keys()))

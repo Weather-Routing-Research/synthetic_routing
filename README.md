@@ -57,7 +57,7 @@ This is an ocean vessel path finding algorithm that optimizes fuel consumption a
 
 The repository is structured into the following directories:
 
-- `/synchrouting`: where the python code is.
+- `/synthrouting`: where the python code is.
 
 ## Contributing
 
@@ -124,7 +124,7 @@ You can fix it by running:
 pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 ```
 
-This will raise an `ERROR` telling that the package `synchrouting` is no longer compatible. Ignore that.
+This will raise an `ERROR` telling that the package `synthrouting` is no longer compatible. Ignore that.
 
 ## Add dependencies
 
@@ -139,12 +139,12 @@ The library is structured as follows.
 
 ## Vector Fields
 
-The module [synchrouting.vectorfields](./synchrouting/vectorfields/) contains all the different `Vectorfield` classes used in our study. Each `Vectorfield` implements a synthetic field of sea currents.
+The module [synthrouting.vectorfields](./synthrouting/vectorfields/) contains all the different `Vectorfield` classes used in our study. Each `Vectorfield` implements a synthetic field of sea currents.
 
 Sample code to use vectorfields:
 
 ```python
-from synchrouting.vectorfields import Circular
+from synthrouting.vectorfields import Circular
 
 # Initialize the vectorfield
 vectorfield = Circular()
@@ -166,13 +166,13 @@ Here is the expected plot output:
 
 ### JAX Utils
 
-The module [synchrouting.jax_utils](./synchrouting/jax_utils/) implements all the functions to optimize a route by using JAX.
+The module [synthrouting.jax_utils](./synthrouting/jax_utils/) implements all the functions to optimize a route by using JAX.
 
 Example and set up of `optimize_route`:
 
 ```python
-  from synchrouting.jax_utils.optimize import optimize_route
-  from synchrouting.vectorfields import NoCurrent
+  from synthrouting.jax_utils.optimize import optimize_route
+  from synthrouting.vectorfields import NoCurrent
   import numpy
 
   # We must provide the following parameters:
@@ -220,14 +220,14 @@ The diagram below illustrates the setup: \
 ---SECTION UNDER CONSTRUCTION---
 ```
 
-The module [synchrouting.web](./synchrouting/web/) contains the utils used to deploy our demo. You can learn more about this in our [demo section](#demo).
+The module [synthrouting.web](./synthrouting/web/) contains the utils used to deploy our demo. You can learn more about this in our [demo section](#demo).
 
 ## Demo
 
 With the `synthrouting` environment active, you can initialize the web application by running the following command:
 
 ```cmd
-streamlit run synchrouting/demo.py --server.port 8501
+streamlit run synthrouting/demo.py --server.port 8501
 ```
 
 The demo will start at port 8501 (you can change the port to anyone you prefer). Then you can access the web in your PC by going to [http://localhost:8501]
