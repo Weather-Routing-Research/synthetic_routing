@@ -15,11 +15,6 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<p align="center">
-  <a href="https://github.com/daniprec">
-    <img src="img/dal_banner.png" alt="Logo" width="auto" height="auto">
-  </a>
-</p>
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
