@@ -1,9 +1,14 @@
 name: synthrouting
 channels:
+  - anaconda
   - conda-forge
   - defaults
+  - nvidia
 dependencies:
   - python=3.9
   - pip
+  - cudatoolkit
+  - cudnn
+  - cuda-nvcc
   - pip:
       - -e .[dev]

@@ -79,7 +79,7 @@ There are two install options, we recommend installing an environment using [`co
 - Conda:
 
   ```cmd
-  conda env create -f environment.yml --force
+  conda env create -f environment.yml --yes
   ```
 
   Make sure to activate the conda environment once installation is finished.
