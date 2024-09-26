@@ -39,7 +39,7 @@ TIME_MIN, TIME, TIME_MAX = 0.1, 0.5, 2.0
 NUM_ITER_DNJ = 500
 
 st.set_page_config(
-    layout="centered", page_icon="img/dalhousie.png", page_title="Hybrid Routing"
+    layout="centered", page_title="Hybrid Routing"
 )
 
 #########
@@ -47,9 +47,6 @@ st.set_page_config(
 #########
 
 row0col1, row0col2 = st.columns([1, 2], gap="medium")
-
-with row0col1:
-    st.image(Image.open("img/dalhousie.png"))
 
 with row0col2:
     st.title("Hybrid Routing")
@@ -203,7 +200,7 @@ def plot_start_and_goal(x1, y1, x2, y2, angle_amplitude: float):
 
 
 def plot_vectorfield():
-    vectorfield.plot(x_min=X_MIN, x_max=X_MAX, y_min=Y_MIN, y_max=Y_MAX)
+    vectorfield.plot(extent=(X_MIN, X_MAX, Y_MIN, Y_MAX))
     plt.xlim([X_MIN, X_MAX])
     plt.ylim([Y_MIN, Y_MAX])
     plt.gca().set_aspect("equal")
