@@ -152,10 +152,6 @@ referencing==0.35.1
     #   jsonschema-specifications
 requests==2.32.3
     # via streamlit
-rich==13.8.1
-    # via
-    #   streamlit
-    #   typer
 rpds-py==0.20.0
     # via
     #   jsonschema
