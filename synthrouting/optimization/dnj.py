@@ -23,7 +23,9 @@ class DNJ:
     def __init__(
         self,
         vectorfield: Vectorfield,
-        time_step: float = 0.1,
+        time_step: Optional[float] = 0.1,
+        tfixed: Optional[float] = None,
+        num_points: Optional[int] = None,
         optimize_for: str = "fuel",
         num_iter: int = 10,
     ):
@@ -47,10 +49,13 @@ class DNJ:
             When `optimize_for` is not valid
         """
         self.vectorfield = vectorfield
-        self.time_step = time_step
+        if time_step is None:
+            self.time_step = tfixed / num_points
+        else:
+            self.time_step = time_step
         self.optimize_for = optimize_for
         self.num_iter = num_iter
-        h = time_step
+        h = self.time_step
         if vectorfield.spherical:
             get_current = vectorfield.get_current_rad
         else:
@@ -76,7 +81,7 @@ class DNJ:
                     Cost of this state
                 """
                 w = get_current(x[0], x[1])
-                cost = jnp.sqrt((xp[0] - w[0]) ** 2 + (xp[1] - w[1]) ** 2)
+                cost = h * ((xp[0] - w[0]) ** 2 + (xp[1] - w[1]) ** 2) / 2
                 return cost
 
         elif optimize_for == "time":
@@ -183,7 +188,9 @@ class DNJ:
         route.y = pts[:, 1]
 
         # Update the minimum cost
-        route.cost = self.cost_function_discretized(pts[:-1], pts[1:]).sum()
+        route.cost = self.cost_function(
+            pts, jnp.diff(pts, axis=0) / self.time_step
+        ).sum()
 
 
 class DNJRandomGuess:
@@ -192,16 +199,21 @@ class DNJRandomGuess:
         vectorfield: Vectorfield,
         q0: Tuple[float, float],
         q1: Tuple[float, float],
-        time_step: float = 0.1,
+        time_step: Optional[float] = None,
+        tfixed: Optional[float] = None,
         optimize_for: str = "fuel",
         angle_amplitude: float = jnp.pi,
-        num_points: int = 80,
+        num_points: int = 200,
         num_routes: int = 3,
         num_iter: int = 500,
     ):
         """Initializes a DNJ with random guesses"""
         x_start, y_start = q0
         x_end, y_end = q1
+        if time_step is None:
+            t = jnp.linspace(0, tfixed, num_points)
+        else:
+            t = jnp.linspace(0, tfixed, num_points)
         list_routes: List[Route] = [None] * num_routes
         # Randomly select number of segments per route
         num_segments = random.randint(KEY, (num_routes,), minval=2, maxval=5)
@@ -244,22 +256,30 @@ class DNJRandomGuess:
             y = jnp.array([y_start])
             for idx_seg in range(num_segments[idx_route]):
                 x_new = jnp.linspace(
-                    x_pts[idx_seg], x_pts[idx_seg + 1], num_points_seg[idx_seg]
+                    x_pts[idx_seg], x_pts[idx_seg + 1], num_points_seg[idx_seg] + 1
                 ).flatten()
                 x = jnp.concatenate([x, x_new[1:]])
                 y_new = jnp.linspace(
-                    y_pts[idx_seg], y_pts[idx_seg + 1], num_points_seg[idx_seg]
+                    y_pts[idx_seg], y_pts[idx_seg + 1], num_points_seg[idx_seg] + 1
                 ).flatten()
                 y = jnp.concatenate([y, y_new[1:]])
+            # Add final point
+            x = jnp.concatenate([x, jnp.array([x_end])])
+            y = jnp.concatenate([y, jnp.array([y_end])])
             # Add the route to the list
-            list_routes[idx_route] = Route(x, y, geometry=vectorfield.geometry)
+            list_routes[idx_route] = Route(x, y, t=t, geometry=vectorfield.geometry)
         # Store parameters
         self.dnj = DNJ(
-            vectorfield=vectorfield, time_step=time_step, optimize_for=optimize_for
+            vectorfield=vectorfield,
+            time_step=time_step,
+            tfixed=tfixed,
+            num_points=num_points,
+            optimize_for=optimize_for,
         )
         self.list_routes = list_routes
         self.num_iter = num_iter
         self.total_iter: int = 0
+        self.tfixed = tfixed
 
     def __next__(self) -> List[Route]:
         for route in self.list_routes:
@@ -268,14 +288,23 @@ class DNJRandomGuess:
         return self.list_routes
 
 
-def main(num_iter: int = 500):
+def main(num_iter: int = 2000):
     vectorfield = Swirlys()
 
     q0 = (0, 0)
     qn = (6, 5)
     tend = 30
 
-    optimizer = DNJRandomGuess(vectorfield, q0, qn, num_iter=num_iter)
+    optimizer = DNJRandomGuess(
+        vectorfield,
+        q0,
+        qn,
+        tfixed=tend,
+        num_points=200,
+        num_iter=num_iter,
+        num_routes=1,
+        angle_amplitude=0,
+    )
     list_routes = next(optimizer)
 
     # Concatenate values
