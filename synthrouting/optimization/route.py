@@ -21,7 +21,9 @@ class Route:
         self.t: jnp.ndarray = (
             jnp.atleast_1d(t) if t is not None else jnp.arange(0, len(self.x), 1)
         )
-        assert len(self.x) == len(self.y) == len(self.t), "Array lengths are not equal"
+        assert (
+            len(self.x) == len(self.y) == len(self.t)
+        ), f"Array lengths are not equal: {self.x.shape}, {self.y.shape}, {self.t.shape}"
         # Heading of the vessel
         self.theta: jnp.ndarray = (
             jnp.atleast_1d(theta) if theta is not None else jnp.zeros_like(x)
