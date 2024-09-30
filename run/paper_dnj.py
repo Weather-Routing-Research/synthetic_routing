@@ -37,7 +37,6 @@ dnj = DNJRandomGuess(
     q0=(x0, y0),
     q1=(xn, yn),
     time_step=0.025,
-    optimize_for="fuel",
     angle_amplitude=np.pi,
     num_points=80,
     num_routes=20,

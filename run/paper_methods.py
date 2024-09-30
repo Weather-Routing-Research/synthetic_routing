@@ -269,7 +269,7 @@ print("Optimization - Finished")
 Discrete Newton-Jacobi
 """
 
-dnj = DNJ(vectorfield, time_step=optimizer.time_step, optimize_for="fuel")
+dnj = DNJ(vectorfield, time_step=optimizer.time_step)
 
 plot_vectorfield()
 plt.scatter(route.x[0], route.y[0], c="green", s=20, zorder=10)

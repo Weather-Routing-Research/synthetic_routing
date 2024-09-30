@@ -26,7 +26,6 @@ class DNJ:
         time_step: Optional[float] = 0.1,
         tfixed: Optional[float] = None,
         num_points: Optional[int] = None,
-        optimize_for: str = "fuel",
         num_iter: int = 10,
     ):
         """Initialize the DNJ algorithm
@@ -38,8 +37,6 @@ class DNJ:
         time_step : float, optional
             Time step between points. For the method to work properly,
             must be the same as the route, by default 0.1
-        optimize_for : str, optional
-            Optimization target, either "fuel" or "time", by default "fuel"
         num_iter : int, optional
             Number of DNJ iterations, by default 10
 
@@ -51,9 +48,10 @@ class DNJ:
         self.vectorfield = vectorfield
         if time_step is None:
             self.time_step = tfixed / num_points
+            self.optimize_for = "fuel"
         else:
             self.time_step = time_step
-        self.optimize_for = optimize_for
+            self.optimize_for = "time"
         self.num_iter = num_iter
         h = self.time_step
         if vectorfield.spherical:
@@ -61,7 +59,7 @@ class DNJ:
         else:
             get_current = vectorfield.get_current
 
-        if optimize_for == "fuel":
+        if self.optimize_for == "fuel":
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
                 """Cost function that penalizes fuel consumption. It outputs lower
@@ -84,7 +82,13 @@ class DNJ:
                 cost = h * ((xp[0] - w[0]) ** 2 + (xp[1] - w[1]) ** 2) / 2
                 return cost
 
-        elif optimize_for == "time":
+            def cost_function_discretized(q0: jnp.array, q1: jnp.array) -> jnp.array:
+                l1 = cost_function(q0, (q1 - q0) / h)
+                l2 = cost_function(q1, (q1 - q0) / h)
+                ld = h / 2 * (l1 + l2)
+                return ld
+
+        elif self.optimize_for == "time":
 
             def cost_function(x: jnp.array, xp: jnp.array) -> jnp.array:
                 """Cost function that penalizes time.
@@ -115,14 +119,14 @@ class DNJ:
                 ) ** 2
                 return cost
 
+            def cost_function_discretized(q0: jnp.array, q1: jnp.array) -> jnp.array:
+                l1 = cost_function(q0, (q1 - q0) / h)
+                l2 = cost_function(q1, (q1 - q0) / h)
+                ld = h / 2 * (l1**2 + l2**2)
+                return ld
+
         else:
             raise ValueError("unrecognized cost function")
-
-        def cost_function_discretized(q0: jnp.array, q1: jnp.array) -> jnp.array:
-            l1 = cost_function(q0, (q1 - q0) / h)
-            l2 = cost_function(q1, (q1 - q0) / h)
-            ld = h / 2 * (l1**2 + l2**2)
-            return ld
 
         d1ld = grad(cost_function_discretized, argnums=0)
         d2ld = grad(cost_function_discretized, argnums=1)
@@ -146,8 +150,9 @@ class DNJ:
 
     def asdict(self) -> Dict:
         return {
-            "time_step": float(self.time_step),
-            "optimize_for": self.optimize_for,
+            "time_step": self.time_step,
+            "tfixed": self.tfixed,
+            "num_points": self.num_points,
         }
 
     @partial(jit, static_argnums=(0, 2))
@@ -186,11 +191,11 @@ class DNJ:
         # Update the points of the route
         route.x = pts[:, 0]
         route.y = pts[:, 1]
+        vel = jnp.diff(pts, axis=0) / self.time_step
 
         # Update the minimum cost
-        route.cost = self.cost_function(
-            pts, jnp.diff(pts, axis=0) / self.time_step
-        ).sum()
+        route.cost = self.cost_function(pts, vel).sum()
+        print(self.cost_function(pts, vel))
 
 
 class DNJRandomGuess:
@@ -201,7 +206,6 @@ class DNJRandomGuess:
         q1: Tuple[float, float],
         time_step: Optional[float] = None,
         tfixed: Optional[float] = None,
-        optimize_for: str = "fuel",
         angle_amplitude: float = jnp.pi,
         num_points: int = 200,
         num_routes: int = 3,
@@ -274,7 +278,6 @@ class DNJRandomGuess:
             time_step=time_step,
             tfixed=tfixed,
             num_points=num_points,
-            optimize_for=optimize_for,
         )
         self.list_routes = list_routes
         self.num_iter = num_iter
@@ -327,6 +330,15 @@ def main(num_iter: int = 2000):
     plt.legend(title="Cost (fuel)")
     plt.title("DNJ")
     plt.savefig("output/dnj.png")
+
+    # Store the route in txt file
+    x = list_routes[0].x
+    y = list_routes[0].y
+    t = list_routes[0].t
+    with open("output/dnj.txt", "w") as f:
+        f.write("x;y;t\n")
+        for xi, yi, ti in zip(x, y, t):
+            f.write(f"{xi};{yi};{ti}\n")
 
 
 if __name__ == "__main__":

@@ -173,19 +173,13 @@ class Pipeline:
         self._timeit.update({"geodesic": int(time.process_time() - tic)})
         self.geodesic = route
 
-    def solve_dnj(
-        self,
-        num_iter: int = 5,
-        optimize_for: str = "time",
-    ):
+    def solve_dnj(self, num_iter: int = 5):
         """Solve the Discrete Newton-Jacobi, using the route from ZIVP
 
         Parameters
         ----------
         num_iter : int, optional
             Number of DNJ iterations, by default 5
-        optimize_for : str, optional
-            Optimization criteria, by default "time"
 
         Raises
         ------
@@ -196,7 +190,7 @@ class Pipeline:
             raise AttributeError("ZIVP step is missing. Run `solve_zivp` first.")
         # Apply DNJ
         time_step = float(np.mean(np.diff(self.route_zivp.t)))
-        self.dnj = DNJ(self.vectorfield, time_step=time_step, optimize_for=optimize_for)
+        self.dnj = DNJ(self.vectorfield, time_step=time_step)
         # Apply DNJ in loop
         tic = time.process_time()  # We want to time this process
         num_iter = num_iter // self._num_dnj

@@ -38,9 +38,7 @@ VEL_MIN, VEL, VEL_MAX = 0.1, 1.0, 2.0
 TIME_MIN, TIME, TIME_MAX = 0.1, 0.5, 2.0
 NUM_ITER_DNJ = 500
 
-st.set_page_config(
-    layout="centered", page_title="Hybrid Routing"
-)
+st.set_page_config(layout="centered", page_title="Hybrid Routing")
 
 #########
 # Title #
@@ -260,7 +258,6 @@ if do_run_dnj:
         q0=(x_start, y_start),
         q1=(x_end, y_end),
         time_step=time_step,
-        optimize_for="fuel",
         angle_amplitude=angle * pi / 180,
         num_points=80,
         num_routes=num_angles,

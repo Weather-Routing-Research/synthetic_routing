@@ -91,7 +91,7 @@ def open_json_and_plot(
 
     if num_iter:
         print(f"\nDNJ redo, {num_iter} iterations")
-        pipe.solve_dnj(num_iter=num_iter, optimize_for="time")
+        pipe.solve_dnj(num_iter=num_iter)
 
         route_dnj = pipe.route_dnj
         print(f"  Time (h): {route_dnj.t[-1] / 3600:.1f}")

@@ -25,7 +25,6 @@ def main(
         q0,
         q1,
         time_step=time_step,
-        optimize_for="time",
         angle_amplitude=2 * np.pi,
         num_points=num_points,
         num_routes=num_routes,
