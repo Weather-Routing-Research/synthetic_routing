@@ -36,6 +36,6 @@ def test_optimize(use_rk: bool):
 
     assert len(route_opt.x) == len(route_opt.y)
 
-    dnj = DNJ(vectorfield)
+    dnj = DNJ(vectorfield, time_step=1)
     dnj.optimize_route(route_opt, num_iter=100)
     assert len(route_opt.x) == len(route_opt.y)
