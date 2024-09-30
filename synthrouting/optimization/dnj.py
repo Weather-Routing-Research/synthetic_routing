@@ -220,6 +220,8 @@ class DNJRandomGuess:
         list_routes: List[Route] = [None] * num_routes
         # Randomly select number of segments per route
         num_segments = random.randint(KEY, (num_routes,), minval=2, maxval=5)
+        ls_angs = random.uniform(KEY, (num_routes * 5,), minval=-0.5, maxval=0.5)
+        ls_dist = random.uniform(KEY, (num_routes * 5,), minval=0.1, maxval=0.9)
         for idx_route in range(num_routes):
             # We first will choose the bounding points of each segment
             x_pts = [x_start]
@@ -231,13 +233,9 @@ class DNJRandomGuess:
                 dy = y_end - y_pts[-1]
                 ang = jnp.arctan2(dy, dx)
                 # Randomly select angle deviation
-                ang_dev = (
-                    random.uniform(KEY, (1,), minval=-0.5, maxval=0.5) * angle_amplitude
-                )
+                ang_dev = angle_amplitude * ls_angs[idx_route * 5 + idx_seg]
                 # Randomly select the distance travelled
-                d = jnp.sqrt(dx**2 + dy**2) * random.uniform(
-                    KEY, (1,), minval=0.1, maxval=0.9
-                )
+                d = jnp.sqrt(dx**2 + dy**2) * ls_dist[idx_route * 5 + idx_seg]
                 # Get the final point of the segment
                 x_pts.append(x_pts[-1] + d * jnp.cos(ang + ang_dev))
                 y_pts.append(y_pts[-1] + d * jnp.sin(ang + ang_dev))
@@ -291,7 +289,7 @@ class DNJRandomGuess:
         return self.list_routes
 
 
-def main(num_iter: int = 22000):
+def main(num_iter: int = 2300):
     vectorfield = Swirlys()
 
     q0 = (0, 0)
