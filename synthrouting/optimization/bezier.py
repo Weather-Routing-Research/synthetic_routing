@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Optional, Tuple
 
 import cma
 import jax.numpy as jnp
@@ -48,48 +48,53 @@ class CMAOptimizer(Optimizer):
     def __init__(
         self,
         vectorfield: Vectorfield,
-        num_control_points: int = 8,
-        num_segments: int = 200,
-        pop_size: int = 100,
-        sigma0: float = 5.0,
+        num_control_points: int = 6,
+        num_segments: int = 64,
+        popsize: int = 200,
+        sigma0: float = 2.0,
+        timeout: Optional[int] = None,
+        maxfevals: Optional[int] = None,
+        tolfun: float = 1e-4,
+        verb_disp: int = 1,
+        seed: int = 0,
     ):
         super().__init__(vectorfield=vectorfield)
-        self.pop_size = pop_size
+        self.popsize = popsize
         self.num_control_points = num_control_points
         self.num_segments = num_segments
         self.sigma0 = sigma0
-        self.timeout = 15
-        self.maxfevals = 1e6
-        self.opt_tolerance = 1e-6
-        self.verb_disp = 1
-        self.seed = 0
+        self.timeout = timeout
+        self.maxfevals = maxfevals
+        self.tolfun = tolfun
+        self.verb_disp = verb_disp
+        self.seed = seed
 
     def evaluate_candidates(self, pts: jnp.array) -> jnp.array:
         # Times for Bézier curve
         t = jnp.linspace(0, 1, self.num_segments)
-        # Unflatten control points (pop_size, num_control_points, 2)
-        pts = jnp.reshape(pts, (self.pop_size, self.num_control_points, 2))
-        xy = batch_bezier(t[1:-1], pts)  # (pop_size, num_segments, 2)
-        # Change to (2, num_segments, pop_size)
+        # Unflatten control points (popsize, num_control_points, 2)
+        pts = jnp.reshape(pts, (self.popsize, self.num_control_points, 2))
+        xy = batch_bezier(t[1:-1], pts)  # (popsize, num_segments, 2)
+        # Change to (2, num_segments, popsize)
         xy = jnp.transpose(xy, (2, 1, 0))
-        # Add p0 and pn to form (2, num_segments + 2, pop_size)
+        # Add p0 and pn to form (2, num_segments + 2, popsize)
         # First replicate p0 and pn
-        p0 = jnp.tile(self.p0[:, None], (1, self.pop_size))
-        pn = jnp.tile(self.pn[:, None], (1, self.pop_size))
+        p0 = jnp.tile(self.p0[:, None], (1, self.popsize))
+        pn = jnp.tile(self.pn[:, None], (1, self.popsize))
         xy = jnp.concatenate((p0[:, None, :], xy, pn[:, None, :]), axis=1)
         # Distance of every segment
         dist = self.geometry.dist_p0_to_p1(xy[:, :-1], xy[:, 1:])
-        # (num_segments - 1, pop_size)
+        # (num_segments - 1, popsize)
 
         # Angle of every segment
         theta = self.geometry.angle_p0_to_p1(xy[:, :-1], xy[:, 1:])
-        # (num_segments - 1, pop_size)
+        # (num_segments - 1, popsize)
 
         # Re-scale times
         t = t * self.tend
         # Time delta
         dt = jnp.diff(t)  # (num_segments - 1,)
-        dt = jnp.tile(dt[:, None], (1, self.pop_size))
+        dt = jnp.tile(dt[:, None], (1, self.popsize))
 
         # Speed Over Ground
         sog = dist / dt
@@ -99,7 +104,7 @@ class CMAOptimizer(Optimizer):
 
         # Speed of currents
         wx, wy = self.vectorfield.get_current(xy[0, :-1], xy[1, :-1])
-        # (num_segments - 1, pop_size)
+        # (num_segments - 1, popsize)
 
         # Speed Through Water
         # Components of STW
@@ -109,7 +114,7 @@ class CMAOptimizer(Optimizer):
         # stw = jnp.sqrt(stwx**2 + stwy**2)
 
         # Cost of every candidate
-        cost = (dt * (stwx**2 + stwy**2) / 2).sum(axis=0)  # (pop_size,)
+        cost = (dt * (stwx**2 + stwy**2) / 2).sum(axis=0)  # (popsize,)
         # Velocities must be closer to 1
         # cost = ((stw - 1) ** 2).sum(axis=0)
         # Penalize going out of bounds
@@ -136,17 +141,17 @@ class CMAOptimizer(Optimizer):
             pt0,
             self.sigma0,
             inopts={
-                "popsize": self.pop_size,
+                "popsize": self.popsize,
                 "timeout": self.timeout,
                 "maxfevals": self.maxfevals,
-                "tolfun": self.opt_tolerance,
+                "tolfun": self.tolfun,
                 "bounds": None,
                 "verb_disp": self.verb_disp,
                 "seed": self.seed,
             },
         )
         while not es.stop():
-            X = es.ask()  # sample `pop_size` candidate solutions
+            X = es.ask()  # sample `popsize` candidate solutions
             # Score the routes and apply the evolution strategy
             xy, cost = self.evaluate_candidates(jnp.array(X))
             es.tell(X, cost.tolist())
@@ -172,13 +177,19 @@ def main():
     optimizer = CMAOptimizer(vectorfield)
     route = optimizer.optimize_route((x_start, y_start), (x_end, y_end), tend=tend)
 
-    vectorfield.plot(extent=(-8, 13, -8, 13), step=0.5)
-    plt.xlim([-8, 13])
-    plt.ylim([-8, 13])
-    plt.title(f"Total fuel: {optimizer.cost_min:.2f}")
-    plt.gca().set_aspect("equal")
+    # Round limits
+    xmin = int(route.x.min()) - 1
+    xmax = int(route.x.max()) + 1
+    ymin = int(route.y.min()) - 1
+    ymax = int(route.y.max()) + 1
+
+    vectorfield.plot(extent=(xmin, xmax, ymin, ymax), step=0.5)
     plt.plot(route.x, route.y, color="green", linestyle="--", alpha=0.7)
     plt.scatter([x_start, x_end], [y_start, y_end], color="red")
+    plt.xlim([xmin, xmax])
+    plt.ylim([ymin, ymax])
+    plt.gca().set_aspect("equal")
+    plt.title(f"Total fuel: {optimizer.cost_min:.2f}")
     plt.savefig("output/bezier.png")
 
 
