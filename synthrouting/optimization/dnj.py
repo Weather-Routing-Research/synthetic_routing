@@ -266,9 +266,10 @@ class DNJRandomGuess:
                     y_pts[idx_seg], y_pts[idx_seg + 1], num_points_seg[idx_seg] + 1
                 ).flatten()
                 y = jnp.concatenate([y, y_new[1:]])
-            # Add final point
-            x = jnp.concatenate([x, jnp.array([x_end])])
-            y = jnp.concatenate([y, jnp.array([y_end])])
+            if len(x) < num_points:
+                # Add final point
+                x = jnp.concatenate([x, jnp.array([x_end])])
+                y = jnp.concatenate([y, jnp.array([y_end])])
             # Add the route to the list
             list_routes[idx_route] = Route(x, y, t=t, geometry=vectorfield.geometry)
         # Store parameters
@@ -290,7 +291,7 @@ class DNJRandomGuess:
         return self.list_routes
 
 
-def main(num_iter: int = 2000):
+def main(num_iter: int = 22000):
     vectorfield = Swirlys()
 
     q0 = (0, 0)
@@ -304,8 +305,8 @@ def main(num_iter: int = 2000):
         tfixed=tend,
         num_points=200,
         num_iter=num_iter,
-        num_routes=1,
-        angle_amplitude=0,
+        num_routes=5,
+        angle_amplitude=jnp.pi,
     )
     list_routes = next(optimizer)
 
@@ -321,7 +322,7 @@ def main(num_iter: int = 2000):
 
     vectorfield.plot(extent=(xmin, xmax, ymin, ymax), step=0.5)
     for route in list_routes:
-        plt.plot(route.x, route.y, label=f"{route.cost:.2f}")
+        plt.plot(route.x, route.y, label=f"{route.cost:.3f}")
     plt.scatter([q0[0], qn[0]], [q0[1], qn[1]], color="red")
     plt.xlim([xmin, xmax])
     plt.ylim([ymin, ymax])
