@@ -24,7 +24,7 @@ class DNJ:
         self,
         vectorfield: Vectorfield,
         time_step: Optional[float] = 0.1,
-        tfixed: Optional[float] = None,
+        time_end: Optional[float] = None,
         num_points: Optional[int] = None,
         num_iter: int = 10,
     ):
@@ -47,7 +47,7 @@ class DNJ:
         """
         self.vectorfield = vectorfield
         if time_step is None:
-            self.time_step = tfixed / num_points
+            self.time_step = time_end / num_points
             self.optimize_for = "fuel"
         else:
             self.time_step = time_step
@@ -151,7 +151,7 @@ class DNJ:
     def asdict(self) -> Dict:
         return {
             "time_step": self.time_step,
-            "tfixed": self.tfixed,
+            "time_end": self.time_end,
             "num_points": self.num_points,
         }
 
@@ -204,7 +204,7 @@ class DNJRandomGuess:
         q0: Tuple[float, float],
         q1: Tuple[float, float],
         time_step: Optional[float] = None,
-        tfixed: Optional[float] = None,
+        time_end: Optional[float] = None,
         angle_amplitude: float = jnp.pi,
         num_points: int = 200,
         num_routes: int = 3,
@@ -214,9 +214,9 @@ class DNJRandomGuess:
         x_start, y_start = q0
         x_end, y_end = q1
         if time_step is None:
-            t = jnp.linspace(0, tfixed, num_points)
+            t = jnp.linspace(0, time_end, num_points)
         else:
-            t = jnp.linspace(0, tfixed, num_points)
+            t = jnp.linspace(0, time_end, num_points)
         list_routes: List[Route] = [None] * num_routes
         # Randomly select number of segments per route
         num_segments = random.randint(KEY, (num_routes,), minval=2, maxval=5)
@@ -276,13 +276,13 @@ class DNJRandomGuess:
         self.dnj = DNJ(
             vectorfield=vectorfield,
             time_step=time_step,
-            tfixed=tfixed,
+            time_end=time_end,
             num_points=num_points,
         )
         self.list_routes = list_routes
         self.num_iter = num_iter
         self.total_iter: int = 0
-        self.tfixed = tfixed
+        self.time_end = time_end
 
     def __next__(self) -> List[Route]:
         for route in self.list_routes:
@@ -302,7 +302,7 @@ def main(num_iter: int = 22000):
         vectorfield,
         q0,
         qn,
-        tfixed=tend,
+        time_end=tend,
         num_points=200,
         num_iter=num_iter,
         num_routes=5,
