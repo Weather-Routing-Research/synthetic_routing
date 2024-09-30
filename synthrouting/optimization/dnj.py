@@ -289,7 +289,7 @@ class DNJRandomGuess:
         return self.list_routes
 
 
-def main(num_iter: int = 2300):
+def main(num_iter: int = 22000):
     vectorfield = Swirlys()
 
     q0 = (0, 0)
@@ -304,7 +304,7 @@ def main(num_iter: int = 2300):
         num_points=200,
         num_iter=num_iter,
         num_routes=5,
-        angle_amplitude=jnp.pi,
+        angle_amplitude=2 * jnp.pi,
     )
     list_routes = next(optimizer)
 
