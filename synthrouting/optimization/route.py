@@ -38,6 +38,9 @@ class Route:
         # Compute distance
         self.d = self.geometry.dist_between_coords(self.x, self.y)
 
+        # Store cost
+        self.cost = None
+
     def __len__(self) -> int:
         return len(self.x)
 

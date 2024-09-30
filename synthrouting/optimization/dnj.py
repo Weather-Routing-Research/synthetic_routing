@@ -3,9 +3,12 @@ from functools import partial
 from typing import Callable, Dict, List, Optional, Tuple
 
 import jax.numpy as jnp
+import typer
 from jax import grad, jacfwd, jacrev, jit, random, vmap
+from matplotlib import pyplot as plt
 
 from synthrouting.optimization.route import Route
+from synthrouting.vectorfields import Swirlys
 from synthrouting.vectorfields.base import Vectorfield
 
 KEY = random.PRNGKey(42)
@@ -179,6 +182,9 @@ class DNJ:
         route.x = pts[:, 0]
         route.y = pts[:, 1]
 
+        # Update the minimum cost
+        route.cost = self.cost_function_discretized(pts[:-1], pts[1:]).sum()
+
 
 class DNJRandomGuess:
     def __init__(
@@ -260,3 +266,39 @@ class DNJRandomGuess:
             self.dnj.optimize_route(route, num_iter=self.num_iter)
         self.total_iter += self.num_iter
         return self.list_routes
+
+
+def main(num_iter: int = 500):
+    vectorfield = Swirlys()
+
+    q0 = (0, 0)
+    qn = (6, 5)
+    tend = 30
+
+    optimizer = DNJRandomGuess(vectorfield, q0, qn, num_iter=num_iter)
+    list_routes = next(optimizer)
+
+    # Concatenate values
+    x = jnp.concatenate([route.x for route in list_routes])
+    y = jnp.concatenate([route.y for route in list_routes])
+
+    # Round limits
+    xmin = int(x.min()) - 1
+    xmax = int(x.max()) + 1
+    ymin = int(y.min()) - 1
+    ymax = int(y.max()) + 1
+
+    vectorfield.plot(extent=(xmin, xmax, ymin, ymax), step=0.5)
+    for route in list_routes:
+        plt.plot(route.x, route.y, label=f"{route.cost:.2f}")
+    plt.scatter([q0[0], qn[0]], [q0[1], qn[1]], color="red")
+    plt.xlim([xmin, xmax])
+    plt.ylim([ymin, ymax])
+    plt.gca().set_aspect("equal")
+    plt.legend(title="Cost (fuel)")
+    plt.title("DNJ")
+    plt.savefig("output/dnj.png")
+
+
+if __name__ == "__main__":
+    typer.run(main)
