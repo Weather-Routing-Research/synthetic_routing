@@ -23,7 +23,7 @@ class DNJ:
     def __init__(
         self,
         vectorfield: Vectorfield,
-        time_step: Optional[float] = 0.1,
+        time_step: Optional[float] = None,
         time_end: Optional[float] = None,
         num_points: Optional[int] = None,
         num_iter: int = 10,
@@ -194,7 +194,8 @@ class DNJ:
         vel = jnp.diff(pts, axis=0) / self.time_step
 
         # Update the minimum cost (needs to flip dimensions)
-        route.cost = self.cost_function(pts[:-1].T, vel.T).sum()
+        cost = self.cost_function(pts[:-1].T, vel.T)
+        route.cost = cost.sum()
 
 
 class DNJRandomGuess:
