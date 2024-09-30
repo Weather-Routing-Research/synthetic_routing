@@ -50,15 +50,15 @@ class CMAOptimizer(Optimizer):
         vectorfield: Vectorfield,
         num_control_points: int = 8,
         num_segments: int = 200,
-        pop_size: int = 1000,
-        sigma0: float = 1.0,
+        pop_size: int = 100,
+        sigma0: float = 5.0,
     ):
         super().__init__(vectorfield=vectorfield)
         self.pop_size = pop_size
         self.num_control_points = num_control_points
         self.num_segments = num_segments
         self.sigma0 = sigma0
-        self.timeout = None
+        self.timeout = 15
         self.maxfevals = 1e6
         self.opt_tolerance = 1e-6
         self.verb_disp = 1
@@ -106,15 +106,15 @@ class CMAOptimizer(Optimizer):
         stwx = sogx - wx
         stwy = sogy - wy
         # Module of STW
-        stw = jnp.sqrt(stwx**2 + stwy**2)
+        # stw = jnp.sqrt(stwx**2 + stwy**2)
 
         # Cost of every candidate
-        cost = ((stwx**2 + stwy**2) / 2).sum(axis=0)  # (pop_size,)
+        cost = (dt * (stwx**2 + stwy**2) / 2).sum(axis=0)  # (pop_size,)
         # Velocities must be closer to 1
         # cost = ((stw - 1) ** 2).sum(axis=0)
         # Penalize going out of bounds
-        cost += (xy[:, 1:-1] > 6).sum(axis=(0, 1))
-        cost += (xy[:, 1:-1] < -1).sum(axis=(0, 1))
+        # cost += (xy[:, 1:-1] > 6).sum(axis=(0, 1))
+        # cost += (xy[:, 1:-1] < -1).sum(axis=(0, 1))
         return xy, cost
 
     def optimize_route(
@@ -124,10 +124,13 @@ class CMAOptimizer(Optimizer):
         self.p0 = jnp.array(p0)
         self.pn = jnp.array(pn)
 
-        # Initial guess is a straight line
-        x0 = jnp.linspace(p0[0], pn[0], self.num_control_points + 1)[1:]
-        y0 = jnp.linspace(p0[1], pn[1], self.num_control_points + 1)[1:]
-        pt0 = jnp.concatenate((x0, y0))
+        # Initial guess is random
+        pt0 = random.uniform(
+            random.PRNGKey(self.seed),
+            (2 * self.num_control_points,),
+            minval=-10,
+            maxval=10,
+        )
 
         es = cma.CMAEvolutionStrategy(
             pt0,
@@ -151,6 +154,7 @@ class CMAOptimizer(Optimizer):
 
         # Take the best candidate
         idx_best = jnp.argmin(cost)
+        self.cost_min = cost[idx_best]
         x_best = xy[0, :, idx_best]
         y_best = xy[1, :, idx_best]
         t = jnp.linspace(0, tend, self.num_segments)
@@ -168,9 +172,10 @@ def main():
     optimizer = CMAOptimizer(vectorfield)
     route = optimizer.optimize_route((x_start, y_start), (x_end, y_end), tend=tend)
 
-    vectorfield.plot(extent=(-1, 6, -1, 6), step=0.5)
-    plt.xlim([-1, 6])
-    plt.ylim([-1, 6])
+    vectorfield.plot(extent=(-8, 13, -8, 13), step=0.5)
+    plt.xlim([-8, 13])
+    plt.ylim([-8, 13])
+    plt.title(f"Total fuel: {optimizer.cost_min:.2f}")
     plt.gca().set_aspect("equal")
     plt.plot(route.x, route.y, color="green", linestyle="--", alpha=0.7)
     plt.scatter([x_start, x_end], [y_start, y_end], color="red")
