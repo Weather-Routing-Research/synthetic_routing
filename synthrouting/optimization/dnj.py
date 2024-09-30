@@ -85,7 +85,7 @@ class DNJ:
             def cost_function_discretized(q0: jnp.array, q1: jnp.array) -> jnp.array:
                 l1 = cost_function(q0, (q1 - q0) / h)
                 l2 = cost_function(q1, (q1 - q0) / h)
-                ld = h / 2 * (l1 + l2)
+                ld = (l1 + l2) / 2  # Skip h because is in cost function
                 return ld
 
         elif self.optimize_for == "time":
@@ -193,9 +193,8 @@ class DNJ:
         route.y = pts[:, 1]
         vel = jnp.diff(pts, axis=0) / self.time_step
 
-        # Update the minimum cost
-        route.cost = self.cost_function(pts, vel).sum()
-        print(self.cost_function(pts, vel))
+        # Update the minimum cost (needs to flip dimensions)
+        route.cost = self.cost_function(pts[:-1].T, vel.T).sum()
 
 
 class DNJRandomGuess:
